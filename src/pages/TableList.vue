@@ -7,6 +7,17 @@
         <md-card>
           <md-card-header data-background-color="green">
             <h4 class="title">Customer Information</h4>
+
+            <form action="/action_page.php">
+              <label for="cname">Search:</label>
+              <input type="text" id="cname" name="cname">
+              <input type="submit" value="Submit">
+            </form>
+
+            <md-button class="md-icon-button">
+              <md-icon>add</md-icon>
+            </md-button>
+
             <p class="category">Filter customers according to id, sale type, product price and sale period</p>
           </md-card-header>
           <md-card-content>
