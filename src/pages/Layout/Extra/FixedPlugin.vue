@@ -95,7 +95,7 @@
 </template>
 <script>
 import Vue from "vue";
-import SocialSharing from "vue-social-sharing";
+// import VueSocialSharing from "vue-social-sharing";
 import VueGitHubButtons from "vue-github-buttons";
 import "vue-github-buttons/dist/vue-github-buttons.css";
 
