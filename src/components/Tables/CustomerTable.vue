@@ -1,6 +1,6 @@
 <template>
   <div>
-    <md-table v-model="users" :table-header-color="tableHeaderColor">
+    <md-table v-model="filteredUsers" :table-header-color="tableHeaderColor">
       <md-table-row slot="md-table-row" slot-scope="{ item }">
         <md-table-cell md-label="Name">{{ item.name }}</md-table-cell>
         <md-table-cell md-label="Country">{{ item.country }}</md-table-cell>
@@ -13,12 +13,24 @@
 
 <script>
 export default {
-  name: "simple-table",
+  name: "customer-table",
   props: {
     tableHeaderColor: {
       type: String,
       default: "",
     },
+    searchTerm: {
+      type: String,
+      default: ""
+    },
+    minSalary: {
+      type: Number, // Expecting a number from the parent
+      default: null
+    },
+    maxSalary: {
+      type: Number, // Expecting a number from the parent
+      default: null
+    }
   },
   data() {
     return {
@@ -60,8 +72,36 @@ export default {
           country: "Chile",
           city: "Gloucester",
         },
+        {
+          customerid: "9",
+          sales_types: "Marketing",
+          product_price: "$16.93",
+          sales_date: "26-03-2024",
+        }
       ],
     };
   },
+  computed: {
+    // Computed property to filter the users based on the searchTerm prop
+    filteredUsers() {
+      const lowerCaseSearchTerm = this.searchTerm.toLowerCase();
+
+      return this.users.filter(user => {
+        // Extract numerical salary from the salary string (removes '$' and commas)
+        const salaryNumber = parseFloat(user.salary.replace(/[\$,]/g, ''));
+
+        // Filter by name if search term exists
+        const matchesName = user.name.toLowerCase().includes(lowerCaseSearchTerm);
+
+        // Filter by salary range, only if the salary limits are provided
+        const isAboveMinSalary = this.minSalary ? salaryNumber >= this.minSalary : true;
+        const isBelowMaxSalary = this.maxSalary ? salaryNumber <= this.maxSalary : true;
+
+        // Only return users that match both the name and salary criteria
+        return matchesName && isAboveMinSalary && isBelowMaxSalary;
+        
+      });
+    }
+  }
 };
 </script>
