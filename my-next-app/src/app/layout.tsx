@@ -1,6 +1,20 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import './style/globals.css';
+import { navigationMenuTriggerStyle } from "@/components/ui/navigation-menu"
+import {
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuIndicator,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+  NavigationMenuViewport,
+} from "@/components/ui/navigation-menu"
+import Link from 'next/link';
+
+
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -25,6 +39,16 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+
+      {/* <NavigationMenuItem>
+        <Link href="/docs" legacyBehavior passHref>
+          <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+            Documentation
+          </NavigationMenuLink>
+        </Link>
+      </NavigationMenuItem> */}
+
+      
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
