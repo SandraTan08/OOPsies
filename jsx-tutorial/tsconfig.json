@@ -1,0 +1,32 @@
+{
+    "compilerOptions": {
+      "target": "es2017",                     // Specify ECMAScript target version
+      "lib": ["dom", "dom.iterable", "esnext"], // Include necessary libraries
+      "allowJs": true,                        // Allow JavaScript files to be compiled
+      "skipLibCheck": true,                   // Skip type checking of all declaration files
+      "esModuleInterop": true,                // Enable compatibility between CommonJS and ES modules
+      "allowSyntheticDefaultImports": true,   // Allow default imports from modules with no default export
+      "strict": true,                         // Enable all strict type-checking options
+      "forceConsistentCasingInFileNames": true, // Ensure consistent file name casing
+      "noFallthroughCasesInSwitch": true,     // Report errors for fallthrough cases in switch statements
+      "module": "esnext",                     // Specify module code generation
+      "moduleResolution": "node",             // Resolve modules similar to Node.js
+      "resolveJsonModule": true,              // Enable importing JSON modules
+      "isolatedModules": true,                // Ensure each file can be transpiled in isolation
+      "noEmit": true,                         // Do not emit compiled files; only perform type checking
+      "jsx": "react-jsx",                     // Specify JSX code generation for React (using new JSX transform)
+      "baseUrl": "./src",                     // Set base directory for non-relative module imports
+      "paths": {                              // Aliases for path mapping (useful for components, utils, etc.)
+        "@components/*": ["components/*"],
+        "@utils/*": ["utils/*"]
+      }
+    },
+    "include": [
+      "src"                                   // Include all files in the "src" directory
+    ],
+    "exclude": [
+      "node_modules",                         // Exclude files in node_modules folder
+      "build"                                 // Exclude build output folder
+    ]
+  }
+  
