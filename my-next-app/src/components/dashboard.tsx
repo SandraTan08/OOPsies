@@ -1,18 +1,30 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Bar, Line } from 'react-chartjs-2'
+
 import {
   Chart as ChartJS,
   CategoryScale,
   LinearScale,
   BarElement,
-  LineElement,
   Title,
+  LineElement,
+  PointElement,
   Tooltip,
   Legend,
-  PointElement,
 } from 'chart.js'
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  LineElement,
+  PointElement,
+  Title,
+  Tooltip,
+  Legend
+)
 import { CSVLink } from 'react-csv'
 import { 
   LayoutGrid, 
@@ -27,16 +39,7 @@ import {
   Download
 } from 'lucide-react'
 
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend,
-  PointElement
-)
+
 
 // Mock data (replace with actual data fetching logic)
 const salesData = {
@@ -72,7 +75,25 @@ const transactionsData = [
   // Add more mock data as needed
 ]
 
+interface Sale {
+  Sale_Date: string;
+  Total_Price: number;
+}
+
+
 export default function Dashboard() {
+
+  const [salesData, setSalesData] = useState({
+    labels: [] as string[],
+    datasets: [
+      {
+        label: 'Sales',
+        data: [] as number[],
+        backgroundColor: 'rgba(75, 192, 192, 0.6)',
+      },
+    ],
+  })
+
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [filteredTransactions, setFilteredTransactions] = useState(transactionsData)
 
@@ -84,6 +105,46 @@ export default function Dashboard() {
     // Implement filtering logic here
     // Update filteredTransactions state based on filter criteria
   }
+
+  useEffect(() => {
+    // Fetch sales data from the API
+    async function fetchSalesData() {
+      const res = await fetch('/api/sales')
+      const data: Sale[] = await res.json()
+      
+      const monthlyData = data.reduce<Record<string, number>>((acc, sale) => {
+      const month = new Date(sale.Sale_Date).toLocaleString('default', { month: 'short' });
+
+      const totalPrice = typeof sale.Total_Price === 'string' ? parseFloat(sale.Total_Price) : sale.Total_Price;
+  
+        if (!acc[month]) {
+          acc[month] = 0;  // Initialize if month doesn't exist in accumulator
+        }
+  
+        acc[month] += totalPrice;  // Add the Total_Price for the current sale
+        return acc;
+      }, {});
+  
+      // Extract the labels (months) and the data (total sales for each month)
+      const labels = Object.keys(monthlyData);  // Months like ['Jan', 'Feb', 'Mar', ...]
+      const sales = Object.values(monthlyData);  // Aggregated totals for each month
+
+      console.log(labels,sales)
+      // Update salesData state
+      setSalesData({
+        labels: labels,
+        datasets: [
+          {
+            label: 'Sales',
+            data: sales,
+            backgroundColor: 'rgba(75, 192, 192, 0.6)',
+          },
+        ],
+      })
+    }
+
+    fetchSalesData()
+  }, [])
 
   return (
     <div className="flex h-screen bg-gray-100">
