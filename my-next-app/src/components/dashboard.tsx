@@ -88,33 +88,7 @@ export default function Dashboard() {
   return (
     <div className="flex h-screen bg-gray-100">
       {/* Sidebar */}
-      <aside className="hidden md:flex md:flex-shrink-0">
-        <div className="flex flex-col w-64">
-          <div className="flex items-center h-16 px-4 bg-gray-900">
-            <h1 className="text-lg font-semibold text-white">Timperio CRM</h1>
-          </div>
-          <div className="flex flex-col flex-1 overflow-y-auto bg-gray-800">
-            <nav className="flex-1 px-2 py-4 space-y-1">
-              <a href="#" className="flex items-center px-2 py-2 text-sm font-medium text-white bg-gray-900 rounded-md group">
-                <LayoutGrid className="w-6 h-6 mr-3 text-gray-300" />
-                Dashboard
-              </a>
-              <a href="#" className="flex items-center px-2 py-2 text-sm font-medium text-gray-300 rounded-md hover:bg-gray-700 hover:text-white group">
-                <Users className="w-6 h-6 mr-3 text-gray-400 group-hover:text-gray-300" />
-                Customers
-              </a>
-              <a href="#" className="flex items-center px-2 py-2 text-sm font-medium text-gray-300 rounded-md hover:bg-gray-700 hover:text-white group">
-                <ShoppingCart className="w-6 h-6 mr-3 text-gray-400 group-hover:text-gray-300" />
-                Sales
-              </a>
-              <a href="#" className="flex items-center px-2 py-2 text-sm font-medium text-gray-300 rounded-md hover:bg-gray-700 hover:text-white group">
-                <BarChart className="w-6 h-6 mr-3 text-gray-400 group-hover:text-gray-300" />
-                Reports
-              </a>
-            </nav>
-          </div>
-        </div>
-      </aside>
+
 
       {/* Main content */}
       <div className="flex flex-col flex-1 overflow-hidden">
@@ -202,13 +176,13 @@ export default function Dashboard() {
               {/* Charts */}
               <div className="mt-8">
                 <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-                  <div className="p-4 bg-white rounded-lg shadow">
+                  <div className="p-4 bg-white rounded-lg shadow" >
                     <h2 className="text-lg font-medium text-gray-900">Sales Overview</h2>
                     <div className="mt-4">
                       <Bar data={salesData} options={{ responsive: true }} />
                     </div>
                   </div>
-                  <div className="p-4 bg-white rounded-lg shadow">
+                  <div className="p-4 bg-white rounded-lg shadow ">
                     <h2 className="text-lg font-medium text-gray-900">Customer Segments</h2>
                     <div className="mt-4">
                       <Line data={customerData} options={{ responsive: true }} />

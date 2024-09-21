@@ -1,6 +1,6 @@
 import AccountManagement from '@/components/accountmanagement';
 
-export default function DashboardPage() {
+export default function AccountPage() {
   return (
     <AccountManagement />
   );
