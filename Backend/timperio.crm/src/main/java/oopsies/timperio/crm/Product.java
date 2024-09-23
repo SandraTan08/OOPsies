@@ -8,11 +8,13 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
+import jakarta.persistence.*;
 
+@Entity  // Use @Entity for JPA with MySQL
+@Table(name = "product")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity  // Use @Entity for JPA with MySQL
 public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)  // For auto-increment ID

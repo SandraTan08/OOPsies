@@ -1,4 +1,14 @@
-oopsies/timperio/crm/MySQLTest.class
+oopsies/timperio/crm/Customer.class
+oopsies/timperio/crm/Controller/ProductController.class
+oopsies/timperio/crm/Repository/ProductRepository.class
 oopsies/timperio/crm/Application.class
+oopsies/timperio/crm/Repository/CustomerRepository.class
 oopsies/timperio/crm/TestController.class
-oopsies/timperio/crm/HelloController.class
+oopsies/timperio/crm/Product.class
+oopsies/timperio/crm/Controller/PurchaseHistoryController.class
+oopsies/timperio/crm/Repository/PurchaseHistoryRepository.class
+oopsies/timperio/crm/Service/CustomerService.class
+oopsies/timperio/crm/Service/ProductService.class
+oopsies/timperio/crm/Controller/CustomerController.class
+oopsies/timperio/crm/Service/PurchaseHistoryService.class
+oopsies/timperio/crm/PurchaseHistory.class
