@@ -15,14 +15,14 @@ import java.util.Date;
 public class PurchaseHistory {
 
     @Id
-    //@GeneratedValue(strategy = GenerationType.IDENTITY) // Automatically generates unique ID
+    @GeneratedValue(strategy = GenerationType.IDENTITY) // Automatically generates unique ID
     private Long purchaseId;
 
     @Temporal(TemporalType.DATE)
     private Date saleDate;
 
     private int saleType;
-    private boolean digital; // Changed to boolean for true/false
+    private int digital; 
     
     private Long customerId;
     private String shippingMethod;

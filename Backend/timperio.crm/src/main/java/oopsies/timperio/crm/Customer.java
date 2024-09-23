@@ -14,7 +14,7 @@ import jakarta.persistence.*; // Import JPA annotations
 public class Customer {
 
     @Id
-    //@GeneratedValue(strategy = GenerationType.IDENTITY) // Use this to automatically generate unique IDs
+    @GeneratedValue(strategy = GenerationType.IDENTITY) // Use this to automatically generate unique IDs
     private Long customerId; // Use Long instead of ObjectId for MySQL
 
     private String zipcode; // Renamed to follow Java naming conventions (camelCase)

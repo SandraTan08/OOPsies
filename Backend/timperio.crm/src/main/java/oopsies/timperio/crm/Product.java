@@ -15,9 +15,9 @@ import jakarta.persistence.GenerationType;
 @Entity  // Use @Entity for JPA with MySQL
 public class Product {
     @Id
-    //@GeneratedValue(strategy = GenerationType.IDENTITY)  // For auto-increment ID
-    private Long productID;
-    private String product;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)  // For auto-increment ID
+    private Long productId;
+    private String productName;
     private int variant;
     private double price;
 }
