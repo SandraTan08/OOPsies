@@ -28,4 +28,19 @@ public class PurchaseHistory {
     private Long productId;
     private int quantity;
     private double totalPrice;
+
+    @Override
+    public String toString() {
+        return "PurchaseHistory{" +
+                "purchaseId=" + purchaseId +
+                ", saleDate=" + saleDate +
+                ", saleType=" + saleType +
+                ", digital=" + digital +
+                ", customerId=" + customerId +
+                ", shippingMethod='" + shippingMethod + '\'' +
+                ", productId=" + productId +
+                ", quantity=" + quantity +
+                ", totalPrice=" + totalPrice +
+                '}';
+    }
 }

@@ -12,7 +12,7 @@ import jakarta.persistence.*; // Import JPA annotations
 @NoArgsConstructor
 @AllArgsConstructor
 public class Customer {
-
+    
     @Id
     //@Column(name = "customerId")
     private Integer customerId; // Change to Integer if you prefer to match MySQL's int
@@ -20,5 +20,11 @@ public class Customer {
 
     //@Column(name = "zipCode") // Ensure case matches
     private Integer zipCode; // Change to Integer for consistency
-
+    
+    public String toString() {
+        return "Customer{" +
+                "customerId=" + customerId +
+                ", zipCode='" + zipCode + '\'' +
+                '}';
+    }
 }

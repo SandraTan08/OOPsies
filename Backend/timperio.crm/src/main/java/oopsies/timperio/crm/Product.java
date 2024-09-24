@@ -22,4 +22,14 @@ public class Product {
     private String productName;
     private int variant;
     private double price;
+
+    @Override
+    public String toString() {
+        return "Product{" +
+                "productId=" + productId +
+                ", productName='" + productName + '\'' +
+                ", variant=" + variant +
+                ", price=" + price +
+                '}';
+    }
 }
