@@ -1,9 +1,7 @@
-import Link from 'next/link';
+import Newsletter from '@/components/newsletter';
 
 export default function NewsletterPage() {
   return (
-    <div>
-      <h1>Newsletter</h1>
-    </div>
+    <Newsletter />
   );
 }
