@@ -35,4 +35,10 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+
 /target.*
+/target/
+*.jar
+*.original
+Backend/timperio.crm/target/*
+Backend/timperio.crm/target/*
