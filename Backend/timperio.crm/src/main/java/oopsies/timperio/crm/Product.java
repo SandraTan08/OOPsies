@@ -4,10 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import jakarta.persistence.*;
 
 @Entity  // Use @Entity for JPA with MySQL
@@ -18,9 +16,13 @@ import jakarta.persistence.*;
 public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)  // For auto-increment ID
+    @JsonProperty("productId")
     private Long productId;
+    @JsonProperty("productName")
     private String productName;
+    @JsonProperty("variant")
     private int variant;
+    @JsonProperty("price")
     private double price;
 
     @Override

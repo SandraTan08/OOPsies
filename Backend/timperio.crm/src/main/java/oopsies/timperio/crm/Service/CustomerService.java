@@ -15,6 +15,8 @@ public class CustomerService {
     private CustomerRepository customerRepository;
 
     public List<Customer> allCustomers(){
-        return customerRepository.findAll();
+        List<Customer> customers = customerRepository.findAll();
+        System.out.println("Fetched customers: " + customers); // Debug log
+        return customers;
     }
 }
