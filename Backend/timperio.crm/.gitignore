@@ -36,9 +36,5 @@ yarn-error.log*
 next-env.d.ts
 
 
-/target.*
-/target/
-*.jar
-*.original
-Backend/timperio.crm/target/*
-Backend/timperio.crm/target/*
+# Ignore the entire target directory
+/Backend/timperio.crm/target/
