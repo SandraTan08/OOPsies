@@ -26,11 +26,11 @@ ChartJS.register(
   Legend
 )
 import { CSVLink } from 'react-csv'
-import { 
-  LayoutGrid, 
-  Users, 
-  ShoppingCart, 
-  BarChart, 
+import {
+  LayoutGrid,
+  Users,
+  ShoppingCart,
+  BarChart,
   Menu,
   Search,
   Bell,
@@ -67,67 +67,37 @@ const customerData = {
   ],
 }
 
-// const transactionsData = [
-//   { id: 1, customerId: 'C001', saleType: 'Online', product: 'Widget A', value: 100, date: '2023-06-01' },
-//   { id: 2, customerId: 'C002', saleType: 'In-store', product: 'Widget B', value: 200, date: '2023-06-02' },
-//   { id: 3, customerId: 'C003', saleType: 'Online', product: 'Widget C', value: 150, date: '2023-06-03' },
-  // Add more mock data as needed
-// ]
-// console.log("transaction data" + transactionsData)
 
-// interface Sale {
-//   Sale_Date: string;
-//   Total_Price: number;
-// }
 
 
 export default function Dashboard() {
-  const [salesData, setSalesData] = useState({
-    labels: [] as string[],
-    datasets: [
-      {
-        label: 'Sales',
-        data: [] as number[],
-        backgroundColor: 'rgba(75, 192, 192, 0.6)',
-      },
-    ],
-  });
+  const [transactionsData, setTransactionsData] = useState<any[]>([]);  // All transactions
+  const [filteredTransactions, setFilteredTransactions] = useState<any[]>([]);  // Filtered transactions to display
+  const [saleTypeFilter, setSaleTypeFilter] = useState<string>('');  // State for sale type filter
 
-  const handleFilter = (e) => {
-    e.preventDefault()
-    // Implement filtering logic here
-    // Update filteredTransactions state based on filter criteria
-  }
-
-  const [transactionsData, setTransactionsData] = useState<any[]>([]);  // Use `any[]` to allow flexible data
-  const [filteredTransactions, setFilteredTransactions] = useState<any[]>([]);  // You can filter this data later
-
+  // Calculate total sales and average order value
   const totalSales = transactionsData.reduce((sum, transaction) => sum + transaction.value, 0).toFixed(2);
   const averageOrderValue = transactionsData.length > 0 ? totalSales / transactionsData.length : 0;
 
+  // Fetch transactions data (mock or API call)
   useEffect(() => {
     async function fetchSalesData() {
       try {
         const res = await fetch('http://localhost:8080/api/v1/purchaseHistory');
-        console.log(res)
         if (!res.ok) throw new Error('Failed to fetch sales data');
         const data = await res.json();
 
-        // Map the API response to the required structure for transactionsData
         const transactions = data.map((purchase: any) => ({
           id: purchase.purchaseId,
-          customerId: purchase.customerId.toString(),  // Convert customerId to string if needed
-          saleType: purchase.saleType === 1 ? 'Online' : 'In-store',  // Handle saleType conversion
-          product: `Product ${purchase.productId}`,  // Modify this based on your actual product data
-          value: purchase.totalPrice,  // Use totalPrice from API
-          date: purchase.saleDate,  // Use saleDate directly
+          customerId: purchase.customerId.toString(),
+          saleType: purchase.saleType === 1 ? 'Online' : 'In-store',
+          product: `Product ${purchase.productId}`,
+          value: purchase.totalPrice,
+          date: purchase.saleDate,
         }));
 
-        // Update transactionsData state with the mapped data
         setTransactionsData(transactions);
-        setFilteredTransactions(transactions);  // Set the initial filtered transactions to the full dataset
-
-        // You can also update your salesData here as needed (same as before)
+        setFilteredTransactions(transactions);  // Initially show all transactions
       } catch (error) {
         console.error('Error fetching sales data:', error);
       }
@@ -136,21 +106,62 @@ export default function Dashboard() {
     fetchSalesData();
   }, []);
 
+  // Handle filter form submission
+  const handleFilter = (e) => {
+    e.preventDefault();
+
+    if (saleTypeFilter) {
+      const filtered = transactionsData.filter(transaction => transaction.saleType === saleTypeFilter);
+      setFilteredTransactions(filtered);
+    } else {
+      // If no filter is selected, show all transactions
+      setFilteredTransactions(transactionsData);
+    }
+  };
+
   return (
+    // <div className="flex h-screen bg-gray-100">
+    //   {/* Sidebar */}
+
+
+    //   {/* Main content */}
+    //   <div className="flex flex-col flex-1 overflow-hidden">
+    //     {/* Navbar */}
+    //     <header className="flex items-center justify-between px-4 py-4 bg-white border-b border-gray-200 sm:px-6 lg:px-8">
+    //       <button
+    //         className="text-gray-500 md:hidden"
+    //         onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+    //       >
+    //         <Menu className="w-6 h-6" />
+    //       </button>
+    //       <div className="flex items-center">
+    //         <div className="relative">
+    //           <input
+    //             type="text"
+    //             placeholder="Search..."
+    //             className="w-64 px-4 py-2 text-sm text-gray-700 placeholder-gray-400 bg-gray-100 border border-transparent rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+    //           />
+    //           <Search className="absolute top-2.5 right-3 w-5 h-5 text-gray-400" />
+    //         </div>
+    //       </div>
+    //       <div className="flex items-center">
+    //         <button className="p-1 text-gray-400 rounded-full hover:bg-gray-100 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500">
+    //           <Bell className="w-6 h-6" />
+    //         </button>
+    //         <div className="relative ml-3">
+    //           <div>
+    //             <button className="flex items-center max-w-xs text-sm bg-white rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500" id="user-menu" aria-expanded="false" aria-haspopup="true">
+    //               <span className="sr-only">Open user menu</span>
+    //               <User className="w-8 h-8 rounded-full" />
+    //             </button>
+    //           </div>
+    //         </div>
+    //       </div>
+    //     </header>
     <div className="flex h-screen bg-gray-100">
-      {/* Sidebar */}
-
-
       {/* Main content */}
       <div className="flex flex-col flex-1 overflow-hidden">
-        {/* Navbar */}
         <header className="flex items-center justify-between px-4 py-4 bg-white border-b border-gray-200 sm:px-6 lg:px-8">
-          <button
-            className="text-gray-500 md:hidden"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          >
-            <Menu className="w-6 h-6" />
-          </button>
           <div className="flex items-center">
             <div className="relative">
               <input
@@ -159,19 +170,6 @@ export default function Dashboard() {
                 className="w-64 px-4 py-2 text-sm text-gray-700 placeholder-gray-400 bg-gray-100 border border-transparent rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
               <Search className="absolute top-2.5 right-3 w-5 h-5 text-gray-400" />
-            </div>
-          </div>
-          <div className="flex items-center">
-            <button className="p-1 text-gray-400 rounded-full hover:bg-gray-100 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500">
-              <Bell className="w-6 h-6" />
-            </button>
-            <div className="relative ml-3">
-              <div>
-                <button className="flex items-center max-w-xs text-sm bg-white rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500" id="user-menu" aria-expanded="false" aria-haspopup="true">
-                  <span className="sr-only">Open user menu</span>
-                  <User className="w-8 h-8 rounded-full" />
-                </button>
-              </div>
             </div>
           </div>
         </header>
@@ -183,6 +181,7 @@ export default function Dashboard() {
               <h1 className="text-2xl font-semibold text-gray-900">Dashboard</h1>
             </div>
             <div className="px-4 mx-auto max-w-7xl sm:px-6 md:px-8">
+    
               {/* Sales metrics */}
               <div className="mt-8">
                 <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
@@ -259,6 +258,7 @@ export default function Dashboard() {
                     </CSVLink>
                   </div>
                 </div>
+                {/* transactions filter */}
                 <div className="mt-4">
                   <form onSubmit={handleFilter} className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
                     <input
@@ -266,8 +266,12 @@ export default function Dashboard() {
                       placeholder="Customer ID"
                       className="block w-full px-3 py-2 placeholder-gray-400 border border-gray-300 rounded-md shadow-sm appearance-none focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                     />
-                    <select className="block w-full px-3 py-2 placeholder-gray-400 border border-gray-300 rounded-md shadow-sm appearance-none focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-                      <option value="">Sale Type</option>
+                    <select 
+                      value={saleTypeFilter}
+                      onChange = {(e) => setSaleTypeFilter(e.target.value)}
+                      className="block w-full px-3 py-2 placeholder-gray-400 border border-gray-300 rounded-md shadow-sm appearance-none focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                    >
+                      <option value="">All Sale Types</option>
                       <option value="Online">Online</option>
                       <option value="In-store">In-store</option>
                     </select>
@@ -284,58 +288,36 @@ export default function Dashboard() {
                     </button>
                   </form>
                 </div>
-                {/*looks like this is the transactions table */}
-                {/* <div className="mt-4 overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
-                  <table className="min-w-full divide-y divide-gray-300">
-                    <thead className="bg-gray-50">
-                      <tr>
-                        <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">Customer ID</th>
-                        <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Sale Type</th>
-                        <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Product</th>
-                        <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Value</th>
-                        <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Date</th>
-                      </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
-                      {filteredTransactions.map((transaction) => (
-                        <tr key={transaction.id}>
-                          <td className="py-4 pl-4 pr-3 text-sm font-medium text-gray-900 whitespace-nowrap sm:pl-6">{transaction.customerId}</td>
-                          <td className="px-3 py-4 text-sm text-gray-500 whitespace-nowrap">{transaction.saleType}</td>
-                          <td className="px-3 py-4 text-sm text-gray-500 whitespace-nowrap">{transaction.product}</td>
-                          <td className="px-3 py-4 text-sm text-gray-500 whitespace-nowrap">${transaction.value}</td>
-                          <td className="px-3 py-4 text-sm text-gray-500 whitespace-nowrap">{transaction.date}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div> */}
+                {/* transactions table */}
                 <div className="mt-8">
-                    <h2 className="text-lg font-medium text-gray-900">Transactions</h2>
-                    <div className="mt-4">
-                      <table className="min-w-full divide-y divide-gray-300">
-                        <thead className="bg-gray-50">
-                          <tr>
-                            <th className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">Customer ID</th>
-                            <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Sale Type</th>
-                            <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Product</th>
-                            <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Value</th>
-                            <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Date</th>
+                  <h2 className="text-lg font-medium text-gray-900">Transactions</h2>
+                  <div className="mt-4 max-h-[36rem] overflow-y-scroll shadow-lg rounded-lg overflow-hidden custom-scrollbar"> {/* max height to show 10 rows and enable scrolling */}
+                    <table className="min-w-full divide-y divide-gray-300">
+                      <thead className="bg-gray-50 sticky top-0"> {/* Sticky header to stay visible while scrolling */}
+                        <tr>
+                          <th className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">Customer ID</th>
+                          <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Sale Type</th>
+                          <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Product</th>
+                          <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Value</th>
+                          <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Date</th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white divide-y divide-gray-200">
+                        {filteredTransactions.map((transaction) => (
+                          <tr key={transaction.id}>
+                            <td className="py-4 pl-4 pr-3 text-sm font-medium text-gray-900 whitespace-nowrap sm:pl-6">{transaction.customerId}</td>
+                            <td className="px-3 py-4 text-sm text-gray-500 whitespace-nowrap">{transaction.saleType}</td>
+                            <td className="px-3 py-4 text-sm text-gray-500 whitespace-nowrap">{transaction.product}</td>
+                            <td className="px-3 py-4 text-sm text-gray-500 whitespace-nowrap">${transaction.value.toFixed(2)}</td>
+                            <td className="px-3 py-4 text-sm text-gray-500 whitespace-nowrap">{transaction.date}</td>
                           </tr>
-                        </thead>
-                        <tbody className="bg-white divide-y divide-gray-200">
-                          {filteredTransactions.map((transaction) => (
-                            <tr key={transaction.id}>
-                              <td className="py-4 pl-4 pr-3 text-sm font-medium text-gray-900 whitespace-nowrap sm:pl-6">{transaction.customerId}</td>
-                              <td className="px-3 py-4 text-sm text-gray-500 whitespace-nowrap">{transaction.saleType}</td>
-                              <td className="px-3 py-4 text-sm text-gray-500 whitespace-nowrap">{transaction.product}</td>
-                              <td className="px-3 py-4 text-sm text-gray-500 whitespace-nowrap">${transaction.value}</td>
-                              <td className="px-3 py-4 text-sm text-gray-500 whitespace-nowrap">{transaction.date}</td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
+                </div>
+
+
               </div>
             </div>
           </div>
