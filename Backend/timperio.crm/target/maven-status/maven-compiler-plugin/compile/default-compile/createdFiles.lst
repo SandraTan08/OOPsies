@@ -1,3 +1,4 @@
+GlobalCorsConfig$1.class
 oopsies/timperio/crm/Customer.class
 oopsies/timperio/crm/Controller/ProductController.class
 oopsies/timperio/crm/Repository/ProductRepository.class
@@ -16,3 +17,4 @@ oopsies/timperio/crm/Controller/CustomerController.class
 oopsies/timperio/crm/Service/PurchaseHistoryService.class
 oopsies/timperio/crm/PurchaseHistory.class
 oopsies/timperio/crm/Service/UserService.class
+GlobalCorsConfig.class

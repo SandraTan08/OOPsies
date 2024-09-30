@@ -40,7 +40,6 @@ import {
 } from 'lucide-react'
 
 
-
 // Mock data (replace with actual data fetching logic)
 const salesData = {
   labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
@@ -68,21 +67,21 @@ const customerData = {
   ],
 }
 
-const transactionsData = [
-  { id: 1, customerId: 'C001', saleType: 'Online', product: 'Widget A', value: 100, date: '2023-06-01' },
-  { id: 2, customerId: 'C002', saleType: 'In-store', product: 'Widget B', value: 200, date: '2023-06-02' },
-  { id: 3, customerId: 'C003', saleType: 'Online', product: 'Widget C', value: 150, date: '2023-06-03' },
+// const transactionsData = [
+//   { id: 1, customerId: 'C001', saleType: 'Online', product: 'Widget A', value: 100, date: '2023-06-01' },
+//   { id: 2, customerId: 'C002', saleType: 'In-store', product: 'Widget B', value: 200, date: '2023-06-02' },
+//   { id: 3, customerId: 'C003', saleType: 'Online', product: 'Widget C', value: 150, date: '2023-06-03' },
   // Add more mock data as needed
-]
+// ]
+// console.log("transaction data" + transactionsData)
 
-interface Sale {
-  Sale_Date: string;
-  Total_Price: number;
-}
+// interface Sale {
+//   Sale_Date: string;
+//   Total_Price: number;
+// }
 
 
 export default function Dashboard() {
-
   const [salesData, setSalesData] = useState({
     labels: [] as string[],
     datasets: [
@@ -92,13 +91,7 @@ export default function Dashboard() {
         backgroundColor: 'rgba(75, 192, 192, 0.6)',
       },
     ],
-  })
-
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [filteredTransactions, setFilteredTransactions] = useState(transactionsData)
-
-  const totalSales = transactionsData.reduce((sum, transaction) => sum + transaction.value, 0)
-  const averageOrderValue = totalSales / transactionsData.length
+  });
 
   const handleFilter = (e) => {
     e.preventDefault()
@@ -106,45 +99,42 @@ export default function Dashboard() {
     // Update filteredTransactions state based on filter criteria
   }
 
+  const [transactionsData, setTransactionsData] = useState<any[]>([]);  // Use `any[]` to allow flexible data
+  const [filteredTransactions, setFilteredTransactions] = useState<any[]>([]);  // You can filter this data later
+
+  const totalSales = transactionsData.reduce((sum, transaction) => sum + transaction.value, 0).toFixed(2);
+  const averageOrderValue = transactionsData.length > 0 ? totalSales / transactionsData.length : 0;
+
   useEffect(() => {
-    // Fetch sales data from the API
     async function fetchSalesData() {
-      const res = await fetch('/api/sales')
-      const data: Sale[] = await res.json()
-      
-      const monthlyData = data.reduce<Record<string, number>>((acc, sale) => {
-      const month = new Date(sale.Sale_Date).toLocaleString('default', { month: 'short' });
+      try {
+        const res = await fetch('http://localhost:8080/api/v1/purchaseHistory');
+        console.log(res)
+        if (!res.ok) throw new Error('Failed to fetch sales data');
+        const data = await res.json();
 
-      const totalPrice = typeof sale.Total_Price === 'string' ? parseFloat(sale.Total_Price) : sale.Total_Price;
-  
-        if (!acc[month]) {
-          acc[month] = 0;  // Initialize if month doesn't exist in accumulator
-        }
-  
-        acc[month] += totalPrice;  // Add the Total_Price for the current sale
-        return acc;
-      }, {});
-  
-      // Extract the labels (months) and the data (total sales for each month)
-      const labels = Object.keys(monthlyData);  // Months like ['Jan', 'Feb', 'Mar', ...]
-      const sales = Object.values(monthlyData);  // Aggregated totals for each month
+        // Map the API response to the required structure for transactionsData
+        const transactions = data.map((purchase: any) => ({
+          id: purchase.purchaseId,
+          customerId: purchase.customerId.toString(),  // Convert customerId to string if needed
+          saleType: purchase.saleType === 1 ? 'Online' : 'In-store',  // Handle saleType conversion
+          product: `Product ${purchase.productId}`,  // Modify this based on your actual product data
+          value: purchase.totalPrice,  // Use totalPrice from API
+          date: purchase.saleDate,  // Use saleDate directly
+        }));
 
-      console.log(labels,sales)
-      // Update salesData state
-      setSalesData({
-        labels: labels,
-        datasets: [
-          {
-            label: 'Sales',
-            data: sales,
-            backgroundColor: 'rgba(75, 192, 192, 0.6)',
-          },
-        ],
-      })
+        // Update transactionsData state with the mapped data
+        setTransactionsData(transactions);
+        setFilteredTransactions(transactions);  // Set the initial filtered transactions to the full dataset
+
+        // You can also update your salesData here as needed (same as before)
+      } catch (error) {
+        console.error('Error fetching sales data:', error);
+      }
     }
 
-    fetchSalesData()
-  }, [])
+    fetchSalesData();
+  }, []);
 
   return (
     <div className="flex h-screen bg-gray-100">
@@ -294,7 +284,8 @@ export default function Dashboard() {
                     </button>
                   </form>
                 </div>
-                <div className="mt-4 overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
+                {/*looks like this is the transactions table */}
+                {/* <div className="mt-4 overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
                   <table className="min-w-full divide-y divide-gray-300">
                     <thead className="bg-gray-50">
                       <tr>
@@ -317,7 +308,34 @@ export default function Dashboard() {
                       ))}
                     </tbody>
                   </table>
-                </div>
+                </div> */}
+                <div className="mt-8">
+                    <h2 className="text-lg font-medium text-gray-900">Transactions</h2>
+                    <div className="mt-4">
+                      <table className="min-w-full divide-y divide-gray-300">
+                        <thead className="bg-gray-50">
+                          <tr>
+                            <th className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">Customer ID</th>
+                            <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Sale Type</th>
+                            <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Product</th>
+                            <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Value</th>
+                            <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Date</th>
+                          </tr>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-gray-200">
+                          {filteredTransactions.map((transaction) => (
+                            <tr key={transaction.id}>
+                              <td className="py-4 pl-4 pr-3 text-sm font-medium text-gray-900 whitespace-nowrap sm:pl-6">{transaction.customerId}</td>
+                              <td className="px-3 py-4 text-sm text-gray-500 whitespace-nowrap">{transaction.saleType}</td>
+                              <td className="px-3 py-4 text-sm text-gray-500 whitespace-nowrap">{transaction.product}</td>
+                              <td className="px-3 py-4 text-sm text-gray-500 whitespace-nowrap">${transaction.value}</td>
+                              <td className="px-3 py-4 text-sm text-gray-500 whitespace-nowrap">{transaction.date}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
               </div>
             </div>
           </div>
