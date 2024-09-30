@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
-import '../globals.css'; // Correct if in src/app/style/
+// import '../globals.css'; // Correct if in src/app/style/
+import '../globals.css';
 import {
   LayoutGrid,
   Users,

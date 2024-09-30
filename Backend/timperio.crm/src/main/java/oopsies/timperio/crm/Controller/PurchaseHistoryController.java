@@ -20,5 +20,8 @@ public class PurchaseHistoryController {
     @GetMapping
     public ResponseEntity<List<PurchaseHistory>> allPurchaseHistory() {
         return new ResponseEntity<>(purchaseHistoryService.allPurchaseHistory(), HttpStatus.OK);
+
+    
     }
+
 }

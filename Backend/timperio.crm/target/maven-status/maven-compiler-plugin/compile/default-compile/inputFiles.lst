@@ -11,6 +11,7 @@
 /Users/amoschan/ESD-project/OOPsies/Backend/timperio.crm/src/main/java/oopsies/timperio/crm/Controller/CustomerController.java
 /Users/amoschan/ESD-project/OOPsies/Backend/timperio.crm/src/main/java/oopsies/timperio/crm/Service/PurchaseHistoryService.java
 /Users/amoschan/ESD-project/OOPsies/Backend/timperio.crm/src/main/java/oopsies/timperio/crm/Repository/ProductRepository.java
+/Users/amoschan/ESD-project/OOPsies/Backend/timperio.crm/src/main/java/oopsies/timperio/crm/config/GlobalCorsConfig.java
 /Users/amoschan/ESD-project/OOPsies/Backend/timperio.crm/src/main/java/oopsies/timperio/crm/Product.java
 /Users/amoschan/ESD-project/OOPsies/Backend/timperio.crm/src/main/java/oopsies/timperio/crm/Controller/ProductController.java
 /Users/amoschan/ESD-project/OOPsies/Backend/timperio.crm/src/main/java/oopsies/timperio/crm/PurchaseHistory.java
