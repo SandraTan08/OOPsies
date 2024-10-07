@@ -13,6 +13,8 @@ import oopsies.timperio.crm.Customer;  // Import your Product entity
 
 @RestController
 @RequestMapping("/api/v1/customer")
+// @CrossOrigin(origins = "http://localhost:3000") 
+
 public class CustomerController {
     @Autowired
     private CustomerService customerService;
