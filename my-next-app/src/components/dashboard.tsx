@@ -74,6 +74,8 @@ export default function Dashboard() {
   const [transactionsData, setTransactionsData] = useState<any[]>([]);  // All transactions
   const [filteredTransactions, setFilteredTransactions] = useState<any[]>([]);  // Filtered transactions to display
   const [saleTypeFilter, setSaleTypeFilter] = useState<string>('');  // State for sale type filter
+  const [customerIdFilter, setCustomerIdFilter] = useState<string>(''); // state for customer ID filter
+  const [productIdFilter, setProductIdFilter] = useState<string>(''); // state for Product ID filter
 
   // Calculate total sales and average order value
   const totalSales = transactionsData.reduce((sum, transaction) => sum + transaction.value, 0).toFixed(2);
@@ -110,54 +112,28 @@ export default function Dashboard() {
   const handleFilter = (e) => {
     e.preventDefault();
 
+    let filtered = transactionsData;
+
+    // Apply filters based on sale type, customer ID, and product ID
     if (saleTypeFilter) {
-      const filtered = transactionsData.filter(transaction => transaction.saleType === saleTypeFilter);
-      setFilteredTransactions(filtered);
-    } else {
-      // If no filter is selected, show all transactions
-      setFilteredTransactions(transactionsData);
+      filtered = filtered.filter(transaction => transaction.saleType === saleTypeFilter);
     }
+    
+    if (customerIdFilter) {
+      filtered = filtered.filter(transaction => transaction.customerId === customerIdFilter);
+    }
+
+    if (productIdFilter) {
+      console.log("product id filter is " +productIdFilter);
+      // console.log (transaction => transaction.product);
+      filtered = filtered.filter(transaction => transaction.product === productIdFilter); // Assuming product name contains the ID
+      // console.log(filtered.filter(transaction => transaction.product));
+    }
+
+    setFilteredTransactions(filtered);
   };
 
   return (
-    // <div className="flex h-screen bg-gray-100">
-    //   {/* Sidebar */}
-
-
-    //   {/* Main content */}
-    //   <div className="flex flex-col flex-1 overflow-hidden">
-    //     {/* Navbar */}
-    //     <header className="flex items-center justify-between px-4 py-4 bg-white border-b border-gray-200 sm:px-6 lg:px-8">
-    //       <button
-    //         className="text-gray-500 md:hidden"
-    //         onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-    //       >
-    //         <Menu className="w-6 h-6" />
-    //       </button>
-    //       <div className="flex items-center">
-    //         <div className="relative">
-    //           <input
-    //             type="text"
-    //             placeholder="Search..."
-    //             className="w-64 px-4 py-2 text-sm text-gray-700 placeholder-gray-400 bg-gray-100 border border-transparent rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-    //           />
-    //           <Search className="absolute top-2.5 right-3 w-5 h-5 text-gray-400" />
-    //         </div>
-    //       </div>
-    //       <div className="flex items-center">
-    //         <button className="p-1 text-gray-400 rounded-full hover:bg-gray-100 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500">
-    //           <Bell className="w-6 h-6" />
-    //         </button>
-    //         <div className="relative ml-3">
-    //           <div>
-    //             <button className="flex items-center max-w-xs text-sm bg-white rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500" id="user-menu" aria-expanded="false" aria-haspopup="true">
-    //               <span className="sr-only">Open user menu</span>
-    //               <User className="w-8 h-8 rounded-full" />
-    //             </button>
-    //           </div>
-    //         </div>
-    //       </div>
-    //     </header>
     <div className="flex h-screen bg-gray-100">
       {/* Main content */}
       <div className="flex flex-col flex-1 overflow-hidden">
@@ -264,6 +240,8 @@ export default function Dashboard() {
                     <input
                       type="text"
                       placeholder="Customer ID"
+                      value={customerIdFilter}
+                      onChange={(e) => setCustomerIdFilter(e.target.value)}
                       className="block w-full px-3 py-2 placeholder-gray-400 border border-gray-300 rounded-md shadow-sm appearance-none focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                     />
                     <select 
@@ -278,6 +256,8 @@ export default function Dashboard() {
                     <input
                       type="text"
                       placeholder="Product"
+                      value={productIdFilter}
+                      onChange={(e) => setProductIdFilter(e.target.value)}
                       className="block w-full px-3 py-2 placeholder-gray-400 border border-gray-300 rounded-md shadow-sm appearance-none focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                     />
                     <button
@@ -288,6 +268,7 @@ export default function Dashboard() {
                     </button>
                   </form>
                 </div>
+
                 {/* transactions table */}
                 <div className="mt-8">
                   <h2 className="text-lg font-medium text-gray-900">Transactions</h2>
