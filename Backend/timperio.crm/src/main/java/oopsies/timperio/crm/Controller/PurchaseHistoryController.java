@@ -14,7 +14,7 @@ import oopsies.timperio.crm.PurchaseHistory;
 
 @RestController
 @RequestMapping("/api/v1/purchaseHistory")
-@CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true") // Allow CORS from localhost:3000
+//@CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true") // Allow CORS from localhost:3000
 
 public class PurchaseHistoryController {
     @Autowired

@@ -14,7 +14,7 @@ import oopsies.timperio.crm.Product;  // Import your Product entity
 
 @RestController
 @RequestMapping("/api/v1/product")
-@CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true") // Allow CORS from localhost:3000
+//@CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true") // Allow CORS from localhost:3000
 public class ProductController {
     @Autowired
     private ProductService productService;

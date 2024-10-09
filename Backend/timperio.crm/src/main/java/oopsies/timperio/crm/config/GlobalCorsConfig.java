@@ -1,3 +1,4 @@
+package oopsies.timperio.crm.config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
@@ -12,10 +13,10 @@ public class GlobalCorsConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**") // Allow all paths
-                        .allowedOrigins("http://localhost:3000") // Allow specific origins
+                        .allowedOrigins("*") // Allow specific origins
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS") // Allow HTTP methods
                         .allowedHeaders("*") // Allow all headers
-                        .allowCredentials(true) // Allow credentials (cookies, authorization headers, etc.)
+                        .allowCredentials(false) // Allow credentials (cookies, authorization headers, etc.)
                         .maxAge(3600); // Cache pre-flight requests for 1 hour
             }
         };
