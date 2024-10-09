@@ -188,7 +188,7 @@ export default function Dashboard() {
             </div>
           </div>
         </header>
-
+      <div>
         <button
         onClick={toggleDropdown}
         className="flex items-center max-w-xs text-sm bg-white rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500"
