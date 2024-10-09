@@ -1,5 +1,8 @@
 {
   "devDependencies": {
     "eslint": "^9.11.1"
+  },
+  "dependencies": {
+    "cors": "^2.8.5"
   }
 }
