@@ -1,0 +1,48 @@
+import { loginSchema } from '@/schemas';
+import { z } from 'zod';
+import { NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
+
+export async function POST(request: NextRequest) {
+  try {
+    // Parse the incoming request body (it should be a JSON)
+    const payload = await request.json();
+    console.log('Payload:', payload);
+
+    // Validate the incoming data using Zod schema
+    const validatedFields = loginSchema.safeParse(payload);
+
+    if (!validatedFields.success) {
+      // Return 422 if validation fails
+      return NextResponse.json({ message: 'Invalid fields', error: validatedFields.error }, { status: 422 });
+    }
+
+    const { userId, password } = validatedFields.data;
+
+    // Fetch the user from the database or another backend API
+    const fetchResponse = await fetch(`http://localhost:8080/api/v1/users/${userId}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!fetchResponse.ok) {
+      // Return 401 if user not found or other issues occur
+      return NextResponse.json({ message: 'Invalid credentials' }, { status: 401 });
+    }
+
+    const existingUser = await fetchResponse.json();
+
+    // Validate the user's credentials (in real scenarios, passwords should be hashed and verified)
+    if (!existingUser || !existingUser.userId || userId.toString() !== password) {
+      return NextResponse.json({ message: 'Invalid credentials' }, { status: 401 });
+    }
+
+    // If everything is valid, return success
+    return NextResponse.json({ message: 'Login successful', userId: existingUser.userId }, { status: 200 });
+  } catch (error) {
+    console.error('Error fetching user or processing login:', error);
+    return NextResponse.json({ message: 'Server error' }, { status: 500 });
+  }
+}

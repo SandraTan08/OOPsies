@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Bar, Line } from 'react-chartjs-2'
+import { useSession, signIn, signOut } from 'next-auth/react';
 
 import {
   Chart as ChartJS,
@@ -39,8 +40,6 @@ import {
   Download
 } from 'lucide-react'
 
-
-
 // Mock data (replace with actual data fetching logic)
 const salesData = {
   labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
@@ -52,6 +51,8 @@ const salesData = {
     },
   ],
 }
+
+
 
 const customerData = {
   labels: ['High Value', 'Medium Value', 'Low Value'],
@@ -94,6 +95,8 @@ export default function Dashboard() {
     ],
   })
 
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const toggleDropdown = () => setDropdownOpen(!dropdownOpen);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [filteredTransactions, setFilteredTransactions] = useState(transactionsData)
 
@@ -108,51 +111,69 @@ export default function Dashboard() {
 
   useEffect(() => {
     // Fetch sales data from the API
-    async function fetchSalesData() {
-      const res = await fetch('/api/sales')
-      const data: Sale[] = await res.json()
+    // async function fetchSalesData() {
+    //   const res = await fetch('/api/sales')
+    //   const data: Sale[] = await res.json()
       
-      const monthlyData = data.reduce<Record<string, number>>((acc, sale) => {
-      const month = new Date(sale.Sale_Date).toLocaleString('default', { month: 'short' });
+    //   const monthlyData = data.reduce<Record<string, number>>((acc, sale) => {
+    //   const month = new Date(sale.Sale_Date).toLocaleString('default', { month: 'short' });
 
-      const totalPrice = typeof sale.Total_Price === 'string' ? parseFloat(sale.Total_Price) : sale.Total_Price;
+    //   const totalPrice = typeof sale.Total_Price === 'string' ? parseFloat(sale.Total_Price) : sale.Total_Price;
   
-        if (!acc[month]) {
-          acc[month] = 0;  // Initialize if month doesn't exist in accumulator
-        }
+    //     if (!acc[month]) {
+    //       acc[month] = 0;  // Initialize if month doesn't exist in accumulator
+    //     }
   
-        acc[month] += totalPrice;  // Add the Total_Price for the current sale
-        return acc;
-      }, {});
+    //     acc[month] += totalPrice;  // Add the Total_Price for the current sale
+    //     return acc;
+    //   }, {});
   
-      // Extract the labels (months) and the data (total sales for each month)
-      const labels = Object.keys(monthlyData);  // Months like ['Jan', 'Feb', 'Mar', ...]
-      const sales = Object.values(monthlyData);  // Aggregated totals for each month
+    //   // Extract the labels (months) and the data (total sales for each month)
+    //   const labels = Object.keys(monthlyData);  // Months like ['Jan', 'Feb', 'Mar', ...]
+    //   const sales = Object.values(monthlyData);  // Aggregated totals for each month
 
-      console.log(labels,sales)
-      // Update salesData state
-      setSalesData({
-        labels: labels,
-        datasets: [
-          {
-            label: 'Sales',
-            data: sales,
-            backgroundColor: 'rgba(75, 192, 192, 0.6)',
-          },
-        ],
-      })
-    }
+    //   console.log(labels,sales)
+    //   // Update salesData state
+    //   setSalesData({
+    //     labels: labels,
+    //     datasets: [
+    //       {
+    //         label: 'Sales',
+    //         data: sales,
+    //         backgroundColor: 'rgba(75, 192, 192, 0.6)',
+    //       },
+    //     ],
+    //   })
+    // }
 
-    fetchSalesData()
+    // fetchSalesData()
   }, [])
 
+  const { data: session, status } = useSession();
+
+  if (status === 'loading') {
+    return <div>Loading...</div>;
+  }
+
+  if (!session) {
+    return (
+      <div>
+        <h1>You are not logged in</h1>
+        <button onClick={() => signIn()}>Sign In</button>
+      </div>
+    );
+  }
+
+
+
   return (
+    
     <div className="flex h-screen bg-gray-100">
       {/* Sidebar */}
 
-
       {/* Main content */}
       <div className="flex flex-col flex-1 overflow-hidden">
+        
         {/* Navbar */}
         <header className="flex items-center justify-between px-4 py-4 bg-white border-b border-gray-200 sm:px-6 lg:px-8">
           <button
@@ -176,12 +197,54 @@ export default function Dashboard() {
               <Bell className="w-6 h-6" />
             </button>
             <div className="relative ml-3">
-              <div>
-                <button className="flex items-center max-w-xs text-sm bg-white rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500" id="user-menu" aria-expanded="false" aria-haspopup="true">
-                  <span className="sr-only">Open user menu</span>
-                  <User className="w-8 h-8 rounded-full" />
-                </button>
-              </div>
+            <div className="relative inline-block text-left">
+      {/* User Menu Button */}
+      <button
+        onClick={toggleDropdown}
+        className="flex items-center max-w-xs text-sm bg-white rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+        id="user-menu"
+        aria-expanded={dropdownOpen}
+        aria-haspopup="true"
+      >
+        <span className="sr-only">Open user menu</span>
+        <User className="w-8 h-8 rounded-full" /> {/* User Icon */}
+      </button>
+
+      {/* Dropdown Menu */}
+      {dropdownOpen && (
+        <div
+          className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5"
+          role="menu"
+          aria-orientation="vertical"
+          aria-labelledby="user-menu"
+        >
+          <div className="py-1" role="none">
+            <a
+              href="#"
+              className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+              role="menuitem"
+            >
+              Profile
+            </a>
+            <a
+              href="#"
+              className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+              role="menuitem"
+            >
+              Settings
+            </a>
+            <button
+              onClick={() => signOut({ callbackUrl: '/' })}
+              className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+              role="menuitem"
+            >
+              Sign Out
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+
             </div>
           </div>
         </header>
@@ -190,7 +253,7 @@ export default function Dashboard() {
         <main className="flex-1 overflow-y-auto bg-gray-100">
           <div className="py-6">
             <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
-              <h1 className="text-2xl font-semibold text-gray-900">Dashboard</h1>
+              <h1 className="text-2xl font-semibold text-gray-900">Welcome, {session.user.role} </h1>
             </div>
             <div className="px-4 mx-auto max-w-7xl sm:px-6 md:px-8">
               {/* Sales metrics */}
