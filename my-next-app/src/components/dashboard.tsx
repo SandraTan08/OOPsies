@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import { Bar, Line } from 'react-chartjs-2'
-
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -26,31 +25,7 @@ ChartJS.register(
   Legend
 )
 import { CSVLink } from 'react-csv'
-import {
-  LayoutGrid,
-  Users,
-  ShoppingCart,
-  BarChart,
-  Menu,
-  Search,
-  Bell,
-  User,
-  ChevronDown,
-  Download
-} from 'lucide-react'
-
-
-// Mock data (replace with actual data fetching logic)
-const salesData = {
-  labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-  datasets: [
-    {
-      label: 'Sales',
-      data: [12, 19, 3, 5, 2, 3],
-      backgroundColor: 'rgba(75, 192, 192, 0.6)',
-    },
-  ],
-}
+import { ShoppingCart, BarChart, Search, Download } from 'lucide-react'
 
 const customerData = {
   labels: ['High Value', 'Medium Value', 'Low Value'],
@@ -67,19 +42,50 @@ const customerData = {
   ],
 }
 
-
-
-
 export default function Dashboard() {
   const [transactionsData, setTransactionsData] = useState<any[]>([]);  // All transactions
   const [filteredTransactions, setFilteredTransactions] = useState<any[]>([]);  // Filtered transactions to display
   const [saleTypeFilter, setSaleTypeFilter] = useState<string>('');  // State for sale type filter
   const [customerIdFilter, setCustomerIdFilter] = useState<string>(''); // state for customer ID filter
   const [productIdFilter, setProductIdFilter] = useState<string>(''); // state for Product ID filter
+  const [salesData, setSalesData] = useState<any>({
+    labels: [],
+    datasets: [
+      {
+        label: 'Sales',
+        data: [],
+        backgroundColor: 'rgba(75, 192, 192, 0.6)',
+      },
+    ],
+  });
 
   // Calculate total sales and average order value
   const totalSales = transactionsData.reduce((sum, transaction) => sum + transaction.value, 0).toFixed(2);
-  const averageOrderValue = transactionsData.length > 0 ? totalSales / transactionsData.length : 0;
+  const averageOrderValue = transactionsData.length > 0 ? (parseFloat(totalSales) / transactionsData.length).toFixed(2) : 0;
+
+  // Process sales data for the chart
+  const processSalesData = (transactions) => {
+    const salesByMonth = {};
+
+    transactions.forEach(transaction => {
+      const date = new Date(transaction.date);
+      const month = date.toLocaleString('default', { month: 'short' }); // e.g., 'Jan', 'Feb'
+      const year = date.getFullYear();
+      const monthYear = `${month} ${year}`;
+
+      // Initialize if not already in the salesByMonth object
+      if (!salesByMonth[monthYear]) {
+        salesByMonth[monthYear] = 0;
+      }
+
+      salesByMonth[monthYear] += transaction.value;
+    });
+
+    return {
+      labels: Object.keys(salesByMonth),
+      data: Object.values(salesByMonth),
+    };
+  };
 
   // Fetch transactions data (mock or API call)
   useEffect(() => {
@@ -100,6 +106,17 @@ export default function Dashboard() {
 
         setTransactionsData(transactions);
         setFilteredTransactions(transactions);  // Initially show all transactions
+
+        // Process sales data for the chart
+        const { labels, data: salesChartData } = processSalesData(transactions);
+        setSalesData({
+          labels,
+          datasets: [{
+            label: 'Sales',
+            data: salesChartData,
+            backgroundColor: 'rgba(75, 192, 192, 0.6)',
+          }],
+        });
       } catch (error) {
         console.error('Error fetching sales data:', error);
       }
@@ -118,16 +135,13 @@ export default function Dashboard() {
     if (saleTypeFilter) {
       filtered = filtered.filter(transaction => transaction.saleType === saleTypeFilter);
     }
-    
+
     if (customerIdFilter) {
       filtered = filtered.filter(transaction => transaction.customerId === customerIdFilter);
     }
 
     if (productIdFilter) {
-      console.log("product id filter is " +productIdFilter);
-      // console.log (transaction => transaction.product);
-      filtered = filtered.filter(transaction => transaction.product === productIdFilter); // Assuming product name contains the ID
-      // console.log(filtered.filter(transaction => transaction.product));
+      filtered = filtered.filter(transaction => transaction.product === productIdFilter);
     }
 
     setFilteredTransactions(filtered);
@@ -157,7 +171,7 @@ export default function Dashboard() {
               <h1 className="text-2xl font-semibold text-gray-900">Dashboard</h1>
             </div>
             <div className="px-4 mx-auto max-w-7xl sm:px-6 md:px-8">
-    
+
               {/* Sales metrics */}
               <div className="mt-8">
                 <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
@@ -188,7 +202,7 @@ export default function Dashboard() {
                           <dl>
                             <dt className="text-sm font-medium text-gray-500 truncate">Average Order Value</dt>
                             <dd className="flex items-baseline">
-                              <div className="text-2xl font-semibold text-gray-900">${averageOrderValue.toFixed(2)}</div>
+                              <div className="text-2xl font-semibold text-gray-900">${averageOrderValue}</div>
                             </dd>
                           </dl>
                         </div>
@@ -217,88 +231,89 @@ export default function Dashboard() {
                 </div>
               </div>
 
-              {/* Transactions table */}
-              <div className="mt-8">
-                <div className="sm:flex sm:items-center">
-                  <div className="sm:flex-auto">
-                    <h2 className="text-lg font-medium text-gray-900">Transactions</h2>
-                  </div>
-                  <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
-                    <CSVLink
-                      data={filteredTransactions}
-                      filename="transactions.csv"
-                      className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                    >
-                      <Download className="w-4 h-4 mr-2" />
-                      Export CSV
-                    </CSVLink>
-                  </div>
-                </div>
-                {/* transactions filter */}
-                <div className="mt-4">
-                  <form onSubmit={handleFilter} className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                    <input
-                      type="text"
-                      placeholder="Customer ID"
-                      value={customerIdFilter}
-                      onChange={(e) => setCustomerIdFilter(e.target.value)}
-                      className="block w-full px-3 py-2 placeholder-gray-400 border border-gray-300 rounded-md shadow-sm appearance-none focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                    />
-                    <select 
+              {/* Filter Form */}
+              <form className="mt-8 p-4 bg-white rounded-lg shadow" onSubmit={handleFilter}>
+                <h3 className="text-lg font-medium text-gray-900">Filter Sales Transactions</h3>
+                <div className="grid grid-cols-1 gap-4 mt-4 sm:grid-cols-2 lg:grid-cols-3">
+                  <div>
+                    <label htmlFor="saleType" className="block text-sm font-medium text-black-700">Sale Type</label>
+                    <select
+                      id="saleType"
+                      name="saleType"
                       value={saleTypeFilter}
-                      onChange = {(e) => setSaleTypeFilter(e.target.value)}
-                      className="block w-full px-3 py-2 placeholder-gray-400 border border-gray-300 rounded-md shadow-sm appearance-none focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                      onChange={(e) => setSaleTypeFilter(e.target.value)}
+                      className="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                     >
-                      <option value="">All Sale Types</option>
+                      <option value="">All</option>
                       <option value="Online">Online</option>
                       <option value="In-store">In-store</option>
                     </select>
+                  </div>
+
+                  <div>
+                    <label htmlFor="customerId" className="block text-sm font-medium text-black-700">Customer ID</label>
                     <input
                       type="text"
-                      placeholder="Product"
+                      id="customerId"
+                      name="customerId"
+                      value={customerIdFilter}
+                      onChange={(e) => setCustomerIdFilter(e.target.value)}
+                      placeholder="e.g., 12345"
+                      className="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="productId" className="block text-sm font-medium text-black-700">Product ID</label>
+                    <input
+                      type="text"
+                      id="productId"
+                      name="productId"
                       value={productIdFilter}
                       onChange={(e) => setProductIdFilter(e.target.value)}
-                      className="block w-full px-3 py-2 placeholder-gray-400 border border-gray-300 rounded-md shadow-sm appearance-none focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                      placeholder="e.g., Product 1"
+                      className="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                     />
-                    <button
-                      type="submit"
-                      className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                    >
-                      Filter
-                    </button>
-                  </form>
-                </div>
-
-                {/* transactions table */}
-                <div className="mt-8">
-                  <h2 className="text-lg font-medium text-gray-900">Transactions</h2>
-                  <div className="mt-4 max-h-[36rem] overflow-y-scroll shadow-lg rounded-lg overflow-hidden custom-scrollbar"> {/* max height to show 10 rows and enable scrolling */}
-                    <table className="min-w-full divide-y divide-gray-300">
-                      <thead className="bg-gray-50 sticky top-0"> {/* Sticky header to stay visible while scrolling */}
-                        <tr>
-                          <th className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">Customer ID</th>
-                          <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Sale Type</th>
-                          <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Product</th>
-                          <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Value</th>
-                          <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Date</th>
-                        </tr>
-                      </thead>
-                      <tbody className="bg-white divide-y divide-gray-200">
-                        {filteredTransactions.map((transaction) => (
-                          <tr key={transaction.id}>
-                            <td className="py-4 pl-4 pr-3 text-sm font-medium text-gray-900 whitespace-nowrap sm:pl-6">{transaction.customerId}</td>
-                            <td className="px-3 py-4 text-sm text-gray-500 whitespace-nowrap">{transaction.saleType}</td>
-                            <td className="px-3 py-4 text-sm text-gray-500 whitespace-nowrap">{transaction.product}</td>
-                            <td className="px-3 py-4 text-sm text-gray-500 whitespace-nowrap">${transaction.value.toFixed(2)}</td>
-                            <td className="px-3 py-4 text-sm text-gray-500 whitespace-nowrap">{transaction.date}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
                   </div>
                 </div>
 
+                <div className="mt-6">
+                  <button
+                    type="submit"
+                    className="px-4 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700"
+                  >
+                    Apply Filter
+                  </button>
+                </div>
+              </form>
 
+              {/* Filtered Transactions Table */}
+              <div className="mt-8 p-4 bg-white rounded-lg shadow">
+                <h3 className="text-lg font-medium text-gray-900">Sales Transactions</h3>
+                <table className="min-w-full mt-4 divide-y divide-gray-200">
+                  <thead>
+                    <tr>
+                      <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Transaction ID</th>
+                      <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Customer ID</th>
+                      <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Sale Type</th>
+                      <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Product</th>
+                      <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Value ($)</th>
+                      <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Date</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200">
+                    {filteredTransactions.map((transaction) => (
+                      <tr key={transaction.id}>
+                        <td className="px-6 py-4 text-sm font-medium text-gray-900">{transaction.id}</td>
+                        <td className="px-6 py-4 text-sm text-gray-500">{transaction.customerId}</td>
+                        <td className="px-6 py-4 text-sm text-gray-500">{transaction.saleType}</td>
+                        <td className="px-6 py-4 text-sm text-gray-500">{transaction.product}</td>
+                        <td className="px-6 py-4 text-sm text-gray-500">{transaction.value.toFixed(2)}</td>
+                        <td className="px-6 py-4 text-sm text-gray-500">{new Date(transaction.date).toLocaleDateString()}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             </div>
           </div>
