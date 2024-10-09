@@ -1,77 +1,83 @@
-import { NextAuthConfig } from 'next-auth';
-import CredentialProvider from 'next-auth/providers/credentials';
+import { NextAuthOptions } from 'next-auth';
+import CredentialsProvider from 'next-auth/providers/credentials';
 import GithubProvider from 'next-auth/providers/github';
 
-
-export const authConfig = {
+export const authConfig: NextAuthOptions = {
   debug: true,
   providers: [
     GithubProvider({
       clientId: process.env.GITHUB_ID ?? '',
       clientSecret: process.env.GITHUB_SECRET ?? ''
     }),
-    CredentialProvider({
+    CredentialsProvider({
       name: 'Credentials',
       credentials: {
-        staff_id: { label: 'Staff ID', type: 'number' },
+        userId: { label: 'User Id', type: 'text' }, // use 'text' for userId type
         password: { label: 'Password', type: 'password' }
       },
       async authorize(credentials, req) {
-        const response = await fetch(`http://localhost:8080/api/v1/users/staff/${credentials.staff_id}`, {
-            method: 'GET',
-            headers: {
-              'Content-Type': 'application/json',
-              // Add any authorization headers here if necessary
-            }
-          });
-  
+        // Fetch user data based on userId
+        const response = await fetch(`http://localhost:8080/api/v1/users/${credentials.userId}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
         const user = await response.json();
-        const { staff_id, password } = credentials;
+
+        // Extract userId and password from credentials
+        const { userId, password } = credentials || {};
         console.log('User found:', user); // Log user for debugging
+
         if (!user) {
-          console.log('Staff ID not found:', staff_id); // Log staff_id not found
-          return null; // If user doesn't exist, return null (block login)
+          console.log('User ID not found:', userId); // Log if user is not found
+          return null; // Return null to block login
         }
 
-        // Validate password (assuming staff_id == password for your case)
-        if (user.staff_id.toString() === password) {
-          console.log('Login successful for staff_id:', staff_id);
-          return user; // If valid, return the user object (successful login)
+        // Assuming you're validating that userId == password (for demo purposes)
+        if (user.userId.toString() === password) {
+          console.log('Login successful for userId:', userId);
+          return user; // If valid, return user object to proceed with login
         } else {
-          console.log('Invalid password for staff_id:', staff_id);
-          return null; // If password doesn't match, return null (block login)
+          console.log('Invalid password for userId:', userId);
+          return null; // Return null to block login
         }
       }
     })
   ],
+  session: {
+    strategy: 'jwt', // Use JWT-based sessions
+    maxAge: 24 * 60 * 60, // 24 hours session expiry
+  },
   callbacks: {
     async jwt({ token, user }) {
+      // When user logs in for the first time, add userId to the token
       if (user) {
-        console.log('User in JWT callback:', user); // Debug user in JWT
-        token.id = user.id;
-        token.staff_id = user.staff_id; // Add staff_id to the JWT token
-        token.staff_fname = user.staff_fname;
+        token.userId = user.id || user.userId;
+        token.userId = user.id || user.userId;  // Make sure to handle both `id` and `userId`
+        token.username = user.username;  // Add username to the token
+        token.role = user.role;  // Add role to the token
+        token.department = user.department;  // Add department to the token
+        token.position = user.position; // Assuming user has `userId`
       }
       return token;
     },
     async session({ session, token }) {
-      console.log('Token in Session callback:', token); // Debug token
-
-      // Ensure session.user exists and assign token values
+      // Pass userId from token to session
       if (token) {
-        session.user = session.user || {}; // Initialize session.user if it doesn't exist
-        session.user.id = token.id as string;
-        session.user.staff_id = token.staff_id as number; // Assign staff_id from token to session.user
-        session.user.staff_fname = token.staff_fname as string;
+        session.user.userId = token.userId as string;
+        session.user.username = token.username as string;  // Ensure username is passed to session
+        session.user.role = token.role as string;
+        session.user.department = token.department as string;
+        session.user.position = token.position as string; // Attach userId to session.user
       }
-
-      console.log('Session after modification:', session); // Debug session after assignment
       return session;
-    }
+    },
   },
   pages: {
-    signIn: '/' //sigin page
+    signIn: '/' // Specify the sign-in page
   }
-} satisfies xNextAuthConfig;
+};
 
 export default authConfig;

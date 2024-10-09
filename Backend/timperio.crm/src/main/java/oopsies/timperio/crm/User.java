@@ -17,6 +17,7 @@ public class User {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @JsonProperty("userId")
     private Integer userId; // Assuming the primary key is "userId"
 
     @JsonProperty("username")

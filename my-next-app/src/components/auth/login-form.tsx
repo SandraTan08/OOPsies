@@ -8,7 +8,7 @@ import { z } from 'zod';
 import { loginSchema } from '@/schemas';
 import { Button } from '@/components/ui/button';
 import { useTransition } from 'react';
-import { login } from '@/actions/login';
+import { signIn } from 'next-auth/react';
 import { FormInput } from '@/components/auth/form-input';
 import { toast } from 'sonner';
 import Link from 'next/link';
@@ -21,31 +21,48 @@ export const LoginForm = () => {
     resolver: zodResolver(loginSchema),
     mode: 'onChange',
     defaultValues: {
-      staff_id: '',
+      userId: '',
       password: ''
     }
   });
 
-  const handleSubmit = form.handleSubmit((values) => {
-    startTransition(() => {
-      login(values)
-        .then((data) => {
-          console.log('HELLO Login response:', data); // Log the entire response
-          if (!data) return toast.error('No response from server.');
-          if (!data.success) {
-            if ('error' in data && data.error) {
-              return toast.error(data.error.message);
-            }
-            return toast.error('An unknown error occurred');
-          }
-          // Redirect to dashboard on successful login
-          router.push('/dashboard');
-        })
-        .catch((error) => {
-          console.error('Login error:', error); // Log the error
-          toast.error('Something went wrong.');
-        });
-    });
+  const handleSubmit = form.handleSubmit(async (values) => {
+    try {
+      // Call your API route to validate credentials on the server
+      const response = await fetch('/api/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(values),
+      });
+  
+      const data = await response.json();
+  
+      if (!response.ok) {
+        toast.error(data.message || 'Something went wrong');
+        return;
+      }
+  
+      // Perform client-side signIn if the credentials are valid
+      const signInResult = await signIn('credentials', {
+        userId: data.userId,
+        password: values.password,
+        redirect: false, // Prevent the automatic redirect
+      });
+  
+      if (signInResult?.error) {
+        toast.error(signInResult.error || 'Invalid credentials');
+        return;
+      }
+  
+      // Redirect to the account page upon successful login
+      toast.success('Login successful!');
+      router.push('/dashboard');
+    } catch (error) {
+      console.error('Login error:', error);
+      toast.error('Something went wrong.');
+    }
   });
 
   return (
@@ -61,8 +78,8 @@ export const LoginForm = () => {
           <div className="space-y-4">
             <FormInput
               control={form.control}
-              name="staff_id"
-              label="Staff ID"
+              name="userId"
+              label="User ID"
               type="number"
               placeholder="Enter your staff ID"
               isPending={isPending}

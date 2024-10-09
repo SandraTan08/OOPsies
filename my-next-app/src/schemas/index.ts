@@ -2,16 +2,16 @@ import { z } from 'zod';
 
 const STAFF_ID_SCHEMA = z
   .string()
-  .length(6, 'Staff ID must be 6 digits long.')
+  .length(5, 'Staff ID must be 5 digits long.')
   .regex(/^\d+$/, 'Staff ID must be numeric.');
 
 export const loginSchema = z.object({
-  staff_id: STAFF_ID_SCHEMA, // Updated from EMAIL_SCHEMA to STAFF_ID_SCHEMA
+  userId: STAFF_ID_SCHEMA, // Updated from EMAIL_SCHEMA to STAFF_ID_SCHEMA
   password: z.string().min(1, 'Password is required.')
 });
 
 export const registerSchema = z.object({
-  staff_id: STAFF_ID_SCHEMA, // Updated from EMAIL_SCHEMA to STAFF_ID_SCHEMA
+  userId: STAFF_ID_SCHEMA, // Updated from EMAIL_SCHEMA to STAFF_ID_SCHEMA
   name: z
     .string()
     .min(1, {
@@ -27,11 +27,11 @@ export const registerSchema = z.object({
 
 // Remove email-related schemas
 export const resendSchema = z.object({
-  staff_id: STAFF_ID_SCHEMA // Updated from EMAIL_SCHEMA to STAFF_ID_SCHEMA
+  userId: STAFF_ID_SCHEMA // Updated from EMAIL_SCHEMA to STAFF_ID_SCHEMA
 });
 
 export const resetPasswordSchema = z.object({
-  staff_id: STAFF_ID_SCHEMA // Updated from EMAIL_SCHEMA to STAFF_ID_SCHEMA
+  userId: STAFF_ID_SCHEMA // Updated from EMAIL_SCHEMA to STAFF_ID_SCHEMA
 });
 
 // ... existing newPasswordSchema and twoFactorSchema remain unchanged ...
