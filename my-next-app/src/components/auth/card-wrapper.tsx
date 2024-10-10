@@ -28,7 +28,6 @@ import {
       headerDescription,
       backButtonLabel,
       backButtonHref,
-      // showSocial,
       children,
       ...rest
     } = props;
@@ -63,11 +62,7 @@ import {
             </CardFooter>
           </>
         ) : null} */}
-        <Separator />
         <CardFooter className="py-3">
-          <Button variant="link" className="w-full font-normal" size="sm" asChild>
-            <Link href={backButtonHref}>{backButtonLabel}</Link>
-          </Button>
         </CardFooter>
       </Card>
     );

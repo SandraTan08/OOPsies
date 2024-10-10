@@ -52,8 +52,10 @@ export default function Dashboard() {
   const [transactionsData, setTransactionsData] = useState<any[]>([]);  // All transactions
   const [filteredTransactions, setFilteredTransactions] = useState<any[]>([]);  // Filtered transactions to display
   const [saleTypeFilter, setSaleTypeFilter] = useState<string>('');  // State for sale type filter
-  const [customerIdFilter, setCustomerIdFilter] = useState<string>(''); // state for customer ID filter
-  const [productIdFilter, setProductIdFilter] = useState<string>(''); // state for Product ID filter
+  const [customerIdFilter, setCustomerIdFilter] = useState<string>(''); // State for customer ID filter
+  const [productIdFilter, setProductIdFilter] = useState<string>(''); // State for Product ID filter
+  const [currentPage, setCurrentPage] = useState(1);  // State to track current page
+  const itemsPerPage = 25;
   const [salesData, setSalesData] = useState<any>({
     labels: [],
     datasets: [
@@ -95,6 +97,15 @@ export default function Dashboard() {
       data: Object.values(salesByMonth),
     };
   };
+
+
+  // Calculate total pages
+  const totalPages = Math.ceil(filteredTransactions.length / itemsPerPage);
+
+  // Calculate the transactions for the current page
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentTransactions = filteredTransactions.slice(startIndex, endIndex);
 
   // Fetch transactions data (mock or API call)
   useEffect(() => {
@@ -170,6 +181,7 @@ export default function Dashboard() {
       </div>
     );
   }
+  
 
 
 
@@ -379,7 +391,7 @@ export default function Dashboard() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200">
-                    {filteredTransactions.map((transaction) => (
+                    {currentTransactions.map((transaction) => (
                       <tr key={transaction.id}>
                         <td className="px-6 py-4 text-sm font-medium text-gray-900">{transaction.id}</td>
                         <td className="px-6 py-4 text-sm text-gray-500">{transaction.customerId}</td>
@@ -390,6 +402,27 @@ export default function Dashboard() {
                       </tr>
                     ))}
                   </tbody>
+                  <div className="mt-4 flex justify-between">
+                  </div>
+                  <div className="mt-4 flex justify-between">
+                  <button
+                    onClick={() => setCurrentPage(currentPage - 1)}
+                    disabled={currentPage === 1}
+                    className="px-4 py-2 bg-blue-500 text-white rounded disabled:opacity-50"
+                  >
+                    Previous
+                  </button>
+
+                  <span>Page {currentPage} of {totalPages}</span>
+
+                  <button
+                    onClick={() => setCurrentPage(currentPage + 1)}
+                    disabled={currentPage === totalPages}
+                    className="px-4 py-2 bg-blue-500 text-white rounded disabled:opacity-50"
+                  >
+                    Next
+                  </button>
+                </div>
                 </table>
               </div>
             </div>

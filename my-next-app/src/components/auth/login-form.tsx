@@ -94,7 +94,7 @@ export const LoginForm = () => {
               name="accountId"
               label="Account ID"
               type="String"
-              placeholder="Enter your staff ID"
+              placeholder="Enter your Account ID"
               isPending={isPending}
             />
             <div>
@@ -112,7 +112,6 @@ export const LoginForm = () => {
                 className="-mt-6 w-full justify-end p-0 text-xs text-blue-500"
                 asChild
               >
-                <Link href="/reset">Forgot password?</Link>
               </Button>
             </div>
           </div>
