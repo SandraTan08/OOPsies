@@ -12,35 +12,38 @@ export const authConfig: NextAuthOptions = {
     CredentialsProvider({
       name: 'Credentials',
       credentials: {
-        userId: { label: 'User Id', type: 'text' }, // use 'text' for userId type
+        accountId: { label: 'Account Id', type: 'text' }, // use 'text' for userId type
         password: { label: 'Password', type: 'password' }
       },
       async authorize(credentials, req) {
         // Fetch user data based on userId
-        const response = await fetch(`http://localhost:8080/api/v1/users/${credentials.userId}`, {
+        if (!credentials) {
+            throw new Error("Credentials are undefined");
+        }
+        const response = await fetch(`http://localhost:8080/api/v1/account/${credentials.accountId}`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
           },
         });
 
-        const user = await response.json();
+        const account = await response.json();
 
         // Extract userId and password from credentials
-        const { userId, password } = credentials || {};
-        console.log('User found:', user); // Log user for debugging
+        const { accountId, password } = credentials || {};
+        console.log('User found:', account); // Log user for debugging
 
-        if (!user) {
-          console.log('User ID not found:', userId); // Log if user is not found
+        if (!account) {
+          console.log('User ID not found:', accountId); // Log if user is not found
           return null; // Return null to block login
         }
 
         // Assuming you're validating that userId == password (for demo purposes)
-        if (user.userId.toString() === password) {
-          console.log('Login successful for userId:', userId);
-          return user; // If valid, return user object to proceed with login
+        if (account.password === password) {
+          console.log('Login successful for userId:', accountId);
+          return account; // If valid, return user object to proceed with login
         } else {
-          console.log('Invalid password for userId:', userId);
+          console.log('Invalid password for userId:', accountId);
           return null; // Return null to block login
         }
       }
@@ -51,29 +54,31 @@ export const authConfig: NextAuthOptions = {
     maxAge: 24 * 60 * 60, // 24 hours session expiry
   },
   callbacks: {
-    async jwt({ token, user }) {
-      // When user logs in for the first time, add userId to the token
-      if (user) {
-        token.userId = user.id || user.userId;
-        token.userId = user.id || user.userId;  // Make sure to handle both `id` and `userId`
-        token.username = user.username;  // Add username to the token
-        token.role = user.role;  // Add role to the token
-        token.department = user.department;  // Add department to the token
-        token.position = user.position; // Assuming user has `userId`
+    async jwt({ token, account, user }) {
+      // When the user logs in for the first time (or when they refresh the session)
+      if (account && user) {
+        token.accountId = user.id || account.providerAccountId;  // Use the `id` from the `user` or `providerAccountId`
+        token.accountUserName = user.accountUserName || '';  // Add the username (if available) from the user
+        token.role = user.role || 'user';  // Add role from `user`, or default to 'user'
+        token.accountEmail = user.accountEmail || '';  // Add email from `user`
       }
+  
       return token;
     },
     async session({ session, token }) {
-      // Pass userId from token to session
+      // Initialize `session.account` if it does not exist
+      session.account = session.account || {};
+  
+      // Populate session fields from the token
       if (token) {
-        session.user.userId = token.userId as string;
-        session.user.username = token.username as string;  // Ensure username is passed to session
-        session.user.role = token.role as string;
-        session.user.department = token.department as string;
-        session.user.position = token.position as string; // Attach userId to session.user
+        session.account.accountId = token.accountId as string;
+        session.account.accountUserName = token.accountUserName as string;
+        session.account.role = token.role as string;
+        session.account.accountEmail = token.accountEmail as string;
       }
+  
       return session;
-    },
+    }
   },
   pages: {
     signIn: '/' // Specify the sign-in page

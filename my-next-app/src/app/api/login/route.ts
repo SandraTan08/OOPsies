@@ -17,10 +17,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ message: 'Invalid fields', error: validatedFields.error }, { status: 422 });
     }
 
-    const { userId, password } = validatedFields.data;
+    const { accountId, password } = validatedFields.data;
 
     // Fetch the user from the database or another backend API
-    const fetchResponse = await fetch(`http://localhost:8080/api/v1/users/${userId}`, {
+    const fetchResponse = await fetch(`http://localhost:8080/api/v1/account/${accountId}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -34,13 +34,12 @@ export async function POST(request: NextRequest) {
 
     const existingUser = await fetchResponse.json();
 
-    // Validate the user's credentials (in real scenarios, passwords should be hashed and verified)
-    if (!existingUser || !existingUser.userId || userId.toString() !== password) {
+    if (!existingUser || !existingUser.accountId || existingUser.password !== password) {
       return NextResponse.json({ message: 'Invalid credentials' }, { status: 401 });
     }
 
     // If everything is valid, return success
-    return NextResponse.json({ message: 'Login successful', userId: existingUser.userId }, { status: 200 });
+    return NextResponse.json({ message: 'Login successful', accountId: existingUser.accountId }, { status: 200 });
   } catch (error) {
     console.error('Error fetching user or processing login:', error);
     return NextResponse.json({ message: 'Server error' }, { status: 500 });

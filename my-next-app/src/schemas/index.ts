@@ -1,17 +1,16 @@
 import { z } from 'zod';
 
-const STAFF_ID_SCHEMA = z
+const ACCOUNT_ID_SCHEMA = z
   .string()
-  .length(5, 'Staff ID must be 5 digits long.')
-  .regex(/^\d+$/, 'Staff ID must be numeric.');
+  .length(4, 'Staff ID must be 4 digits long.')
 
 export const loginSchema = z.object({
-  userId: STAFF_ID_SCHEMA, // Updated from EMAIL_SCHEMA to STAFF_ID_SCHEMA
+  accountId: ACCOUNT_ID_SCHEMA, // Updated from EMAIL_SCHEMA to STAFF_ID_SCHEMA
   password: z.string().min(1, 'Password is required.')
 });
 
 export const registerSchema = z.object({
-  userId: STAFF_ID_SCHEMA, // Updated from EMAIL_SCHEMA to STAFF_ID_SCHEMA
+  accountId: ACCOUNT_ID_SCHEMA, // Updated from EMAIL_SCHEMA to STAFF_ID_SCHEMA
   name: z
     .string()
     .min(1, {
@@ -27,11 +26,11 @@ export const registerSchema = z.object({
 
 // Remove email-related schemas
 export const resendSchema = z.object({
-  userId: STAFF_ID_SCHEMA // Updated from EMAIL_SCHEMA to STAFF_ID_SCHEMA
+  accountId: ACCOUNT_ID_SCHEMA // Updated from EMAIL_SCHEMA to STAFF_ID_SCHEMA
 });
 
 export const resetPasswordSchema = z.object({
-  userId: STAFF_ID_SCHEMA // Updated from EMAIL_SCHEMA to STAFF_ID_SCHEMA
+  accountId: ACCOUNT_ID_SCHEMA // Updated from EMAIL_SCHEMA to STAFF_ID_SCHEMA
 });
 
 // ... existing newPasswordSchema and twoFactorSchema remain unchanged ...
@@ -46,7 +45,7 @@ export const profileSchema = z.object({
       .min(4, 'Name must be at least 4 characters.')
       .max(24, 'Maximum length of Name is 24 characters.')
   ),
-  staff_id: z.optional(STAFF_ID_SCHEMA), // Updated from email to staff_id
+  staff_id: z.optional(ACCOUNT_ID_SCHEMA), // Updated from email to staff_id
   password: z.optional(
     z.string().min(6, 'Password must be at least 6 characters.')
   ),

@@ -20,4 +20,8 @@ public class AccountService {
         System.out.println("Fetched accounts: " + accounts); // Debug log
         return accounts;
     }
+    
+    public Optional<Account> getAccountById(String accountID) {
+        return accountRepository.findById(accountID);
+    }
 }

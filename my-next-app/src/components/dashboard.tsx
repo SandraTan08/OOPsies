@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react'
 import { Bar, Line } from 'react-chartjs-2'
 import { useSession, signIn, signOut } from 'next-auth/react';
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+
 
 import {
   Chart as ChartJS,
@@ -187,18 +189,23 @@ export default function Dashboard() {
               <Search className="absolute top-2.5 right-3 w-5 h-5 text-gray-400" />
             </div>
           </div>
+            <button
+                onClick={toggleDropdown}
+                className="flex items-center max-w-xs text-sm bg-black rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+                id="user-menu"
+                aria-expanded={dropdownOpen}
+                aria-haspopup="true"
+              >
+                <Avatar>
+                  <AvatarImage src="https://github.com/shadcn.png" />
+                  <AvatarFallback>CN</AvatarFallback>
+                </Avatar>
+                <span className="sr-only">Open user menu</span>
+              </button>
+          
         </header>
       <div>
-        <button
-        onClick={toggleDropdown}
-        className="flex items-center max-w-xs text-sm bg-white rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500"
-        id="user-menu"
-        aria-expanded={dropdownOpen}
-        aria-haspopup="true"
-      >
-        <span className="sr-only">Open user menu</span>
-      </button>
-
+        
       {/* Dropdown Menu */}
       {dropdownOpen && (
         <div
@@ -238,7 +245,7 @@ export default function Dashboard() {
         <main className="flex-1 overflow-y-auto bg-gray-100">
           <div className="py-6">
             <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
-              <h1 className="text-2xl font-semibold text-gray-900">Welcome, {session.user.role} </h1>
+              <h1 className="text-2xl font-semibold text-gray-900">Welcome, {session.account.accountUserName} </h1>
             </div>
             <div className="px-4 mx-auto max-w-7xl sm:px-6 md:px-8">
 

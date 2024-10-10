@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { useTransition } from 'react';
 import { signIn } from 'next-auth/react';
 import { FormInput } from '@/components/auth/form-input';
-import { toast } from 'sonner';
+import { toast ,Toaster } from 'sonner';  // Ensure `sonner` is installed and imported
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
@@ -21,7 +21,7 @@ export const LoginForm = () => {
     resolver: zodResolver(loginSchema),
     mode: 'onChange',
     defaultValues: {
-      userId: '',
+      accountId: '',
       password: ''
     }
   });
@@ -36,36 +36,48 @@ export const LoginForm = () => {
         },
         body: JSON.stringify(values),
       });
-  
+      
       const data = await response.json();
+      console.log('API returned success:', data); 
   
       if (!response.ok) {
-        toast.error(data.message || 'Something went wrong');
+        // Display a toast error if the API returns an error response (e.g., user not found)
+        toast.error(data.message || 'Invalid account or password.');
         return;
       }
-  
+
+      
       // Perform client-side signIn if the credentials are valid
       const signInResult = await signIn('credentials', {
-        userId: data.userId,
+        accountId: values.accountId,
         password: values.password,
         redirect: false, // Prevent the automatic redirect
       });
-  
+      
       if (signInResult?.error) {
+            // Show an error toast if signIn failed (wrong password, etc.)
         toast.error(signInResult.error || 'Invalid credentials');
         return;
       }
-  
-      // Redirect to the account page upon successful login
+
+      console.log('API response:', response);  // Logs the entire response
+      console.log('API data:', data);  // Logs the parsed JSON data
+          
+      
+      // Redirect to the dashboard page upon successful login
       toast.success('Login successful!');
-      router.push('/dashboard');
-    } catch (error) {
+      startTransition(() => {
+        router.push('/dashboard');
+      });
+    } 
+    catch (error) {
       console.error('Login error:', error);
-      toast.error('Something went wrong.');
+      toast.error('Something went wrong. Please try again.');
     }
   });
 
   return (
+    
     <CardWrapper
       headerTitle="Login"
       headerDescription="Welcome back! Please fill out the form below before logging in to the website."
@@ -73,14 +85,15 @@ export const LoginForm = () => {
       backButtonHref="/register"
       showSocial
     >
+    <Toaster />
       <Form {...form}>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-4">
             <FormInput
               control={form.control}
-              name="userId"
-              label="User ID"
-              type="number"
+              name="accountId"
+              label="Account ID"
+              type="String"
               placeholder="Enter your staff ID"
               isPending={isPending}
             />
@@ -111,5 +124,3 @@ export const LoginForm = () => {
     </CardWrapper>
   );
 };
-
-// Update the loginSchema to validate staff_id
