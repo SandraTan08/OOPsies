@@ -57,7 +57,7 @@ const CustomerList: React.FC = () => {
             {customers.map(customer => (
               <tr key={customer.customerId}>
                 <td>
-                  <a href={`http://localhost:3001/customerprofile/${customer.customerId}`} target="_blank" rel="noopener noreferrer">
+                  <a href={`http://localhost:3001/customerprofile/${customer.customerId}`} rel="noopener noreferrer">
                     {customer.customerId}
                   </a>
                 </td>
