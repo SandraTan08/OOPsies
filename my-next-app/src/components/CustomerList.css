@@ -1,0 +1,82 @@
+.customer-profile {
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    font-family: Arial, sans-serif;
+}
+
+.profile-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.tier-badge {
+    margin-left: 10px;
+    font-size: 0.8em;
+    color: #fff;
+    background-color: #4CAF50; /* Green for Gold/Silver/Bronze */
+    padding: 5px 10px;
+    border-radius: 4px;
+}
+
+.contact-button {
+    padding: 8px 16px;
+    margin-left: 10px;
+    background-color: #007BFF; /* Bootstrap primary color */
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.contact-button:hover {
+    background-color: #0056b3; /* Darker shade for hover effect */
+}
+
+.customer-details {
+    margin-bottom: 20px;
+    background-color: #fff;
+    padding: 15px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+h2 {
+    margin-top: 20px;
+}
+
+#purchase-history {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+#purchase-history th,
+#purchase-history td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: left;
+}
+
+#purchase-history th {
+    background-color: #007BFF; /* Header background color */
+    color: white;
+}
+
+#purchase-history tr:nth-child(even) {
+    background-color: #f2f2f2; /* Zebra stripe effect */
+}
+
+.loading,
+.error {
+    text-align: center;
+    margin: 20px;
+    font-size: 1.2em;
+    color: #ff0000; /* Error color */
+}
