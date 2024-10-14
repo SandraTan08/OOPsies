@@ -51,6 +51,7 @@ const customerData = {
 export default function Dashboard() {
   const [transactionsData, setTransactionsData] = useState<any[]>([]);  // All transactions
   const [filteredTransactions, setFilteredTransactions] = useState<any[]>([]);  // Filtered transactions to display
+  const [viewType, setViewType] = useState<string>('monthly');  // Sales Overview default state to be 'monthly' view
   const [saleTypeFilter, setSaleTypeFilter] = useState<string>('');  // State for sale type filter
   const [customerIdFilter, setCustomerIdFilter] = useState<string>(''); // State for customer ID filter
   const [productIdFilter, setProductIdFilter] = useState<string>(''); // State for Product ID filter
@@ -75,26 +76,35 @@ export default function Dashboard() {
   const averageOrderValue = transactionsData.length > 0 ? (parseFloat(totalSales) / transactionsData.length).toFixed(2) : 0;
 
   // Process sales data for the chart
-  const processSalesData = (transactions) => {
-    const salesByMonth = {};
+  const processSalesData = (transactions, viewType) => {
+    const salesByPeriod = {};
 
     transactions.forEach(transaction => {
       const date = new Date(transaction.date);
-      const month = date.toLocaleString('default', { month: 'short' }); // e.g., 'Jan', 'Feb'
-      const year = date.getFullYear();
-      const monthYear = `${month} ${year}`;
+      let period;
 
-      // Initialize if not already in the salesByMonth object
-      if (!salesByMonth[monthYear]) {
-        salesByMonth[monthYear] = 0;
+      // Adjust the period based on the viewType
+      if (viewType === 'weekly') {
+        const week = `${date.getFullYear()}-W${Math.ceil((date.getDate() - 1) / 7)}`;
+        period = week;
+      } else if (viewType === 'monthly') {
+        const month = date.toLocaleString('default', { month: 'short' });
+        const year = date.getFullYear();
+        period = `${month} ${year}`;
+      } else if (viewType === 'yearly') {
+        period = date.getFullYear();
       }
 
-      salesByMonth[monthYear] += transaction.value;
+      if (!salesByPeriod[period]) {
+        salesByPeriod[period] = 0;
+      }
+
+      salesByPeriod[period] += transaction.value;
     });
 
     return {
-      labels: Object.keys(salesByMonth),
-      data: Object.values(salesByMonth),
+      labels: Object.keys(salesByPeriod),
+      data: Object.values(salesByPeriod),
     };
   };
 
@@ -125,10 +135,10 @@ export default function Dashboard() {
         }));
 
         setTransactionsData(transactions);
-        setFilteredTransactions(transactions);  // Initially show all transactions
+        setFilteredTransactions(transactions);
 
-        // Process sales data for the chart
-        const { labels, data: salesChartData } = processSalesData(transactions);
+        // Process sales data based on the current view type
+        const { labels, data: salesChartData } = processSalesData(transactions, viewType);
         setSalesData({
           labels,
           datasets: [{
@@ -143,7 +153,7 @@ export default function Dashboard() {
     }
 
     fetchSalesData();
-  }, []);
+  }, [viewType]);
 
   // Handle filter form submission
   const handleFilter = (e) => {
@@ -182,12 +192,12 @@ export default function Dashboard() {
       </div>
     );
   }
-  
+
 
 
 
   return (
-    
+
     <div className="flex h-screen bg-gray-100">
       {/* Main content */}
       <div className="flex flex-col flex-1 overflow-hidden">
@@ -202,57 +212,57 @@ export default function Dashboard() {
               <Search className="absolute top-2.5 right-3 w-5 h-5 text-gray-400" />
             </div>
           </div>
-            <button
-                onClick={toggleDropdown}
-                className="flex items-center max-w-xs text-sm bg-black rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500"
-                id="user-menu"
-                aria-expanded={dropdownOpen}
-                aria-haspopup="true"
-              >
-                <Avatar>
-                  <AvatarImage src="https://github.com/shadcn.png" />
-                  <AvatarFallback>CN</AvatarFallback>
-                </Avatar>
-                <span className="sr-only">Open user menu</span>
-              </button>
-          
+          <button
+            onClick={toggleDropdown}
+            className="flex items-center max-w-xs text-sm bg-black rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+            id="user-menu"
+            aria-expanded={dropdownOpen}
+            aria-haspopup="true"
+          >
+            <Avatar>
+              <AvatarImage src="https://github.com/shadcn.png" />
+              <AvatarFallback>CN</AvatarFallback>
+            </Avatar>
+            <span className="sr-only">Open user menu</span>
+          </button>
+
         </header>
-      <div>
-        
-      {/* Dropdown Menu */}
-      {dropdownOpen && (
-        <div
-          className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5"
-          role="menu"
-          aria-orientation="vertical"
-          aria-labelledby="user-menu"
-        >
-          <div className="py-1" role="none">
-            <a
-              href="#"
-              className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-              role="menuitem"
+        <div>
+
+          {/* Dropdown Menu */}
+          {dropdownOpen && (
+            <div
+              className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5"
+              role="menu"
+              aria-orientation="vertical"
+              aria-labelledby="user-menu"
             >
-              Profile
-            </a>
-            <a
-              href="#"
-              className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-              role="menuitem"
-            >
-              Settings
-            </a>
-            <button
-              onClick={() => signOut({ callbackUrl: '/' })}
-              className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-              role="menuitem"
-            >
-              Sign Out
-            </button>
-          </div>
+              <div className="py-1" role="none">
+                <a
+                  href="#"
+                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  role="menuitem"
+                >
+                  Profile
+                </a>
+                <a
+                  href="#"
+                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  role="menuitem"
+                >
+                  Settings
+                </a>
+                <button
+                  onClick={() => signOut({ callbackUrl: '/' })}
+                  className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  role="menuitem"
+                >
+                  Sign Out
+                </button>
+              </div>
+            </div>
+          )}
         </div>
-      )}
-    </div>
 
         {/* Dashboard content */}
         <main className="flex-1 overflow-y-auto bg-gray-100">
@@ -308,6 +318,28 @@ export default function Dashboard() {
                 <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
                   <div className="p-4 bg-white rounded-lg shadow" >
                     <h2 className="text-lg font-medium text-gray-900">Sales Overview</h2>
+
+                    <div className="mt-4 flex justify-between">
+                      <button
+                        className={`px-4 py-2 ${viewType === 'weekly' ? 'bg-blue-600' : 'bg-gray-200'} text-white rounded`}
+                        onClick={() => setViewType('weekly')}
+                      >
+                        Weekly
+                      </button>
+                      <button
+                        className={`px-4 py-2 ${viewType === 'monthly' ? 'bg-blue-600' : 'bg-gray-200'} text-white rounded`}
+                        onClick={() => setViewType('monthly')}
+                      >
+                        Monthly
+                      </button>
+                      <button
+                        className={`px-4 py-2 ${viewType === 'yearly' ? 'bg-blue-600' : 'bg-gray-200'} text-white rounded`}
+                        onClick={() => setViewType('yearly')}
+                      >
+                        Yearly
+                      </button>
+                    </div>
+
                     <div className="mt-4">
                       <Bar data={salesData} options={{ responsive: true }} />
                     </div>
@@ -406,24 +438,24 @@ export default function Dashboard() {
                   <div className="mt-4 flex justify-between">
                   </div>
                   <div className="mt-4 flex justify-between">
-                  <button
-                    onClick={() => setCurrentPage(currentPage - 1)}
-                    disabled={currentPage === 1}
-                    className="px-4 py-2 bg-blue-500 text-white rounded disabled:opacity-50"
-                  >
-                    Previous
-                  </button>
+                    <button
+                      onClick={() => setCurrentPage(currentPage - 1)}
+                      disabled={currentPage === 1}
+                      className="px-4 py-2 bg-blue-500 text-white rounded disabled:opacity-50"
+                    >
+                      Previous
+                    </button>
 
-                  <span>Page {currentPage} of {totalPages}</span>
+                    <span>Page {currentPage} of {totalPages}</span>
 
-                  <button
-                    onClick={() => setCurrentPage(currentPage + 1)}
-                    disabled={currentPage === totalPages}
-                    className="px-4 py-2 bg-blue-500 text-white rounded disabled:opacity-50"
-                  >
-                    Next
-                  </button>
-                </div>
+                    <button
+                      onClick={() => setCurrentPage(currentPage + 1)}
+                      disabled={currentPage === totalPages}
+                      className="px-4 py-2 bg-blue-500 text-white rounded disabled:opacity-50"
+                    >
+                      Next
+                    </button>
+                  </div>
                 </table>
               </div>
             </div>
