@@ -161,6 +161,7 @@ export default function Dashboard() {
     }
 
     if (productIdFilter) {
+      // filtered = filtered.filter(transaction => transaction.product.includes(productIdFilter) );
       filtered = filtered.filter(transaction => transaction.product === productIdFilter);
     }
 
@@ -325,13 +326,13 @@ export default function Dashboard() {
                 <h3 className="text-lg font-medium text-gray-900">Filter Sales Transactions</h3>
                 <div className="grid grid-cols-1 gap-4 mt-4 sm:grid-cols-2 lg:grid-cols-3">
                   <div>
-                    <label htmlFor="saleType" className="block text-sm font-medium text-black-700">Sale Type</label>
+                    <label htmlFor="saleType" className="block text-sm font-medium text-black">Sale Type</label>
                     <select
                       id="saleType"
                       name="saleType"
                       value={saleTypeFilter}
                       onChange={(e) => setSaleTypeFilter(e.target.value)}
-                      className="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                      className="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-500"
                     >
                       <option value="">All</option>
                       <option value="Online">Online</option>
@@ -340,7 +341,7 @@ export default function Dashboard() {
                   </div>
 
                   <div>
-                    <label htmlFor="customerId" className="block text-sm font-medium text-black-700">Customer ID</label>
+                    <label htmlFor="customerId" className="block text-sm font-medium text-black">Customer ID</label>
                     <input
                       type="text"
                       id="customerId"
@@ -348,12 +349,12 @@ export default function Dashboard() {
                       value={customerIdFilter}
                       onChange={(e) => setCustomerIdFilter(e.target.value)}
                       placeholder="e.g., 12345"
-                      className="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                      className="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-500"
                     />
                   </div>
 
                   <div>
-                    <label htmlFor="productId" className="block text-sm font-medium text-black-700">Product ID</label>
+                    <label htmlFor="productId" className="block text-sm font-medium text-black">Product ID</label>
                     <input
                       type="text"
                       id="productId"
@@ -361,7 +362,7 @@ export default function Dashboard() {
                       value={productIdFilter}
                       onChange={(e) => setProductIdFilter(e.target.value)}
                       placeholder="e.g., Product 1"
-                      className="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                      className="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-500"
                     />
                   </div>
                 </div>
