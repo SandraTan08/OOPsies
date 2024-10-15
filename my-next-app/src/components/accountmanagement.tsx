@@ -1,24 +1,41 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { Menu, Search, Bell, User, Plus, Edit2, Trash2 } from 'lucide-react'
+import { useState, useEffect } from 'react';
+import { Menu, Search, Bell, User, Plus, Edit2, Trash2 } from 'lucide-react';
 
-// Mock data for existing accounts
-const initialAccounts = [
-  { id: 1, userName: 'john.doe', email: 'john.doe@example.com', role: 'Admin' },
-  { id: 2, userName: 'jane.smith', email: 'jane.smith@example.com', role: 'User' },
-]
+// Default account state
+const initialAccounts = [];
 
 export default function AccountManagement() {
-  const [accounts, setAccounts] = useState(initialAccounts)
-  const [newAccount, setNewAccount] = useState({ accountId: '', userName: '', email: '', role: '' })
-  const [editingAccount, setEditingAccount] = useState(null)
-  const [showModal, setShowModal] = useState(false)
-  const [modalContent, setModalContent] = useState(null)
-  const [notification, setNotification] = useState(null)
+  const [accounts, setAccounts] = useState(initialAccounts);
+  const [newAccount, setNewAccount] = useState({ accountId: '', userName: '', email: '', role: '' });
+  const [editingAccount, setEditingAccount] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+  const [modalContent, setModalContent] = useState(null);
+  const [notification, setNotification] = useState(null);
+
+  // Fetch existing accounts from the backend when the component mounts
+  useEffect(() => {
+    const fetchAccounts = async () => {
+      try {
+        const response = await fetch('http://localhost:8080/api/v1/account');
+        if (response.ok) {
+          const data = await response.json();
+          setAccounts(data); // Set the accounts from the response
+        } else {
+          throw new Error('Failed to fetch accounts');
+        }
+      } catch (error) {
+        console.error('Error fetching accounts:', error);
+        setNotification({ type: 'error', message: 'Error fetching accounts' });
+      }
+    };
+
+    fetchAccounts();
+  }, []); // Empty dependency array means this runs once on mount
 
   const handleCreateAccount = async (e) => {
-    e.preventDefault()
+    e.preventDefault();
     if (newAccount.accountId && newAccount.userName && newAccount.email && newAccount.role) {
       setModalContent({
         title: 'Confirm Account Creation',
@@ -35,62 +52,104 @@ export default function AccountManagement() {
                 accountEmail: newAccount.email,
                 role: newAccount.role,
               }),
-            })
+            });
             if (response.ok) {
-              const createdAccount = await response.json()
-              setAccounts([...accounts, createdAccount])
-              setNewAccount({ accountId: '', userName: '', email: '', role: '' })
-              setNotification({ type: 'success', message: 'Account created successfully' })
+              const createdAccount = await response.json();
+              setAccounts((prevAccounts) => [...prevAccounts, createdAccount]); // Add the created account to the state
+              setNewAccount({ accountId: '', userName: '', email: '', role: '' });
+              setNotification({ type: 'success', message: 'Account created successfully' });
             } else {
-              throw new Error('Failed to create account')
+              throw new Error('Failed to create account');
             }
           } catch (error) {
-            console.error('Error:', error)
-            setNotification({ type: 'error', message: 'Error creating account' })
+            console.error('Error:', error);
+            setNotification({ type: 'error', message: 'Error creating account' });
           } finally {
-            setModalContent(null)
+            setShowModal(false); // Close modal after action
           }
         },
-      })
-      setShowModal(true)
+      });
+      setShowModal(true);
     }
-  }
+  };
 
   const handleEditAccount = (account) => {
-    setEditingAccount(account)
-  }
+    setEditingAccount(account);
+  };
 
   const handleUpdateAccount = (e) => {
-    e.preventDefault()
+    e.preventDefault();
     setModalContent({
       title: 'Confirm Account Update',
       message: `Are you sure you want to update the account for ${editingAccount.userName}?`,
       action: () => {
         const updatedAccounts = accounts.map(acc =>
           acc.id === editingAccount.id ? editingAccount : acc
-        )
-        setAccounts(updatedAccounts)
-        setEditingAccount(null)
-        setNotification({ type: 'success', message: 'Account updated successfully' })
-        setModalContent(null)
-      }
-    })
-    setShowModal(true)
-  }
+        );
+        setAccounts(updatedAccounts);
+        setEditingAccount(null);
+        setNotification({ type: 'success', message: 'Account updated successfully' });
+        setShowModal(false); // Close modal after action
+      },
+    });
+    setShowModal(true);
+  };
 
   const handleDeleteAccount = (account) => {
+    console.log(account.id);
     setModalContent({
       title: 'Confirm Account Deletion',
       message: `Are you sure you want to delete the account for ${account.userName}?`,
-      action: () => {
-        const updatedAccounts = accounts.filter(acc => acc.id !== account.id)
-        setAccounts(updatedAccounts)
-        setNotification({ type: 'success', message: 'Account deleted successfully' })
-        setModalContent(null)
-      }
-    })
-    setShowModal(true)
-  }
+      action: async () => {
+        try {
+          const response = await fetch(`http://localhost:8080/api/v1/account/${account.id}`, {
+            method: 'DELETE',
+          });
+  
+          if (response.ok) {
+            const updatedAccounts = accounts.filter(acc => acc.id !== account.id);
+            setAccounts(updatedAccounts);
+            setNotification({ type: 'success', message: 'Account deleted successfully' });
+          } else if (response.status === 404) {
+            setNotification({ type: 'error', message: 'Account not found' });
+          } else {
+            setNotification({ type: 'error', message: 'Failed to delete account' });
+          }
+        } catch (error) {
+          console.error('Error deleting account:', error);
+          setNotification({ type: 'error', message: 'An error occurred while deleting the account' });
+        } finally {
+          setShowModal(false); // Close modal after action
+        }
+      },
+    });
+    setShowModal(true);
+  };
+
+  const Modal = ({ title, onClose, children }) => (
+    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-auto bg-black bg-opacity-50">
+      <div className="bg-white rounded-2xl shadow-xl p-6 w-96 max-w-[90%]">
+        <h2 className="text-xl font-semibold mb-4">{title}</h2>
+        <div>{children}</div>
+        <div className="flex justify-end space-x-4 mt-4">
+          <button
+            className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+            onClick={onClose}
+          >
+            Cancel
+          </button>
+          <button
+            className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            onClick={async () => {
+              await modalContent.action();
+            }}
+          >
+            Confirm
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 
   return (
     <div className="flex h-screen bg-gray-50">
@@ -149,13 +208,13 @@ export default function AccountManagement() {
                       />
                     </div>
                     <div>
-                      <label htmlFor="email-address" className="block text-sm font-medium text-gray-700 mb-1">
-                        Email address
+                      <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                        Email
                       </label>
                       <input
                         type="email"
-                        name="email-address"
-                        id="email-address"
+                        name="email"
+                        id="email"
                         value={newAccount.email}
                         onChange={(e) => setNewAccount({ ...newAccount, email: e.target.value })}
                         className="w-full px-3 py-2 text-gray-700 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -175,101 +234,70 @@ export default function AccountManagement() {
                       />
                     </div>
                   </div>
-                  <div className="flex justify-end">
-                    <button
-                      type="submit"
-                      className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                    >
-                      Create Account
-                    </button>
-                  </div>
+                  <button
+                    type="submit"
+                    className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  >
+                    <Plus className="mr-2" /> Create Account
+                  </button>
                 </form>
               </div>
-            </div>
 
-            {notification && (
-              <div className={`mt-4 p-4 rounded-md ${notification.type === 'error' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
-                {notification.message}
-              </div>
-            )}
-
-            <div className="mt-8 bg-white rounded-2xl shadow-sm overflow-hidden">
-              <div className="p-6">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">Existing Accounts</h2>
-                <div className="overflow-x-auto">
-                  <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
-                      <tr>
-                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          User Name
-                        </th>
-                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Email
-                        </th>
-                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Role
-                        </th>
-                        <th scope="col" className="relative px-6 py-3">
-                          <span className="sr-only">Actions</span>
-                        </th>
+              <div className="overflow-hidden border-t border-gray-200">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Account ID</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User Name</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {accounts.map((account) => (
+                      <tr key={account.id}>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{account.accountId}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{account.accountUserName}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{account.accountEmail}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{account.role}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                          <button
+                            onClick={() => handleEditAccount(account)}
+                            className="text-blue-600 hover:text-blue-900"
+                          >
+                            <Edit2 className="w-5 h-5 inline" />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteAccount(account)}
+                            className="text-red-600 hover:text-red-900"
+                          >
+                            <Trash2 className="w-5 h-5 inline" />
+                          </button>
+                        </td>
                       </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
-                      {accounts.map((account) => (
-                        <tr key={account.id}>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{account.userName}</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{account.email}</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{account.role}</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                            <button
-                              className="text-blue-600 hover:text-blue-900 mr-4"
-                              onClick={() => handleEditAccount(account)}
-                            >
-                              <Edit2 className="w-5 h-5" />
-                            </button>
-                            <button
-                              className="text-red-600 hover:text-red-900"
-                              onClick={() => handleDeleteAccount(account)}
-                            >
-                              <Trash2 className="w-5 h-5" />
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             </div>
           </div>
+
+          {/* Modal */}
+          {showModal && modalContent && (
+            <Modal title={modalContent.title} onClose={() => setShowModal(false)}>
+              <p>{modalContent.message}</p>
+            </Modal>
+          )}
+
+          {/* Notification */}
+          {notification && (
+            <div className={`mt-4 p-4 text-sm rounded-md ${notification.type === 'error' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
+              {notification.message}
+            </div>
+          )}
         </main>
       </div>
-
-      {showModal && modalContent && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-auto bg-black bg-opacity-50">
-          <div className="bg-white rounded-2xl shadow-xl p-6 w-96 max-w-[90%]">
-            <h2 className="text-xl font-semibold mb-4">{modalContent.title}</h2>
-            <p className="text-gray-600 mb-6">{modalContent.message}</p>
-            <div className="flex justify-end space-x-4">
-              <button
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
-                onClick={() => { setShowModal(false); setModalContent(null); }}
-              >
-                Cancel
-              </button>
-              <button
-                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                onClick={async () => { 
-                  await modalContent.action(); 
-                  setShowModal(false);
-                }}
-              >
-                Confirm
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
-  )
+  );
 }
