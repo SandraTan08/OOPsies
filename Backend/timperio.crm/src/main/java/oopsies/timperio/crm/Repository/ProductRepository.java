@@ -6,4 +6,5 @@ import oopsies.timperio.crm.Product;  // Import your Product entity
 
 @Repository
 public interface ProductRepository extends JpaRepository<Product, Long> {
+    // No need to declare findById again, it's already provided by JpaRepository
 }

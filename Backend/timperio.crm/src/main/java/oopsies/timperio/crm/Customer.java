@@ -5,7 +5,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import jakarta.persistence.*; // Import JPA annotations
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Entity
@@ -22,13 +21,12 @@ public class Customer {
     @JsonProperty("zipCode")
     private Integer zipCode;
 
-
     // Optionally add the following if there are no other fields
+    @Override
     public String toString() {
         return "Customer{" +
                 "customerId=" + customerId +
-                ", zipCode='" + zipCode + '\'' +
+                ", zipCode=" + zipCode +
                 '}';
     }
 }
-
