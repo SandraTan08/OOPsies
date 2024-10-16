@@ -29,13 +29,13 @@ export async function POST(request: NextRequest) {
 
     if (!fetchResponse.ok) {
       // Return 401 if user not found or other issues occur
-      return NextResponse.json({ message: 'Invalid credentials' }, { status: 401 });
+      return NextResponse.json({ message: 'Invalid accountId' }, { status: 401 });
     }
 
     const existingUser = await fetchResponse.json();
 
     if (!existingUser || !existingUser.accountId || existingUser.password !== password) {
-      return NextResponse.json({ message: 'Invalid credentials' }, { status: 401 });
+      return NextResponse.json({ message: 'Invalid password' }, { status: 401 });
     }
 
     // If everything is valid, return success
