@@ -96,18 +96,18 @@ export default function AccountManagement() {
   };
 
   const handleDeleteAccount = (account) => {
-    console.log(account.id);
+    console.log(account.accountId);
     setModalContent({
       title: 'Confirm Account Deletion',
       message: `Are you sure you want to delete the account for ${account.userName}?`,
       action: async () => {
         try {
-          const response = await fetch(`http://localhost:8080/api/v1/account/${account.id}`, {
+          const response = await fetch(`http://localhost:8080/api/v1/account/${account.accountId}`, {
             method: 'DELETE',
           });
   
           if (response.ok) {
-            const updatedAccounts = accounts.filter(acc => acc.id !== account.id);
+            const updatedAccounts = accounts.filter(acc => acc.accountId !== account.accountId);
             setAccounts(updatedAccounts);
             setNotification({ type: 'success', message: 'Account deleted successfully' });
           } else if (response.status === 404) {
