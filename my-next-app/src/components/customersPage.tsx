@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import './CustomerList.css'; // Import the CSS file
+import Header from "@/components/header";
 
 interface Customer {
   customerId: number;
@@ -42,34 +43,37 @@ const CustomerList: React.FC = () => {
   }
 
   return (
-    <div className="customer-profile">
-      <h1>Customer List</h1>
-      {customers.length > 0 ? (
-        <table id="purchase-history">
-          <thead>
-            <tr>
-              <th>Customer ID</th>
-              <th>Zip Code</th>
-              {/* Add other headers as necessary */}
-            </tr>
-          </thead>
-          <tbody>
-            {customers.map(customer => (
-              <tr key={customer.customerId}>
-                <td>
-                  <a href={`http://localhost:3001/customerprofile/${customer.customerId}`} rel="noopener noreferrer">
-                    {customer.customerId}
-                  </a>
-                </td>
-                <td>{customer.zipCode}</td>
-                {/* Add other fields as necessary */}
+    <div className="min-h-screen bg-gray-100">
+      <Header />
+      <div className="customer-profile">
+        <h1>Customer List</h1>
+        {customers.length > 0 ? (
+          <table id="purchase-history">
+            <thead>
+              <tr>
+                <th>Customer ID</th>
+                <th>Zip Code</th>
+                {/* Add other headers as necessary */}
               </tr>
-            ))}
-          </tbody>
-        </table>
-      ) : (
-        <p>No customers available.</p>
-      )}
+            </thead>
+            <tbody>
+              {customers.map(customer => (
+                <tr key={customer.customerId}>
+                  <td>
+                    <a href={`http://localhost:3001/customerprofile/${customer.customerId}`} rel="noopener noreferrer">
+                      {customer.customerId}
+                    </a>
+                  </td>
+                  <td>{customer.zipCode}</td>
+                  {/* Add other fields as necessary */}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        ) : (
+          <p>No customers available.</p>
+        )}
+      </div>
     </div>
   );
 };

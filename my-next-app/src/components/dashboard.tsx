@@ -69,6 +69,7 @@ export default function Dashboard() {
 
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const toggleDropdown = () => setDropdownOpen(!dropdownOpen);
+  
 
   // Calculate total sales and average order value
   const totalSales = transactionsData.reduce((sum, transaction) => sum + transaction.value, 0).toFixed(2);
@@ -168,18 +169,15 @@ export default function Dashboard() {
   };
 
   const { data: session, status } = useSession();
+  
 
   if (status === 'loading') {
     return <div>Loading...</div>;
   }
 
   if (!session) {
-    return (
-      <div>
-        <h1>You are not logged in</h1>
-        <button onClick={() => signIn()}>Sign In</button>
-      </div>
-    );
+    window.location.href = '/'; // Redirect to login page without extra params
+    return null; // Render nothing during the redirect
   }
   
 

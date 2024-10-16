@@ -1,6 +1,6 @@
 'use client'
-
-import { useState } from 'react'
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { useState, useEffect } from 'react'
 import { 
   LayoutGrid, 
   Users, 
@@ -15,6 +15,8 @@ import {
   Trash2,
   X
 } from 'lucide-react'
+import { useSession, signIn, signOut } from 'next-auth/react';
+import Header from "@/components/header";
 
 // Mock data for existing accounts
 const initialAccounts = [
@@ -84,43 +86,25 @@ export default function AccountManagement() {
     })
   }
 
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const toggleDropdown = () => setDropdownOpen(!dropdownOpen);
+
+  const { data: session, status } = useSession();
+  
+
+  if (status === 'loading') {
+    return <div>Loading...</div>;
+  }
+
+  if (!session) {
+    window.location.href = '/'; // Redirect to login page without extra params
+    return null; // Render nothing during the redirect
+  }
+
   return (
     <div className="flex h-screen bg-gray-100">
-      {/* Sidebar */}
-
-
-      {/* Main content */}
       <div className="flex flex-col flex-1 overflow-hidden">
-        {/* Navbar */}
-        <header className="flex items-center justify-between px-4 py-4 bg-white border-b border-gray-200 sm:px-6 lg:px-8">
-          <button className="text-gray-500 md:hidden">
-            <Menu className="w-6 h-6" />
-          </button>
-          <div className="flex items-center">
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="Search..."
-                className="w-64 px-4 py-2 text-sm text-gray-700 placeholder-gray-400 bg-gray-100 border border-transparent rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-              <Search className="absolute top-2.5 right-3 w-5 h-5 text-gray-400" />
-            </div>
-          </div>
-          <div className="flex items-center">
-            <button className="p-1 text-gray-400 rounded-full hover:bg-gray-100 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500">
-              <Bell className="w-6 h-6" />
-            </button>
-            <div className="relative ml-3">
-              <div>
-                <button className="flex items-center max-w-xs text-sm bg-white rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500" id="user-menu" aria-expanded="false" aria-haspopup="true">
-                  <span className="sr-only">Open user menu</span>
-                  <User className="w-8 h-8 rounded-full" />
-                </button>
-              </div>
-            </div>
-          </div>
-        </header>
-
+        <Header />
         {/* Account management content */}
         <main className="flex-1 overflow-y-auto bg-gray-100">
           <div className="py-6">

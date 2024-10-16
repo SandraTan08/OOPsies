@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
+import { useSession, signIn, signOut } from 'next-auth/react';
+import Header from "@/components/header";
 
 export default function Newsletter() {
   const [template, setTemplate] = useState({
@@ -55,8 +57,23 @@ export default function Newsletter() {
     console.log('Sending newsletter')
   }
 
+  const { data: session, status } = useSession();
+  
+
+  if (status === 'loading') {
+    return <div>Loading...</div>;
+  }
+
+  if (!session) {
+    window.location.href = '/'; // Redirect to login page without extra params
+    return null; // Render nothing during the redirect
+  }
+
+
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-gray-100">
+
+      <Header />
       <div className="max-w-4xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden">
         <div className="px-6 py-4 bg-gray-100 border-b">
           <h1 className="text-2xl font-semibold text-gray-800">Personalized Newsletter</h1>
@@ -183,7 +200,7 @@ Marketing team`}
               <Save className="w-4 h-4 mr-2" />
               Save Template
             </Button>
-            <Button onClick={handleCopy} variant="outline" className="flex items-center">
+            <Button onClick={handleCopy} className="flex items-center">
               <Copy className="w-4 h-4 mr-2" />
               Copy to Clipboard
             </Button>
