@@ -92,7 +92,9 @@ const CustomerProfile: React.FC<CustomerProfileProps> = ({ customerId }) => {
         setPurchaseHistory(purchasesWithProductDetails);
 
         // Calculate cumulative total price
-        const totalPrice = purchasesWithProductDetails.reduce((acc, purchase) => acc + purchase.totalPrice, 0);
+        const totalPrice = purchasesWithProductDetails.reduce((acc: number, purchase: Purchase) => {
+          return acc + purchase.totalPrice;
+        }, 0);
         setCumulativeTotal(totalPrice);
 
       } catch (err: any) {
@@ -122,11 +124,11 @@ const CustomerProfile: React.FC<CustomerProfileProps> = ({ customerId }) => {
   const tier = getTier(cumulativeTotal); 
 
   const handleRedirect = () => {
-    window.location.href = 'http://localhost:3001/newsletter';
+    window.location.href = 'http://localhost:3000/newsletter';
   };
 
   const handleBack = () => {
-    window.location.href = 'http://localhost:3001/customers'; // Redirect to the customers page
+    window.location.href = 'http://localhost:3000/customers'; // Redirect to the customers page
   };
 
   return (
