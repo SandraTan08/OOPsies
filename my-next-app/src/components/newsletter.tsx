@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { Save, Copy, Send } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -14,6 +14,7 @@ export default function Newsletter() {
   })
 
   const [numProducts, setNumProducts] = useState(1); // New state for number of products
+  const textAreaRef = useRef(null); // Reference for the textarea
 
   // Initialize products based on numProducts
   const handleNumProductsChange = (e) => {
@@ -47,12 +48,46 @@ export default function Newsletter() {
     });
   }
 
-  const handleSave = () => {
-    console.log('Saving template:', template);
-  }
+  const handleSave = async () => {
+    console.log('Saving template');
+    try {
+        const response = await fetch('http://localhost:8080/api/v1/newsletter/save', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(template), // Convert the template object to JSON
+        });
+
+        if (!response.ok) {
+            // Handle non-2xx responses
+            const errorMessage = await response.text();
+            alert(`Error saving template: ${errorMessage}`);
+            return;
+        }
+
+        // Handle successful response
+        const message = await response.text();
+        alert(message); // Display success message
+
+        // Optionally reset the form or do other actions here
+    } catch (error) {
+        console.error("Error saving template:", error);
+        alert("An error occurred while saving the template.");
+    }
+};
 
   const handleCopy = () => {
     console.log('Copying template');
+    if (textAreaRef.current) {
+      navigator.clipboard.writeText(textAreaRef.current.value)
+        .then(() => {
+          alert("Copied to clipboard!");
+        })
+        .catch((err) => {
+          console.error("Failed to copy: ", err);
+        });
+    }
   }
 
   const handleSend = () => {
@@ -196,6 +231,7 @@ export default function Newsletter() {
           <div className="mt-8">
             <Label htmlFor="preview">Preview</Label>
             <Textarea
+              ref={textAreaRef}
               id="preview"
               className="mt-1 h-64"
               value={`Dear ${template.customerName},
