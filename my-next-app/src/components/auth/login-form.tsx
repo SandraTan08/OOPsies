@@ -80,7 +80,7 @@ export const LoginForm = () => {
     
     <CardWrapper
       headerTitle="Login"
-      headerDescription="Welcome back! Please fill out the form below before logging in to the website."
+      headerDescription="Timperio Customer Relationship Management System"
       backButtonLabel="Don't have an account? Register"
       backButtonHref="/register"
       showSocial

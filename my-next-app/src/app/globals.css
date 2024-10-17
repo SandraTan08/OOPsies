@@ -90,3 +90,10 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+.bg-image {
+  background-image: url('../img/variety-olive-oils-with-copy-space-background.jpg'); /* Replace with the actual path to your image */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}

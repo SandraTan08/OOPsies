@@ -1,4 +1,6 @@
 import '../globals.css';
+import Image from 'next/image';
+import downloadImage from '../../img/logo.png';
 
 export const metadata = {
   title: 'Next.js',
@@ -13,9 +15,14 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <div className="flex justify-center items-center min-h-screen">
+      <div className="flex flex-col justify-center items-center min-h-screen bg-image">
+        <div className="p-5">
+          <Image src={downloadImage} alt="Download Image" width={250} height={250} />
+        </div>
+        <div>
           {children}
         </div>
+      </div>
       </body>
     </html>
   )
