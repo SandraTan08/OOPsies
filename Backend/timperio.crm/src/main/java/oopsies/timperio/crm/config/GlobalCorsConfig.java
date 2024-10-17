@@ -16,7 +16,7 @@ public class GlobalCorsConfig {
                         .allowedOrigins("*") // Allow specific origins
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS") // Allow HTTP methods
                         .allowedHeaders("*") // Allow all headers
-                        .allowCredentials(false) // Allow credentials (cookies, authorization headers, etc.)
+                        .allowCredentials(true) // Allow credentials (cookies, authorization headers, etc.)
                         .maxAge(3600); // Cache pre-flight requests for 1 hour
             }
         };
