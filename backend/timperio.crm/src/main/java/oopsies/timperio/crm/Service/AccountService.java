@@ -46,4 +46,20 @@ public class AccountService {
             return false;
         }
     }
+
+    public Account updateAccount(String accountID, Account updatedAccount) {
+        // Use the default findById to check if the account exists
+        return accountRepository.findById(accountID).map(existingAccount -> {
+            // Update only the necessary fields using Lombok's generated setter methods
+            existingAccount.setAccountUserName(updatedAccount.getAccountUserName());
+            existingAccount.setAccountEmail(updatedAccount.getAccountEmail());
+            existingAccount.setPassword(updatedAccount.getPassword());
+            existingAccount.setRole(updatedAccount.getRole());
+    
+            // Save the updated account using the default save method
+            return accountRepository.save(existingAccount);
+        }).orElse(null);  // Return null if account not found
+    }
+    
+    
 }

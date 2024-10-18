@@ -74,26 +74,46 @@ export default function AccountManagement() {
   };
 
   const handleEditAccount = (account) => {
+    console.log("Editing account:", account);
     setEditingAccount(account);
+    setShowModal(true);
   };
 
-  const handleUpdateAccount = (e) => {
+  const handleUpdateAccount = async (e) => {
     e.preventDefault();
     setModalContent({
       title: 'Confirm Account Update',
-      message: `Are you sure you want to update the account for ${editingAccount.userName}?`,
-      action: () => {
-        const updatedAccounts = accounts.map(acc =>
-          acc.id === editingAccount.id ? editingAccount : acc
-        );
-        setAccounts(updatedAccounts);
-        setEditingAccount(null);
-        setNotification({ type: 'success', message: 'Account updated successfully' });
-        setShowModal(false); // Close modal after action
+      message: `Are you sure you want to update the account for ${editingAccount.accountUserName}?`, // Use accountUserName here
+      action: async () => { // Make this function async
+        try {
+          const response = await fetch(`http://localhost:8080/api/v1/account/${editingAccount.accountId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(editingAccount), // Send the updated account data
+          });
+
+          if (response.ok) {
+            const updatedAccount = await response.json(); // Get the updated account
+            const updatedAccounts = accounts.map(acc =>
+              acc.accountId === updatedAccount.accountId ? updatedAccount : acc
+            );
+            setAccounts(updatedAccounts); // Update the local state with the updated account
+            setNotification({ type: 'success', message: 'Account updated successfully' });
+          } else {
+            throw new Error('Failed to update account');
+          }
+        } catch (error) {
+          console.error('Error updating account:', error);
+          setNotification({ type: 'error', message: 'An error occurred while updating the account' });
+        } finally {
+          setEditingAccount(null);
+          setShowModal(false); // Close modal after action
+        }
       },
     });
     setShowModal(true);
-  };
+};
+
 
   const handleDeleteAccount = (account) => {
     console.log(account.accountId);

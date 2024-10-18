@@ -51,4 +51,17 @@ public class AccountController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
+
+    @PutMapping("/{accountID}")
+    public ResponseEntity<Account> updateAccount(@PathVariable("accountID") String accountID, @RequestBody Account account) {
+        Optional<Account> existingAccount = accountService.getAccountById(accountID);
+        
+        if (existingAccount.isPresent()) {
+            Account updatedAccount = accountService.updateAccount(accountID, account);
+            return new ResponseEntity<>(updatedAccount, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
 }
