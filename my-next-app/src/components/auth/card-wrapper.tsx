@@ -17,7 +17,6 @@ import {
     headerDescription: string;
     backButtonLabel: string;
     backButtonHref: string;
-    showSocial?: boolean;
     heroImage?: string;
   };
   

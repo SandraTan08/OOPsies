@@ -83,7 +83,6 @@ export const LoginForm = () => {
       headerDescription="Timperio Customer Relationship Management System"
       backButtonLabel="Don't have an account? Register"
       backButtonHref="/register"
-      showSocial
     >
     <Toaster />
       <Form {...form}>
