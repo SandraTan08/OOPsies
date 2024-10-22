@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Menu, Search, Bell, User, Plus, Edit2, Trash2 } from 'lucide-react'
 
 // Default account state
@@ -9,17 +9,11 @@ const initialAccounts = []
 export default function AccountManagement() {
   const [accounts, setAccounts] = useState(initialAccounts)
   const [newAccount, setNewAccount] = useState({ accountId: '', userName: '', email: '', role: '' })
-  const [editingAccount, setEditingAccount] = useState({
-    accountId: '',
-    accountUserName: '',
-    accountEmail: '',
-    role: '',
-    password: '' // Include this if you need it in your form
-  });
-  
+  const [editingAccount, setEditingAccount] = useState(null)
   const [showModal, setShowModal] = useState(false)
   const [modalContent, setModalContent] = useState(null)
   const [notification, setNotification] = useState(null)
+  const inputRef = useRef(null)
 
   useEffect(() => {
     const fetchAccounts = async () => {
@@ -39,6 +33,63 @@ export default function AccountManagement() {
 
     fetchAccounts()
   }, [])
+
+  useEffect(() => {
+    if (editingAccount) {
+      setModalContent({
+        title: 'Edit Account',
+        message: (
+          <form className="space-y-4">
+            <div>
+              <label htmlFor="edit-user-name" className="block text-sm font-medium text-gray-700 mb-1">
+                User Name
+              </label>
+              <input
+                ref={inputRef}
+                type="text"
+                name="edit-user-name"
+                id="edit-user-name"
+                value={editingAccount.accountUserName}
+                onChange={(e) =>
+                  setEditingAccount((prev) => ({ ...prev, accountUserName: e.target.value }))}
+                className="w-full px-3 py-2 text-gray-700 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div>
+              <label htmlFor="edit-email" className="block text-sm font-medium text-gray-700 mb-1">
+                Email
+              </label>
+              <input
+                type="email"
+                name="edit-email"
+                id="edit-email"
+                value={editingAccount.accountEmail}
+                onChange={(e) =>
+                  setEditingAccount((prev) => ({ ...prev, accountEmail: e.target.value }))}
+                className="w-full px-3 py-2 text-gray-700 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div>
+              <label htmlFor="edit-role" className="block text-sm font-medium text-gray-700 mb-1">
+                Role
+              </label>
+              <input
+                type="text"
+                name="edit-role"
+                id="edit-role"
+                value={editingAccount.role}
+                onChange={(e) =>
+                  setEditingAccount((prev) => ({ ...prev, role: e.target.value }))}
+                className="w-full px-3 py-2 text-gray-700 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+          </form>
+        ),
+        action: handleUpdateAccount,
+      })
+      setShowModal(true)
+    }
+  }, [editingAccount])
 
   const handleCreateAccount = async (e) => {
     e.preventDefault()
@@ -80,92 +131,8 @@ export default function AccountManagement() {
   }
 
   const handleEditAccount = (account) => {
-    console.log("Edit account called with:", account);
-  
-    if (!account) {
-      console.error("Account is null or undefined");
-      setNotification({ type: 'error', message: 'Cannot edit account: Invalid account data' });
-      return;
-    }
-  
-    setEditingAccount({
-      accountId: account.accountId,
-      accountUserName: account.accountUserName,
-      accountEmail: account.accountEmail,
-      role: account.role,
-      password: '' // If you need to set this, otherwise just leave it out
-    });
-
-    console.log("Editing Account set to:", {
-      accountId: account.accountId,
-      accountUserName: account.accountUserName,
-      accountEmail: account.accountEmail,
-      role: account.role,
-    });
-  
-  
-    setModalContent({
-      title: 'Edit Account',
-      message: (
-        <form onSubmit={(e) => {
-          e.preventDefault();
-          handleUpdateAccount(); // Ensure you call the update when submitting
-        }} className="space-y-4">
-          <div>
-            <label htmlFor="edit-user-name" className="block text-sm font-medium text-gray-700 mb-1">
-              User Name
-            </label>
-            <input
-              type="text"
-              name="edit-user-name"
-              id="edit-user-name"
-              value={editingAccount.accountUserName} // Reference editingAccount here
-              onChange={(e) =>
-                setEditingAccount((prev) => ({ ...prev, accountUserName: e.target.value }))
-              }
-              className="w-full px-3 py-2 text-gray-700 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-          <div>
-            <label htmlFor="edit-email" className="block text-sm font-medium text-gray-700 mb-1">
-              Email
-            </label>
-            <input
-              type="email"
-              name="edit-email"
-              id="edit-email"
-              value={editingAccount.accountEmail} // Reference editingAccount here
-              onChange={(e) =>
-                setEditingAccount((prev) => ({ ...prev, accountEmail: e.target.value }))
-              }
-              className="w-full px-3 py-2 text-gray-700 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-          <div>
-            <label htmlFor="edit-role" className="block text-sm font-medium text-gray-700 mb-1">
-              Role
-            </label>
-            <input
-              type="text"
-              name="edit-role"
-              id="edit-role"
-              value={editingAccount.role} // Reference editingAccount here
-              onChange={(e) =>
-                setEditingAccount((prev) => ({ ...prev, role: e.target.value }))
-              }
-              className="w-full px-3 py-2 text-gray-700 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-        </form>
-      ),
-      action: handleUpdateAccount,
-    });
-    
-  
-    setShowModal(true);
-  };
-  
-  
+    setEditingAccount(account)
+  }
 
   const handleUpdateAccount = async () => {
     try {
@@ -177,9 +144,11 @@ export default function AccountManagement() {
 
       if (response.ok) {
         const updatedAccount = await response.json()
-        setAccounts(accounts.map(acc =>
-          acc.accountId === updatedAccount.accountId ? updatedAccount : acc
-        ))
+        setAccounts(
+          accounts.map((acc) =>
+            acc.accountId === updatedAccount.accountId ? updatedAccount : acc
+          )
+        )
         setNotification({ type: 'success', message: 'Account updated successfully' })
       } else {
         throw new Error('Failed to update account')
@@ -236,9 +205,7 @@ export default function AccountManagement() {
           </button>
           <button
             className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-            onClick={async () => {
-              await modalContent.action()
-            }}
+            onClick={modalContent.action}
           >
             Confirm
           </button>
@@ -346,15 +313,15 @@ export default function AccountManagement() {
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Account ID</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User Name</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase  tracking-wider">Role</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
                     {accounts.map((account) => (
-                      <tr key={account.id}>
+                      <tr key={account.accountId}>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{account.accountId}</td>
-                        <td className="px-6  py-4 whitespace-nowrap text-sm text-gray-900">{account.accountUserName}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{account.accountUserName}</td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{account.accountEmail}</td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{account.role}</td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
