@@ -56,10 +56,6 @@ export default function RootLayout({
                                         <Users className="w-6 h-6 mr-3 text-gray-400 group-hover:text-gray-300" />
                                         Customers
                                     </Link>
-                                    <Link href="/sales" className="flex items-center px-2 py-2 text-sm font-medium text-gray-300 rounded-md hover:bg-gray-700 hover:text-white group">
-                                        <ShoppingCart className="w-6 h-6 mr-3 text-gray-400 group-hover:text-gray-300" />
-                                        Sales
-                                    </Link>
                                     <Link href="/newsletter" className="flex items-center px-2 py-2 text-sm font-medium text-gray-300 rounded-md hover:bg-gray-700 hover:text-white group">
                                         <ShoppingCart className="w-6 h-6 mr-3 text-gray-400 group-hover:text-gray-300" />
                                         Newsletter
