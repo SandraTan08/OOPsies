@@ -2,8 +2,9 @@ package oopsies.timperio.crm;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
-
+import lombok.Setter;
 import jakarta.persistence.*;
 import java.io.Serializable;
 
@@ -12,6 +13,8 @@ import java.io.Serializable;
 @Table(name = "newsletter_products") 
 @NoArgsConstructor
 @AllArgsConstructor
+@Getter
+@Setter
 public class ProductTemplate implements Serializable {
 
     @Id
