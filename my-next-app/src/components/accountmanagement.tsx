@@ -1,6 +1,6 @@
 'use client'
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { useState, useEffect } from 'react'
+
 import { 
   LayoutGrid, 
   Users, 
@@ -18,35 +18,133 @@ import {
 import { useSession, signIn, signOut } from 'next-auth/react';
 import Header from "@/components/header";
 
-// Mock data for existing accounts
-const initialAccounts = [
-  { id: 1, userId: 'john.doe', email: 'john.doe@example.com' },
-  { id: 2, userId: 'jane.smith', email: 'jane.smith@example.com' },
-]
+import { useState, useEffect, useRef } from 'react'
+
+
+// Default account state
+const initialAccounts = []
 
 export default function AccountManagement() {
   const [accounts, setAccounts] = useState(initialAccounts)
-  const [newAccount, setNewAccount] = useState({ userId: '', email: '' })
+  const [newAccount, setNewAccount] = useState({ accountId: '', userName: '', email: '', role: '' })
   const [editingAccount, setEditingAccount] = useState(null)
   const [showModal, setShowModal] = useState(false)
-  const [modalContent, setModalContent] = useState({ title: '', message: '', action: null })
+  const [modalContent, setModalContent] = useState(null)
   const [notification, setNotification] = useState(null)
+  const inputRef = useRef(null)
 
-  const handleCreateAccount = (e) => {
-    e.preventDefault()
-    if (newAccount.userId && newAccount.email) {
+  useEffect(() => {
+    const fetchAccounts = async () => {
+      try {
+        const response = await fetch('http://localhost:8080/api/v1/account')
+        if (response.ok) {
+          const data = await response.json()
+          setAccounts(data)
+        } else {
+          throw new Error('Failed to fetch accounts')
+        }
+      } catch (error) {
+        console.error('Error fetching accounts:', error)
+        setNotification({ type: 'error', message: 'Error fetching accounts' })
+      }
+    }
+
+    fetchAccounts()
+  }, [])
+
+  useEffect(() => {
+    if (editingAccount) {
+      setModalContent({
+        title: 'Edit Account',
+        message: (
+          <form className="space-y-4">
+            <div>
+              <label htmlFor="edit-user-name" className="block text-sm font-medium text-gray-700 mb-1">
+                User Name
+              </label>
+              <input
+                ref={inputRef}
+                type="text"
+                name="edit-user-name"
+                id="edit-user-name"
+                value={editingAccount.accountUserName}
+                onChange={(e) =>
+                  setEditingAccount((prev) => ({ ...prev, accountUserName: e.target.value }))}
+                className="w-full px-3 py-2 text-gray-700 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div>
+              <label htmlFor="edit-email" className="block text-sm font-medium text-gray-700 mb-1">
+                Email
+              </label>
+              <input
+                type="email"
+                name="edit-email"
+                id="edit-email"
+                value={editingAccount.accountEmail}
+                onChange={(e) =>
+                  setEditingAccount((prev) => ({ ...prev, accountEmail: e.target.value }))}
+                className="w-full px-3 py-2 text-gray-700 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div>
+              <label htmlFor="edit-role" className="block text-sm font-medium text-gray-700 mb-1">
+                Role
+              </label>
+              <input
+                type="text"
+                name="edit-role"
+                id="edit-role"
+                value={editingAccount.role}
+                onChange={(e) =>
+                  setEditingAccount((prev) => ({ ...prev, role: e.target.value }))}
+                className="w-full px-3 py-2 text-gray-700 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+          </form>
+        ),
+        action: handleUpdateAccount,
+      })
       setShowModal(true)
+    }
+  }, [editingAccount])
+
+  const handleCreateAccount = async (e) => {
+    e.preventDefault()
+    if (newAccount.accountId && newAccount.userName && newAccount.email && newAccount.role) {
       setModalContent({
         title: 'Confirm Account Creation',
-        message: `Are you sure you want to create an account for ${newAccount.userId}?`,
-        action: () => {
-          const updatedAccounts = [...accounts, { ...newAccount, id: accounts.length + 1 }]
-          setAccounts(updatedAccounts)
-          setNewAccount({ userId: '', email: '' })
-          setNotification({ type: 'success', message: 'Account created successfully' })
-          setShowModal(false)
-        }
+        message: `Are you sure you want to create an account for ${newAccount.userName}?`,
+        action: async () => {
+          try {
+            const response = await fetch('http://localhost:8080/api/v1/account/new_account', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                accountId: newAccount.accountId,
+                accountUserName: newAccount.userName,
+                password: "123456",
+                accountEmail: newAccount.email,
+                role: newAccount.role,
+              }),
+            })
+            if (response.ok) {
+              const createdAccount = await response.json()
+              setAccounts((prevAccounts) => [...prevAccounts, createdAccount])
+              setNewAccount({ accountId: '', userName: '', email: '', role: '' })
+              setNotification({ type: 'success', message: 'Account created successfully' })
+            } else {
+              throw new Error('Failed to create account')
+            }
+          } catch (error) {
+            console.error('Error:', error)
+            setNotification({ type: 'error', message: 'Error creating account' })
+          } finally {
+            setShowModal(false)
+          }
+        },
       })
+      setShowModal(true)
     }
   }
 
@@ -54,36 +152,61 @@ export default function AccountManagement() {
     setEditingAccount(account)
   }
 
-  const handleUpdateAccount = (e) => {
-    e.preventDefault()
-    setShowModal(true)
-    setModalContent({
-      title: 'Confirm Account Update',
-      message: `Are you sure you want to update the account for ${editingAccount.userId}?`,
-      action: () => {
-        const updatedAccounts = accounts.map(acc => 
-          acc.id === editingAccount.id ? editingAccount : acc
+  const handleUpdateAccount = async () => {
+    try {
+      const response = await fetch(`http://localhost:8080/api/v1/account/${editingAccount.accountId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(editingAccount),
+      })
+
+      if (response.ok) {
+        const updatedAccount = await response.json()
+        setAccounts(
+          accounts.map((acc) =>
+            acc.accountId === updatedAccount.accountId ? updatedAccount : acc
+          )
         )
-        setAccounts(updatedAccounts)
-        setEditingAccount(null)
         setNotification({ type: 'success', message: 'Account updated successfully' })
-        setShowModal(false)
+      } else {
+        throw new Error('Failed to update account')
       }
-    })
+    } catch (error) {
+      console.error('Error updating account:', error)
+      setNotification({ type: 'error', message: 'An error occurred while updating the account' })
+    } finally {
+      setEditingAccount(null)
+      setShowModal(false)
+    }
   }
 
   const handleDeleteAccount = (account) => {
-    setShowModal(true)
     setModalContent({
       title: 'Confirm Account Deletion',
-      message: `Are you sure you want to delete the account for ${account.userId}?`,
-      action: () => {
-        const updatedAccounts = accounts.filter(acc => acc.id !== account.id)
-        setAccounts(updatedAccounts)
-        setNotification({ type: 'success', message: 'Account deleted successfully' })
-        setShowModal(false)
-      }
+      message: `Are you sure you want to delete the account for ${account.accountUserName}?`,
+      action: async () => {
+        try {
+          const response = await fetch(`http://localhost:8080/api/v1/account/${account.accountId}`, {
+            method: 'DELETE',
+          })
+
+          if (response.ok) {
+            setAccounts(accounts.filter(acc => acc.accountId !== account.accountId))
+            setNotification({ type: 'success', message: 'Account deleted successfully' })
+          } else if (response.status === 404) {
+            setNotification({ type: 'error', message: 'Account not found' })
+          } else {
+            setNotification({ type: 'error', message: 'Failed to delete account' })
+          }
+        } catch (error) {
+          console.error('Error deleting account:', error)
+          setNotification({ type: 'error', message: 'An error occurred while deleting the account' })
+        } finally {
+          setShowModal(false)
+        }
+      },
     })
+    setShowModal(true)
   }
 
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -101,272 +224,175 @@ export default function AccountManagement() {
     return null; // Render nothing during the redirect
   }
 
+  
+  const Modal = ({ title, onClose, children }) => (
+    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-auto bg-black bg-opacity-50">
+      <div className="bg-white rounded-2xl shadow-xl p-6 w-96 max-w-[90%]">
+        <h2 className="text-xl font-semibold mb-4">{title}</h2>
+        <div>{children}</div>
+        <div className="flex justify-end space-x-4 mt-4">
+          <button
+            className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+            onClick={onClose}
+          >
+            Cancel
+          </button>
+          <button
+            className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            onClick={modalContent.action}
+          >
+            Confirm
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+
   return (
-    <div className="flex h-screen bg-gray-100">
+    <div className="flex h-screen bg-gray-50">
       <div className="flex flex-col flex-1 overflow-hidden">
-        <Header />
-        {/* Account management content */}
-        <main className="flex-1 overflow-y-auto bg-gray-100">
-          <div className="py-6">
-            <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
-              <h1 className="text-2xl font-semibold text-gray-900">Account Management</h1>
+        <header className="flex items-center justify-between px-6 py-4 bg-white border-b border-gray-200">
+          <h1 className="text-2xl font-semibold text-gray-900">Account Management</h1>
+          <div className="flex items-center">
+            <div className="relative mr-4">
+              <input
+                type="text"
+                placeholder="Search..."
+                className="w-64 px-4 py-2 text-sm text-gray-700 bg-gray-100 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <Search className="absolute top-2.5 right-3 w-5 h-5 text-gray-400" />
             </div>
-            <div className="px-4 mx-auto max-w-7xl sm:px-6 md:px-8">
-              {/* Create new account form */}
-              <div className="mt-8">
-                <div className="md:grid md:grid-cols-3 md:gap-6">
-                  <div className="md:col-span-1">
-                    <h3 className="text-lg font-medium leading-6 text-gray-900">Create New Account</h3>
-                    <p className="mt-1 text-sm text-gray-600">
-                      Add a new user account to the system.
-                    </p>
+            <button className="p-1 text-gray-400 rounded-full hover:bg-gray-100 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <Bell className="w-6 h-6" />
+            </button>
+            <button className="p-1 ml-3 text-gray-400 rounded-full hover:bg-gray-100 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <User className="w-6 h-6" />
+            </button>
+          </div>
+        </header>
+
+        <main className="flex-1 overflow-y-auto p-6">
+          <div className="max-w-4xl mx-auto">
+            <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
+              <div className="p-6">
+                <h2 className="text-lg font-semibold text-gray-900 mb-4">Create New Account</h2>
+                <form onSubmit={handleCreateAccount} className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label htmlFor="account-id" className="block text-sm font-medium text-gray-700 mb-1">
+                        Account ID
+                      </label>
+                      <input
+                        type="text"
+                        name="account-id"
+                        id="account-id"
+                        value={newAccount.accountId}
+                        onChange={(e) => setNewAccount({ ...newAccount, accountId: e.target.value })}
+                        className="w-full px-3 py-2 text-gray-700 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor="user-name" className="block text-sm font-medium text-gray-700 mb-1">
+                        User Name
+                      </label>
+                      <input
+                        type="text"
+                        name="user-name"
+                        id="user-name"
+                        value={newAccount.userName}
+                        onChange={(e) => setNewAccount({ ...newAccount, userName: e.target.value })}
+                        className="w-full px-3 py-2 text-gray-700 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                        Email
+                      </label>
+                      <input
+                        type="email"
+                        name="email"
+                        id="email"
+                        value={newAccount.email}
+                        onChange={(e) => setNewAccount({ ...newAccount, email: e.target.value })}
+                        className="w-full px-3 py-2 text-gray-700 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor="role" className="block text-sm font-medium text-gray-700 mb-1">
+                        Role
+                      </label>
+                      <input
+                        type="text"
+                        name="role"
+                        id="role"
+                        value={newAccount.role}
+                        onChange={(e) => setNewAccount({ ...newAccount, role: e.target.value })}
+                        className="w-full px-3 py-2 text-gray-700 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
                   </div>
-                  <div className="mt-5 md:mt-0 md:col-span-2">
-                    <form onSubmit={handleCreateAccount}>
-                      <div className="overflow-hidden shadow sm:rounded-md">
-                        <div className="px-4 py-5 bg-white sm:p-6">
-                          <div className="grid grid-cols-6 gap-6">
-                            <div className="col-span-6 sm:col-span-3">
-                              <label htmlFor="user-id" className="block text-sm font-medium text-gray-700">
-                                User ID
-                              </label>
-                              <input
-                                type="text"
-                                name="user-id"
-                                id="user-id"
-                                value={newAccount.userId}
-                                onChange={(e) => setNewAccount({ ...newAccount, userId: e.target.value })}
-                                className="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                              />
-                            </div>
-                            <div className="col-span-6 sm:col-span-3">
-                              <label htmlFor="email-address" className="block text-sm font-medium text-gray-700">
-                                Email address
-                              </label>
-                              <input
-                                type="email"
-                                name="email-address"
-                                id="email-address"
-                                value={newAccount.email}
-                                onChange={(e) => setNewAccount({ ...newAccount, email: e.target.value })}
-                                className="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                              />
-                            </div>
-                          </div>
-                        </div>
-                        <div className="px-4 py-3 text-right bg-gray-50 sm:px-6">
-                          <button
-                            type="submit"
-                            className="inline-flex justify-center px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                          >
-                            Create Account
-                          </button>
-                        </div>
-                      </div>
-                    </form>
-                  </div>
-                </div>
+                  <button
+                    type="submit"
+                    className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  >
+                    <Plus className="mr-2" /> Create Account
+                  </button>
+                </form>
               </div>
 
-              {/* Existing accounts table */}
-              <div className="mt-8">
-                <div className="sm:flex sm:items-center">
-                  <div className="sm:flex-auto">
-                    <h2 className="text-xl font-semibold text-gray-900">Existing Accounts</h2>
-                    <p className="mt-2 text-sm text-gray-700">A list of all user accounts in the system.</p>
-                  </div>
-                </div>
-                <div className="mt-8 overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
-                  <table className="min-w-full divide-y divide-gray-300">
-                    <thead className="bg-gray-50">
-                      <tr>
-                        <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">User ID</th>
-                        <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Email</th>
-                        <th scope="col" className="relative py-3.5 pl-3 pr-4 sm:pr-6">
-                          <span className="sr-only">Actions</span>
-                        </th>
+              <div className="overflow-hidden border-t border-gray-200">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Account ID</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User Name</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase  tracking-wider">Role</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {accounts.map((account) => (
+                      <tr key={account.accountId}>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{account.accountId}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{account.accountUserName}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{account.accountEmail}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{account.role}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                          <button
+                            onClick={() => handleEditAccount(account)}
+                            className="text-blue-600 hover:text-blue-900"
+                          >
+                            <Edit2 className="w-5 h-5 inline" />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteAccount(account)}
+                            className="text-red-600 hover:text-red-900"
+                          >
+                            <Trash2 className="w-5 h-5 inline" />
+                          </button>
+                        </td>
                       </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
-                      {accounts.map((account) => (
-                        <tr key={account.id}>
-                          <td className="py-4 pl-4 pr-3 text-sm font-medium text-gray-900 whitespace-nowrap sm:pl-6">{account.userId}</td>
-                          <td className="px-3 py-4 text-sm text-gray-500 whitespace-nowrap">{account.email}</td>
-                          <td className="relative py-4 pl-3 pr-4 text-sm font-medium text-right whitespace-nowrap sm:pr-6">
-                            <button
-                              onClick={() => handleEditAccount(account)}
-                              className="text-blue-600 hover:text-blue-900 mr-4"
-                            >
-                              Edit<span className="sr-only">, {account.userId}</span>
-                            </button>
-                            <button
-                              onClick={() => handleDeleteAccount(account)}
-                              className="text-red-600 hover:text-red-900"
-                            >
-                              Delete<span className="sr-only">, {account.userId}</span>
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             </div>
           </div>
+
+          {showModal && modalContent && (
+            <Modal title={modalContent.title} onClose={() => setShowModal(false)}>
+              {typeof modalContent.message === 'string' ? <p>{modalContent.message}</p> : modalContent.message}
+            </Modal>
+          )}
+
+          {notification && (
+            <div className={`mt-4 p-4 text-sm rounded-md ${notification.type === 'error' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
+              {notification.message}
+            </div>
+          )}
         </main>
       </div>
-
-      {/* Edit account modal */}
-      {editingAccount && (
-        <div className="fixed inset-0 z-10 overflow-y-auto">
-          <div className="flex items-end justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-            <div className="fixed inset-0 transition-opacity" aria-hidden="true">
-              <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
-            </div>
-            <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-            <div className="inline-block overflow-hidden text-left align-bottom transition-all transform bg-white rounded-lg shadow-xl sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-              <div className="px-4 pt-5 pb-4 bg-white sm:p-6 sm:pb-4">
-                <div className="sm:flex sm:items-start">
-                  <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
-                    <h3 className="text-lg font-medium leading-6 text-gray-900" id="modal-title">
-                      Edit Account
-                    </h3>
-                    <div className="mt-2">
-                      <form onSubmit={handleUpdateAccount}>
-                        <div className="grid grid-cols-6 gap-6">
-                          <div className="col-span-6 sm:col-span-3">
-                            <label htmlFor="edit-user-id" className="block text-sm font-medium text-gray-700">
-                              User ID
-                            </label>
-                            <input
-                              type="text"
-                              name="edit-user-id"
-                              id="edit-user-id"
-                              value={editingAccount.userId}
-                              onChange={(e) => setEditingAccount({ ...editingAccount, userId: e.target.value })}
-                              className="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                            />
-                          </div>
-                          <div className="col-span-6 sm:col-span-3">
-                            <label htmlFor="edit-email-address" className="block text-sm font-medium text-gray-700">
-                              Email address
-                            </label>
-                            <input
-                              type="email"
-                              name="edit-email-address"
-                              id="edit-email-address"
-                              value={editingAccount.email}
-                              onChange={(e) => setEditingAccount({ ...editingAccount, email: e.target.value })}
-                              className="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                            />
-                          </div>
-                        </div>
-                        <div className="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse">
-                          <button
-                            type="submit"
-                            className="inline-flex justify-center w-full px-4 py-2 text-base font-medium text-white bg-blue-600 border border-transparent rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm"
-                          >
-                            Update
-                          </button>
-                          <button
-                            type="button"
-                            className="inline-flex justify-center w-full px-4 py-2 mt-3 text-base font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:w-auto sm:text-sm"
-                            onClick={() => setEditingAccount(null)}
-                          >
-                            Cancel
-                          </button>
-                        </div>
-                      </form>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Confirmation modal */}
-      {showModal && (
-        <div className="fixed inset-0 z-10 overflow-y-auto">
-          <div className="flex items-end justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-            <div className="fixed inset-0 transition-opacity" aria-hidden="true">
-              <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
-            </div>
-            <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-            <div className="inline-block overflow-hidden text-left align-bottom transition-all transform bg-white rounded-lg shadow-xl sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-              <div className="px-4 pt-5 pb-4 bg-white sm:p-6 sm:pb-4">
-                <div className="sm:flex sm:items-start">
-                  <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
-                    <h3 className="text-lg font-medium leading-6 text-gray-900" id="modal-title">
-                      {modalContent.title}
-                    </h3>
-                    <div className="mt-2">
-                      <p className="text-sm text-gray-500">
-                        {modalContent.message}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="px-4 py-3 bg-gray-50 sm:px-6 sm:flex sm:flex-row-reverse">
-                <button
-                  type="button"
-                  className="inline-flex justify-center w-full px-4 py-2 text-base font-medium text-white bg-blue-600 border border-transparent rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm"
-                  onClick={modalContent.action}
-                >
-                  Confirm
-                </button>
-                <button
-                  type="button"
-                  className="inline-flex justify-center w-full px-4 py-2 mt-3 text-base font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:w-auto sm:text-sm"
-                  onClick={() => setShowModal(false)}
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Notification */}
-      {notification && (
-        <div className="fixed inset-0 z-20 flex items-end justify-center px-4 py-6 pointer-events-none sm:p-6 sm:items-start sm:justify-end">
-          <div className="w-full max-w-sm overflow-hidden bg-white rounded-lg shadow-lg pointer-events-auto ring-1 ring-black ring-opacity-5">
-            <div className="p-4">
-              <div className="flex items-start">
-                <div className="flex-shrink-0">
-                  {notification.type === 'success' ? (
-                    <svg className="w-6 h-6 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                  ) : (
-                    <svg className="w-6 h-6 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                  )}
-                </div>
-                <div className="ml-3 w-0 flex-1 pt-0.5">
-                  <p className="text-sm font-medium text-gray-900">
-                    {notification.message}
-                  </p>
-                </div>
-                <div className="flex flex-shrink-0 ml-4">
-                  <button
-                    className="inline-flex text-gray-400 bg-white rounded-md hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                    onClick={() => setNotification(null)}
-                  >
-                    <span className="sr-only">Close</span>
-                    <X className="w-5 h-5" />
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   )
 }
