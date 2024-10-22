@@ -19,9 +19,10 @@ public class NewsletterController {
     @PostMapping("/save")
     public ResponseEntity<String> saveNewsletter(@RequestBody Newsletter newsletter, HttpSession session) {
         // Attempt to save the newsletter template
+        System.out.println("Request Body: " + newsletter);
         try {
             newsletterService.saveNewsletter(newsletter, session);
-            return ResponseEntity.ok("Template saved successfully");
+            return ResponseEntity.status(HttpStatus.CREATED).body("Newsletter saved successfully");
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         } catch (Exception e) {

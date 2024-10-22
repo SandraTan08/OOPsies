@@ -26,8 +26,6 @@ export default function Newsletter() {
     return null; // Render nothing during the redirect
   }
 
-  console.log(session.account.accountId);
-
   // Initialize products based on numProducts
   const handleNumProductsChange = (e) => {
     const count = Math.max(1, Math.min(10, e.target.value)); // Limit to a range
@@ -37,10 +35,10 @@ export default function Newsletter() {
     setTemplate(prev => {
       const updatedProducts = Array.from({ length: count }, (_, index) => ({
         name: `[Product Name ${index + 1}]`,
-        price: '[Product Price]',
+        price: 0,
         discountType: 'none', // New field to track discount type
-        discountPer: '[Discount Percentage]', // Discount percentage or amount
-        discountAmt: '[Discount Amount]',
+        discountPer: 0, // Discount percentage or amount
+        discountAmt: 0,
         promoCode: '[Promo Code]', // Promo code for discount type 1
         relatedProduct: '[Related Product]', // Related product for discount type 2
       }));
@@ -71,9 +69,8 @@ export default function Newsletter() {
 
     // Add userId from the session to the template
     const templateWithUser = {
-      ...template,
       accountId: session.account.accountId,
-      customerName: session.account.accountUserName,
+      ...template
     };
     console.log(session.account.accountId);
     console.log("templateWithUser" + templateWithUser);
@@ -187,6 +184,7 @@ export default function Newsletter() {
                     <Input
                       id={`product-${index}-price`}
                       name="price"
+                      type="number"
                       value={product.price}
                       onChange={(e) => handleChange(e, index)}
                       className="mt-1"
@@ -215,7 +213,10 @@ export default function Newsletter() {
                         <Label htmlFor={`product-${index}-discount`}>Discount Percentage</Label>
                         <Input
                           id={`product-${index}-discount`}
-                          name="discount"
+                          name="discountPer"
+                          type="number"
+                          min="0"
+                          max="100"
                           value={product.discountPer}
                           onChange={(e) => handleChange(e, index)}
                           className="mt-1"
@@ -237,10 +238,12 @@ export default function Newsletter() {
                   {product.discountType === 'relatedProduct' && (
                     <>
                       <div>
-                        <Label htmlFor={`product-${index}-discountAmount`}>Discount Amount</Label>
+                        <Label htmlFor={`product-${index}-discountAmt`}>Discount Amount</Label>
                         <Input
-                          id={`product-${index}-discountAmount`}
-                          name="discount"
+                          id={`product-${index}-discountAmt`}
+                          name="discountAmt"
+                          type="number"
+                          min="0.10"
                           value={product.discountAmt}
                           onChange={(e) => handleChange(e, index)}
                           className="mt-1"
@@ -277,12 +280,12 @@ Top Picks for You:
 ${template.products.map((product, index) => {
                   let productDetails = `${index + 1}. ${product.name}\n   o Price: $${product.price}`;
 
-                  if (product.discountType === 'discountCode' && product.discount && product.promoCode) {
-                    productDetails += `\n   o Discount: ${product.discount}% off with code ${product.promoCode}`;
+                  if (product.discountType === 'discountCode' && product.discountPer && product.promoCode) {
+                    productDetails += `\n   o Discount: ${product.discountPer}% off with code: ${product.promoCode}`;
                   }
 
-                  if (product.discountType === 'relatedProduct' && product.discount && product.relatedProduct) {
-                    productDetails += `\n   o Discount: Save $${product.discount} when you buy with ${product.relatedProduct}`;
+                  if (product.discountType === 'relatedProduct' && product.discountAmt && product.relatedProduct) {
+                    productDetails += `\n   o Discount: Save $${product.discountAmt} when you buy with ${product.relatedProduct}`;
                   }
 
                   return productDetails;

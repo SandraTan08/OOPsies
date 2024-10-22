@@ -22,27 +22,11 @@ public class Newsletter {
     @Column(name = "accountId")
     private String accountId;  // Store the ID of the user who created this template
 
-    public void setAccountId(String accountId) {
-        this.accountId = accountId;
-    }
-
-    public String getAccountId() {
-        return accountId;
-    }
-
     @Column(name = "customerName")
     private String customerName;
 
-    public String getCustomerName() {
-        return customerName;
-    }
-
-    public void setCustomerName(String customerName) {
-        this.customerName = customerName;
-    }
-
-    @ElementCollection
-    @CollectionTable(name = "newsletter_products", joinColumns = @JoinColumn(name = "newsletterId"))
+    // One-to-many relationship to ProductTemplate
+    @OneToMany(mappedBy = "newsletter", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<ProductTemplate> products;  // Store product details as part of the newsletter
 
     @Override

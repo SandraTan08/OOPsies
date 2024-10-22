@@ -17,20 +17,20 @@ public class NewsletterService {
     public void saveNewsletter(Newsletter newsletter, HttpSession session) {
         // Retrieve the accountId from the session
         String accountId = newsletter.getAccountId();
-        String customername = newsletter.getCustomerName();
+        String customerName = newsletter.getCustomerName();
 
         // Check if accountId is present
         if (accountId == null) {
             throw new IllegalArgumentException("Account ID not found in session.");
         }
 
-        if (customername == null) {
+        if (customerName == null) {
             throw new IllegalArgumentException("Customer name not found in session.");
         }
 
         // Set the accountId as the creator of the newsletter
         newsletter.setAccountId(accountId);
-        newsletter.setCustomerName(customername);
+        newsletter.setCustomerName(customerName);
 
 
         // Save the newsletter to the database
