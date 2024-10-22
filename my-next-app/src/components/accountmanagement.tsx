@@ -10,6 +10,7 @@ import {
   Search,
   Bell,
   User,
+  Edit2,
   Plus,
   Edit,
   Trash2,
