@@ -62,7 +62,7 @@ export const LoginForm = () => {
 
       console.log('API response:', response);  // Logs the entire response
       console.log('API data:', data);  // Logs the parsed JSON data
-          
+        
       
       // Redirect to the dashboard page upon successful login
       toast.success('Login successful!');

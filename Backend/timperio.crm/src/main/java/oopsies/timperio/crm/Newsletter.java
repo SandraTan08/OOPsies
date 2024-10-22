@@ -19,11 +19,27 @@ public class Newsletter {
     @Column(name = "newsletterId")
     private Long newsletterId;
 
-    @Column(name = "userId")
-    private String userId;  // Store the ID of the user who created this template
+    @Column(name = "accountId")
+    private String accountId;  // Store the ID of the user who created this template
+
+    public void setAccountId(String accountId) {
+        this.accountId = accountId;
+    }
+
+    public String getAccountId() {
+        return accountId;
+    }
 
     @Column(name = "customerName")
     private String customerName;
+
+    public String getCustomerName() {
+        return customerName;
+    }
+
+    public void setCustomerName(String customerName) {
+        this.customerName = customerName;
+    }
 
     @ElementCollection
     @CollectionTable(name = "newsletter_products", joinColumns = @JoinColumn(name = "newsletterId"))
@@ -34,7 +50,7 @@ public class Newsletter {
         return "Newsletter{" +
                 "newsletterId=" + newsletterId +
                 ", customerName='" + customerName + '\'' +
-                ", userId='" + userId + '\'' +
+                ", accountId='" + accountId + '\'' +
                 ", products=" + products +
                 '}';
     }

@@ -17,6 +17,16 @@ export default function Newsletter() {
 
   const [numProducts, setNumProducts] = useState(1); // New state for number of products
   const textAreaRef = useRef(null); // Reference for the textarea
+  const { data: session, status } = useSession();
+  if (status === 'loading') {
+    return <div>Loading...</div>;
+  }
+  if (!session) {
+    window.location.href = '/'; // Redirect to login page without extra params
+    return null; // Render nothing during the redirect
+  }
+
+  console.log(session.account.accountId);
 
   // Initialize products based on numProducts
   const handleNumProductsChange = (e) => {
@@ -62,11 +72,12 @@ export default function Newsletter() {
     // Add userId from the session to the template
     const templateWithUser = {
       ...template,
-      userId: session.account.accountId
+      accountId: session.account.accountId,
+      customerName: session.account.accountUserName,
     };
-
-    console.log(templateWithUser);
-
+    console.log(session.account.accountId);
+    console.log("templateWithUser" + templateWithUser);
+    console.log('Session before POST request:', session);
     try {
       const response = await fetch('http://localhost:8080/api/v1/newsletter/save', {
         method: 'POST',
@@ -74,7 +85,9 @@ export default function Newsletter() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(templateWithUser), // Send template with userId
+        credentials: 'include', // Allow sending session cookies
       });
+      console.log(templateWithUser);
 
       if (!response.ok) {
         // Handle non-2xx responses
@@ -119,18 +132,6 @@ export default function Newsletter() {
       updatedProducts[index].discountType = value; // Set discount type for the product
       return { ...prev, products: updatedProducts };
     });
-  }
-
-  const { data: session, status } = useSession();
-
-
-  if (status === 'loading') {
-    return <div>Loading...</div>;
-  }
-
-  if (!session) {
-    window.location.href = '/'; // Redirect to login page without extra params
-    return null; // Render nothing during the redirect
   }
 
 
