@@ -179,7 +179,7 @@ export default function Dashboard() {
     window.location.href = '/'; // Redirect to login page without extra params
     return null; // Render nothing during the redirect
   }
-  
+
 
 
 

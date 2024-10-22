@@ -57,10 +57,11 @@ export const authConfig: NextAuthOptions = {
     async jwt({ token, account, user }) {
       // When the user logs in for the first time (or when they refresh the session)
       if (account && user) {
-        token.accountId = user.id || account.providerAccountId;  // Use the `id` from the `user` or `providerAccountId`
+        token.accountId = user.accountId || account.providerAccountId;  // Use the `id` from the `user` or `providerAccountId`
         token.accountUserName = user.accountUserName || '';  // Add the username (if available) from the user
         token.role = user.role || 'user';  // Add role from `user`, or default to 'user'
         token.accountEmail = user.accountEmail || '';  // Add email from `user`
+        console.log('JWT token:', token); // Debug: log the token
       }
   
       return token;
@@ -71,10 +72,13 @@ export const authConfig: NextAuthOptions = {
   
       // Populate session fields from the token
       if (token) {
-        session.account.accountId = token.accountId as string;
-        session.account.accountUserName = token.accountUserName as string;
-        session.account.role = token.role as string;
-        session.account.accountEmail = token.accountEmail as string;
+        session.account = {
+          accountId: token.accountId as string,
+          accountUserName: token.accountUserName as string,
+          role: token.role as string,
+          accountEmail: token.accountEmail as string,
+        }
+        console.log('Session account:', session.account); 
       }
   
       return session;
