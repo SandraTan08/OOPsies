@@ -1,3 +1,4 @@
+// newsletter.tsx
 'use client'
 
 import { useState, useRef } from 'react'
@@ -122,19 +123,38 @@ export default function Newsletter() {
     }
   }
 
-  const handleSend = () => {
+  const handleSend = async () => {
     console.log('Sending newsletter');
-  }
-
-  const handleDiscountTypeChange = (e, index) => {
-    const { value } = e.target;
-    setTemplate(prev => {
-      const updatedProducts = [...prev.products];
-      updatedProducts[index].discountType = value; // Set discount type for the product
-      return { ...prev, products: updatedProducts };
-    });
-  }
-
+  
+    // Get the value from the textarea
+    const newsletterContent = textAreaRef.current.value;
+  
+    try {
+      const response = await fetch('http://localhost:8080/api/v1/newsletter/send', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          content: newsletterContent, // Send the preview content
+          accountId: session.account.accountId, // Include the user ID if needed
+        }),
+        credentials: 'include',
+      });
+  
+      if (!response.ok) {
+        const errorMessage = await response.text();
+        toast.error(`Error sending newsletter: ${errorMessage}`);
+        return;
+      }
+  
+      const message = await response.text();
+      toast.success(message); // Display success message
+    } catch (error) {
+      console.error("Error sending newsletter:", error);
+      toast.error("An error occurred while sending the newsletter.");
+    }
+  };
 
   return (
     <div>

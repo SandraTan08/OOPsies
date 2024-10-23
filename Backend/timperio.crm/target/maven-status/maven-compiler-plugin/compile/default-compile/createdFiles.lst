@@ -21,6 +21,7 @@ oopsies\timperio\crm\Service\ProductService.class
 oopsies\timperio\crm\Controller\AccountController.class
 oopsies\timperio\crm\Repository\UserRepository.class
 oopsies\timperio\crm\Account.class
+oopsies\timperio\crm\Repository\ProductTemplateRepository.class
 oopsies\timperio\crm\Controller\PurchaseHistoryController.class
 oopsies\timperio\crm\Service\NewsletterService.class
 oopsies\timperio\crm\config\GlobalCorsConfig$1.class

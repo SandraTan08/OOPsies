@@ -1,3 +1,4 @@
+// NewsletterRepository.java
 package oopsies.timperio.crm.Repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -7,3 +8,4 @@ import oopsies.timperio.crm.Newsletter;
 @Repository
 public interface NewsletterRepository extends JpaRepository<Newsletter, Long> {
 }
+

@@ -1,10 +1,9 @@
+// Newsletter.java
 package oopsies.timperio.crm;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import jakarta.persistence.*;
 import java.util.List;
 
@@ -13,8 +12,6 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Getter
-@Setter
 public class Newsletter {
 
     @Id
@@ -52,9 +49,9 @@ public class Newsletter {
         this.customerName = customerName;
     }
 
-    // One-to-many relationship to ProductTemplate
-    @OneToMany(mappedBy = "newsletter", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<ProductTemplate> products;  // Store product details as part of the newsletter
+    // Use @ElementCollection to store the list of embedded ProductTemplate objects
+    @OneToMany(mappedBy = "newsletter", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ProductTemplate> products;
 
     @Override
     public String toString() {
