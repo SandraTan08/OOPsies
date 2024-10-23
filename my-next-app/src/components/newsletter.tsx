@@ -49,15 +49,19 @@ export default function Newsletter() {
   const handleChange = (e, productIndex) => {
     const { name, value } = e.target;
 
+    // Convert value to number
+    const numericValue = parseFloat(value);
+
     setTemplate(prev => {
       const updatedProducts = [...prev.products];
       updatedProducts[productIndex] = {
         ...updatedProducts[productIndex],
-        [name]: value
+        [name]: name === 'price' || name === 'discountPer' || name === 'discountAmt' ? Math.max(0, numericValue) : value // Set min value to 0 for price, discount amount, and percentage
       };
       return { ...prev, products: updatedProducts };
     });
-  }
+  };
+
 
   const handleSave = async () => {
     console.log('Saving template');
@@ -187,6 +191,13 @@ export default function Newsletter() {
                       type="number"
                       value={product.price}
                       onChange={(e) => handleChange(e, index)}
+                      onBlur={() => {
+                        setTemplate(prev => {
+                          const updatedProducts = [...prev.products];
+                          updatedProducts[index].price = Math.max(0, updatedProducts[index].price); // Ensure price is not negative
+                          return { ...prev, products: updatedProducts };
+                        });
+                      }}
                       className="mt-1"
                     />
                   </div>
@@ -219,6 +230,13 @@ export default function Newsletter() {
                           max="100"
                           value={product.discountPer}
                           onChange={(e) => handleChange(e, index)}
+                          onBlur={() => {
+                            setTemplate(prev => {
+                              const updatedProducts = [...prev.products];
+                              updatedProducts[index].discountPer = Math.min(100, Math.max(0, updatedProducts[index].discountPer)); // Ensure value is between 0 and 100
+                              return { ...prev, products: updatedProducts };
+                            });
+                          }}
                           className="mt-1"
                         />
                       </div>
@@ -243,9 +261,20 @@ export default function Newsletter() {
                           id={`product-${index}-discountAmt`}
                           name="discountAmt"
                           type="number"
-                          min="0.10"
+                          min="0"
                           value={product.discountAmt}
-                          onChange={(e) => handleChange(e, index)}
+                          onChange={(e) => {
+                            const value = Math.max(0, Math.min(e.target.value, product.price)); // Ensure it does not exceed the price
+                            handleChange({ target: { name: 'discountAmt', value } }, index);
+                          }}
+                          onBlur={() => {
+                            setTemplate(prev => {
+                              const updatedProducts = [...prev.products];
+                              // Ensure the discount amount does not exceed the price
+                              updatedProducts[index].discountAmt = Math.min(updatedProducts[index].discountAmt, updatedProducts[index].price);
+                              return { ...prev, products: updatedProducts };
+                            });
+                          }}
                           className="mt-1"
                         />
                       </div>
