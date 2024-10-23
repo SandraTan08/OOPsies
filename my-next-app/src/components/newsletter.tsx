@@ -35,7 +35,7 @@ export default function Newsletter() {
     // Update products array based on new count
     setTemplate(prev => {
       const updatedProducts = Array.from({ length: count }, (_, index) => ({
-        name: `[Product Name ${index + 1}]`,
+        productName: `[Product Name ${index + 1}]`,
         price: 0,
         discountType: 'none', // New field to track discount type
         discountPer: 0, // Discount percentage or amount
@@ -125,36 +125,16 @@ export default function Newsletter() {
 
   const handleSend = async () => {
     console.log('Sending newsletter');
-  
-    // Get the value from the textarea
-    const newsletterContent = textAreaRef.current.value;
-  
-    try {
-      const response = await fetch('http://localhost:8080/api/v1/newsletter/send', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          content: newsletterContent, // Send the preview content
-          accountId: session.account.accountId, // Include the user ID if needed
-        }),
-        credentials: 'include',
-      });
-  
-      if (!response.ok) {
-        const errorMessage = await response.text();
-        toast.error(`Error sending newsletter: ${errorMessage}`);
-        return;
-      }
-  
-      const message = await response.text();
-      toast.success(message); // Display success message
-    } catch (error) {
-      console.error("Error sending newsletter:", error);
-      toast.error("An error occurred while sending the newsletter.");
-    }
   };
+
+  const handleDiscountTypeChange = (e, index) => {
+    const { value } = e.target;
+    setTemplate(prev => {
+      const updatedProducts = [...prev.products];
+      updatedProducts[index].discountType = value; // Set discount type for the product
+      return { ...prev, products: updatedProducts };
+    });
+  }
 
   return (
     <div>
@@ -197,8 +177,8 @@ export default function Newsletter() {
                     <Label htmlFor={`product-${index}-name`}>Product Name</Label>
                     <Input
                       id={`product-${index}-name`}
-                      name="name"
-                      value={product.name}
+                      name="productName"
+                      value={product.productName}
                       onChange={(e) => handleChange(e, index)}
                       className="mt-1"
                     />
@@ -327,7 +307,7 @@ We've curated something special for you! Based on your recent purchases and brow
 Personalized Product Recommendations:
 Top Picks for You:
 ${template.products.map((product, index) => {
-                  let productDetails = `${index + 1}. ${product.name}\n   o Price: $${product.price}`;
+                  let productDetails = `${index + 1}. ${product.productName}\n   o Price: $${product.price}`;
 
                   if (product.discountType === 'discountCode' && product.discountPer && product.promoCode) {
                     productDetails += `\n   o Discount: ${product.discountPer}% off with code: ${product.promoCode}`;
