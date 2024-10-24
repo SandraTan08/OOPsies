@@ -5,7 +5,6 @@ import { Bar, Line } from 'react-chartjs-2'
 import { useSession, signIn, signOut } from 'next-auth/react';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
-
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -28,10 +27,9 @@ ChartJS.register(
   Tooltip,
   Legend
 )
+
 import { CSVLink } from 'react-csv'
 import { ShoppingCart, BarChart, Search, Download } from 'lucide-react'
-
-
 
 const customerData = {
   labels: ['High Value', 'Medium Value', 'Low Value'],
@@ -49,12 +47,13 @@ const customerData = {
 }
 
 export default function Dashboard() {
-  const [transactionsData, setTransactionsData] = useState<any[]>([]);  // All transactions
-  const [filteredTransactions, setFilteredTransactions] = useState<any[]>([]);  // Filtered transactions to display
-  const [saleTypeFilter, setSaleTypeFilter] = useState<string>('');  // State for sale type filter
-  const [customerIdFilter, setCustomerIdFilter] = useState<string>(''); // State for customer ID filter
-  const [productIdFilter, setProductIdFilter] = useState<string>(''); // State for Product ID filter
-  const [currentPage, setCurrentPage] = useState(1);  // State to track current page
+  const [transactionsData, setTransactionsData] = useState<any[]>([]);
+  const [filteredTransactions, setFilteredTransactions] = useState<any[]>([]);
+  const [viewType, setViewType] = useState<string>('monthly');
+  const [saleTypeFilter, setSaleTypeFilter] = useState<string>('');
+  const [customerIdFilter, setCustomerIdFilter] = useState<string>('');
+  const [productIdFilter, setProductIdFilter] = useState<string>('');
+  const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 25;
   const [salesData, setSalesData] = useState<any>({
     labels: [],
@@ -67,38 +66,51 @@ export default function Dashboard() {
     ],
   });
 
+  const [startMonth, setStartMonth] = useState<string>('Jan');
+  const [endMonth, setEndMonth] = useState<string>('Dec');
+  const [startYear, setStartYear] = useState<number | 'all'>('all'); // NEW: Added startYear state
+  const [endYear, setEndYear] = useState<number | 'all'>('all'); // NEW: Added endYear state
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const toggleDropdown = () => setDropdownOpen(!dropdownOpen);
   
 
   // Calculate total sales and average order value
-  const totalSales = transactionsData.reduce((sum, transaction) => sum + transaction.value, 0).toFixed(2);
-  const averageOrderValue = transactionsData.length > 0 ? (parseFloat(totalSales) / transactionsData.length).toFixed(2) : 0;
+  const totalSales = filteredTransactions.reduce((sum, transaction) => sum + transaction.value, 0).toFixed(2);
+  const averageOrderValue = filteredTransactions.length > 0 
+    ? (parseFloat(totalSales) / filteredTransactions.length).toFixed(2) 
+    : 0;
 
   // Process sales data for the chart
-  const processSalesData = (transactions) => {
-    const salesByMonth = {};
+  const processSalesData = (transactions, viewType) => {
+    const salesByPeriod = {};
 
     transactions.forEach(transaction => {
       const date = new Date(transaction.date);
-      const month = date.toLocaleString('default', { month: 'short' }); // e.g., 'Jan', 'Feb'
-      const year = date.getFullYear();
-      const monthYear = `${month} ${year}`;
+      let period;
 
-      // Initialize if not already in the salesByMonth object
-      if (!salesByMonth[monthYear]) {
-        salesByMonth[monthYear] = 0;
+      if (viewType === 'weekly') {
+        const week = `${date.getFullYear()}-W${Math.ceil((date.getDate() - 1) / 7)}`;
+        period = week;
+      } else if (viewType === 'monthly') {
+        const month = date.toLocaleString('default', { month: 'short' });
+        const year = date.getFullYear();
+        period = `${month} ${year}`;
+      } else if (viewType === 'yearly') {
+        period = date.getFullYear();
       }
 
-      salesByMonth[monthYear] += transaction.value;
+      if (!salesByPeriod[period]) {
+        salesByPeriod[period] = 0;
+      }
+
+      salesByPeriod[period] += transaction.value;
     });
 
     return {
-      labels: Object.keys(salesByMonth),
-      data: Object.values(salesByMonth),
+      labels: Object.keys(salesByPeriod),
+      data: Object.values(salesByPeriod),
     };
   };
-
 
   // Calculate total pages
   const totalPages = Math.ceil(filteredTransactions.length / itemsPerPage);
@@ -107,6 +119,28 @@ export default function Dashboard() {
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
   const currentTransactions = filteredTransactions.slice(startIndex, endIndex);
+
+  // NEW: Filter transactions by selected month and year range
+  const filterTransactionsByRange = (transactions) => {
+    return transactions.filter(transaction => {
+      const date = new Date(transaction.date);
+      const month = date.toLocaleString('default', { month: 'short' });
+      const year = date.getFullYear();
+
+      const startMonthIndex = new Date(`${startMonth} 1, 2000`).getMonth();
+      const endMonthIndex = new Date(`${endMonth} 1, 2000`).getMonth();
+
+      const transactionMonthIndex = date.getMonth();
+
+      // Ensure the transaction is within the selected year and month range
+      return (
+        (startYear === 'all' || year >= startYear) &&
+        (endYear === 'all' || year <= endYear) &&
+        transactionMonthIndex >= startMonthIndex &&
+        transactionMonthIndex <= endMonthIndex
+      );
+    });
+  };
 
   // Fetch transactions data (mock or API call)
   useEffect(() => {
@@ -126,10 +160,11 @@ export default function Dashboard() {
         }));
 
         setTransactionsData(transactions);
-        setFilteredTransactions(transactions);  // Initially show all transactions
+        const filteredRangeTransactions = filterTransactionsByRange(transactions);
+        setFilteredTransactions(filteredRangeTransactions);
 
-        // Process sales data for the chart
-        const { labels, data: salesChartData } = processSalesData(transactions);
+        // Process sales data based on the current view type
+        const { labels, data: salesChartData } = processSalesData(filteredRangeTransactions, viewType);
         setSalesData({
           labels,
           datasets: [{
@@ -144,7 +179,7 @@ export default function Dashboard() {
     }
 
     fetchSalesData();
-  }, []);
+  }, [viewType, startMonth, endMonth, startYear, endYear]);
 
   // Handle filter form submission
   const handleFilter = (e) => {
@@ -165,7 +200,8 @@ export default function Dashboard() {
       filtered = filtered.filter(transaction => transaction.product === productIdFilter);
     }
 
-    setFilteredTransactions(filtered);
+    const filteredRangeTransactions = filterTransactionsByRange(filtered);
+    setFilteredTransactions(filteredRangeTransactions);
   };
 
   const { data: session, status } = useSession();
@@ -184,9 +220,7 @@ export default function Dashboard() {
 
 
   return (
-    
     <div className="flex h-screen bg-gray-100">
-      {/* Main content */}
       <div className="flex flex-col flex-1 overflow-hidden">
         <header className="flex items-center justify-between px-4 py-4 bg-white border-b border-gray-200 sm:px-6 lg:px-8">
           <div className="flex items-center">
@@ -199,69 +233,77 @@ export default function Dashboard() {
               <Search className="absolute top-2.5 right-3 w-5 h-5 text-gray-400" />
             </div>
           </div>
-            <button
-                onClick={toggleDropdown}
-                className="flex items-center max-w-xs text-sm bg-black rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500"
-                id="user-menu"
-                aria-expanded={dropdownOpen}
-                aria-haspopup="true"
-              >
-                <Avatar>
-                  <AvatarImage src="https://github.com/shadcn.png" />
-                  <AvatarFallback>CN</AvatarFallback>
-                </Avatar>
-                <span className="sr-only">Open user menu</span>
-              </button>
-          
+          <button
+            onClick={toggleDropdown}
+            className="flex items-center max-w-xs text-sm bg-black rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+            id="user-menu"
+            aria-expanded={dropdownOpen}
+            aria-haspopup="true"
+          >
+            <Avatar>
+              <AvatarImage src="https://github.com/shadcn.png" />
+              <AvatarFallback>CN</AvatarFallback>
+            </Avatar>
+            <span className="sr-only">Open user menu</span>
+          </button>
         </header>
-      <div>
-        
-      {/* Dropdown Menu */}
-      {dropdownOpen && (
-        <div
-          className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5"
-          role="menu"
-          aria-orientation="vertical"
-          aria-labelledby="user-menu"
-        >
-          <div className="py-1" role="none">
-            <a
-              href="#"
-              className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-              role="menuitem"
-            >
-              Profile
-            </a>
-            <a
-              href="#"
-              className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-              role="menuitem"
-            >
-              Settings
-            </a>
-            <button
-              onClick={() => signOut({ callbackUrl: '/' })}
-              className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-              role="menuitem"
-            >
-              Sign Out
-            </button>
-          </div>
-        </div>
-      )}
-    </div>
 
-        {/* Dashboard content */}
         <main className="flex-1 overflow-y-auto bg-gray-100">
           <div className="py-6">
             <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
-              <h1 className="text-2xl font-semibold text-gray-900">Welcome, {session.account.accountUserName} </h1>
+              <h1 className="text-2xl font-semibold text-gray-900 pb-5">Welcome, {session.account.accountUserName}</h1>
             </div>
+
             <div className="px-4 mx-auto max-w-7xl sm:px-6 md:px-8">
+              {/* Month and Year Range Filter */}
+              <div className="flex space-x-4 p-4 overflow-hidden bg-white rounded-lg shadow">
+                <select
+                  value={startYear}
+                  onChange={(e) => setStartYear(e.target.value === 'all' ? 'all' : parseInt(e.target.value))}
+                  className="px-4 py-2 bg-white border border-gray-300 rounded text-gray-500"
+                >
+                  <option value="all">All Years</option>
+                  {[2019, 2020, 2021, 2022, 2023, 2024].map((year) => (
+                    <option key={year} value={year}>{year}</option>
+                  ))}
+                </select>
+
+                <select
+                  value={startMonth}
+                  onChange={(e) => setStartMonth(e.target.value)}
+                  className="px-4 py-2 bg-white border border-gray-300 rounded text-gray-500"
+                >
+                  {['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'].map((month) => (
+                    <option key={month} value={month}>{month}</option>
+                  ))}
+                </select>
+
+                <select
+                  value={endYear}
+                  onChange={(e) => setEndYear(e.target.value === 'all' ? 'all' : parseInt(e.target.value))}
+                  className="px-4 py-2 bg-white border border-gray-300 rounded text-gray-500"
+                >
+                  <option value="all">All Years</option>
+                  {[2019, 2020, 2021, 2022, 2023, 2024].map((year) => (
+                    <option key={year} value={year}>{year}</option>
+                  ))}
+                </select>
+
+                <select
+                  value={endMonth}
+                  onChange={(e) => setEndMonth(e.target.value)}
+                  className="px-4 py-2 bg-white border border-gray-300 rounded text-gray-500"
+                >
+                  {['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'].map((month) => (
+                    <option key={month} value={month}>{month}</option>
+                  ))}
+                </select>
+              </div>
 
               {/* Sales metrics */}
               <div className="mt-8">
-                <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                  {/* Total Sales Card */}
                   <div className="overflow-hidden bg-white rounded-lg shadow">
                     <div className="p-5">
                       <div className="flex items-center">
@@ -279,6 +321,8 @@ export default function Dashboard() {
                       </div>
                     </div>
                   </div>
+
+                  {/* Average Order Value Card */}
                   <div className="overflow-hidden bg-white rounded-lg shadow">
                     <div className="p-5">
                       <div className="flex items-center">
@@ -296,15 +340,37 @@ export default function Dashboard() {
                       </div>
                     </div>
                   </div>
-                  {/* Add more metric cards as needed */}
                 </div>
               </div>
+
 
               {/* Charts */}
               <div className="mt-8">
                 <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
                   <div className="p-4 bg-white rounded-lg shadow" >
                     <h2 className="text-lg font-medium text-gray-900">Sales Overview</h2>
+
+                    <div className="mt-4 flex justify-between">
+                      <button
+                        className={`px-4 py-2 ${viewType === 'weekly' ? 'bg-blue-600' : 'bg-gray-200'} text-white rounded`}
+                        onClick={() => setViewType('weekly')}
+                      >
+                        Weekly
+                      </button>
+                      <button
+                        className={`px-4 py-2 ${viewType === 'monthly' ? 'bg-blue-600' : 'bg-gray-200'} text-white rounded`}
+                        onClick={() => setViewType('monthly')}
+                      >
+                        Monthly
+                      </button>
+                      <button
+                        className={`px-4 py-2 ${viewType === 'yearly' ? 'bg-blue-600' : 'bg-gray-200'} text-white rounded`}
+                        onClick={() => setViewType('yearly')}
+                      >
+                        Yearly
+                      </button>
+                    </div>
+
                     <div className="mt-4">
                       <Bar data={salesData} options={{ responsive: true }} />
                     </div>
@@ -323,13 +389,13 @@ export default function Dashboard() {
                 <h3 className="text-lg font-medium text-gray-900">Filter Sales Transactions</h3>
                 <div className="grid grid-cols-1 gap-4 mt-4 sm:grid-cols-2 lg:grid-cols-3">
                   <div>
-                    <label htmlFor="saleType" className="block text-sm font-medium text-black-700">Sale Type</label>
+                    <label htmlFor="saleType" className="block text-sm font-medium text-black">Sale Type</label>
                     <select
                       id="saleType"
                       name="saleType"
                       value={saleTypeFilter}
                       onChange={(e) => setSaleTypeFilter(e.target.value)}
-                      className="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                      className="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-500"
                     >
                       <option value="">All</option>
                       <option value="Online">Online</option>
@@ -338,7 +404,7 @@ export default function Dashboard() {
                   </div>
 
                   <div>
-                    <label htmlFor="customerId" className="block text-sm font-medium text-black-700">Customer ID</label>
+                    <label htmlFor="customerId" className="block text-sm font-medium text-black">Customer ID</label>
                     <input
                       type="text"
                       id="customerId"
@@ -346,12 +412,12 @@ export default function Dashboard() {
                       value={customerIdFilter}
                       onChange={(e) => setCustomerIdFilter(e.target.value)}
                       placeholder="e.g., 12345"
-                      className="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                      className="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-500"
                     />
                   </div>
 
                   <div>
-                    <label htmlFor="productId" className="block text-sm font-medium text-black-700">Product ID</label>
+                    <label htmlFor="productId" className="block text-sm font-medium text-black">Product ID</label>
                     <input
                       type="text"
                       id="productId"
@@ -359,7 +425,7 @@ export default function Dashboard() {
                       value={productIdFilter}
                       onChange={(e) => setProductIdFilter(e.target.value)}
                       placeholder="e.g., Product 1"
-                      className="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                      className="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-500"
                     />
                   </div>
                 </div>
@@ -403,24 +469,24 @@ export default function Dashboard() {
                   <div className="mt-4 flex justify-between">
                   </div>
                   <div className="mt-4 flex justify-between">
-                  <button
-                    onClick={() => setCurrentPage(currentPage - 1)}
-                    disabled={currentPage === 1}
-                    className="px-4 py-2 bg-blue-500 text-white rounded disabled:opacity-50"
-                  >
-                    Previous
-                  </button>
+                    <button
+                      onClick={() => setCurrentPage(currentPage - 1)}
+                      disabled={currentPage === 1}
+                      className="px-4 py-2 bg-blue-500 text-white rounded disabled:opacity-50"
+                    >
+                      Previous
+                    </button>
 
-                  <span>Page {currentPage} of {totalPages}</span>
+                    <span>Page {currentPage} of {totalPages}</span>
 
-                  <button
-                    onClick={() => setCurrentPage(currentPage + 1)}
-                    disabled={currentPage === totalPages}
-                    className="px-4 py-2 bg-blue-500 text-white rounded disabled:opacity-50"
-                  >
-                    Next
-                  </button>
-                </div>
+                    <button
+                      onClick={() => setCurrentPage(currentPage + 1)}
+                      disabled={currentPage === totalPages}
+                      className="px-4 py-2 bg-blue-500 text-white rounded disabled:opacity-50"
+                    >
+                      Next
+                    </button>
+                  </div>
                 </table>
               </div>
             </div>
