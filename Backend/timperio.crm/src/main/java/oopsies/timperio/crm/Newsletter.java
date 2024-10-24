@@ -72,14 +72,6 @@ public class Newsletter {
         this.products = products;
     }
 
-    public List<ProductTemplate> getProducts() {
-        return products;
-    }   
-
-    public void setProducts(List<ProductTemplate> products) {
-        this.products = products;
-    }
-
     @Override
     public String toString() {
         return "Newsletter{" +

@@ -15,13 +15,13 @@ const brevoApiKey = process.env.NEXT_PUBLIC_resend_api_key;
 
 export default function Newsletter() {
   const [template, setTemplate] = useState({
-    templateName: '[Template Name]',
-    customerName: '[Customer\'s Name]',
+    templateName: '',
+    customerName: '',
     products: [] // Changed to an array to store products dynamically
   })
 
   const [customerEmail, setCustomerEmail] = useState(''); // State for customer email
-  const [numProducts, setNumProducts] = useState(1); // New state for number of products
+  const [numProducts, setNumProducts] = useState(0); // New state for number of products
   const textAreaRef = useRef(null); // Reference for the textarea
   const { data: session, status } = useSession();
   if (status === 'loading') {
@@ -34,7 +34,7 @@ export default function Newsletter() {
 
   // Initialize products based on numProducts
   const handleNumProductsChange = (e) => {
-    const count = Math.max(1, Math.min(10, e.target.value)); // Limit to a range
+    const count = Math.max(0, Math.min(10, e.target.value)); // Limit to a range
     setNumProducts(count);
 
     // Update products array based on new count
@@ -45,8 +45,8 @@ export default function Newsletter() {
         discountType: 'none', // New field to track discount type
         discountPer: 0, // Discount percentage or amount
         discountAmt: 0,
-        promoCode: '[Promo Code]', // Promo code for discount type 1
-        relatedProduct: '[Related Product]', // Related product for discount type 2
+        promoCode: '', // Promo code for discount type 1
+        relatedProduct: '', // Related product for discount type 2
       }));
       return { ...prev, products: updatedProducts };
     });
@@ -54,26 +54,24 @@ export default function Newsletter() {
 
   const handleChange = (e, productIndex) => {
     const { name, value } = e.target;
-
-    // Convert value to number
-    let numericValue = parseFloat(value);
-
-    // Format numeric values to 2 decimal places
+    let formattedValue = value;
+  
+    // Check if the field is numeric and needs formatting
     if (name === 'price' || name === 'discountPer' || name === 'discountAmt') {
-      numericValue = isNaN(numericValue) ? 0 : Math.max(0, parseFloat(numericValue.toFixed(2))); // Ensure 2 decimal places
+      let numericValue = parseFloat(value);
+      formattedValue = isNaN(numericValue) ? 0 : Math.max(0, parseFloat(numericValue.toFixed(2))); // Ensure 2 decimal places
     }
-
+  
     setTemplate(prev => {
       const updatedProducts = [...prev.products];
       updatedProducts[productIndex] = {
         ...updatedProducts[productIndex],
-        [name]: numericValue
+        [name]: formattedValue  // Set either the formatted numeric value or the original string
       };
       return { ...prev, products: updatedProducts };
     });
   };
-
-
+  
   const handleSave = async () => {
     console.log('Saving template');
     console.log(session.account);
@@ -238,6 +236,7 @@ export default function Newsletter() {
                 id="templateName"
                 name="templateName"
                 value={template.templateName}
+                placeholder="Enter template name"
                 onChange={(e) => setTemplate({ ...template, templateName: e.target.value })}
                 className="mt-1"
               />
@@ -260,6 +259,7 @@ export default function Newsletter() {
                 id="customerName"
                 name="customerName"
                 value={template.customerName}
+                placeholder="Enter customer name"
                 onChange={(e) => setTemplate({ ...template, customerName: e.target.value })}
                 className="mt-1"
               />
@@ -270,9 +270,10 @@ export default function Newsletter() {
               <Input
                 id="numProducts"
                 type="number"
-                min="1"
+                min="0"
                 max="10"
                 value={numProducts}
+                placeholder="Enter number of products"
                 onChange={handleNumProductsChange}
                 className="mt-1"
               />
@@ -288,6 +289,7 @@ export default function Newsletter() {
                       id={`product-${index}-name`}
                       name="productName"
                       value={product.productName}
+                      placeholder="Enter product name"
                       onChange={(e) => handleChange(e, index)}
                       className="mt-1"
                     />
@@ -300,6 +302,7 @@ export default function Newsletter() {
                       type="number"
                       step="0.01"
                       value={product.price}
+                      placeholder="Enter price"
                       onChange={(e) => handleChange(e, index)}
                       onBlur={() => {
                         setTemplate(prev => {
@@ -339,6 +342,7 @@ export default function Newsletter() {
                           min="0"
                           max="100"
                           value={product.discountPer}
+                          placeholder="Enter discount percentage"
                           onChange={(e) => handleChange(e, index)}
                           onBlur={() => {
                             setTemplate(prev => {
@@ -356,6 +360,7 @@ export default function Newsletter() {
                           id={`product-${index}-promoCode`}
                           name="promoCode"
                           value={product.promoCode}
+                          placeholder="Enter promo code"
                           onChange={(e) => handleChange(e, index)}
                           className="mt-1"
                         />
@@ -374,6 +379,7 @@ export default function Newsletter() {
                           min="0"
                           step="0.01"
                           value={product.discountAmt}
+                          placeholder="Enter discount amount"
                           onChange={(e) => {
                             const value = Math.max(0, Math.min(e.target.value, product.price)); // Ensure it does not exceed the price
                             handleChange({ target: { name: 'discountAmt', value } }, index);
@@ -395,6 +401,7 @@ export default function Newsletter() {
                           id={`product-${index}-relatedProduct`}
                           name="relatedProduct"
                           value={product.relatedProduct}
+                          placeholder="Enter related product"
                           onChange={(e) => handleChange(e, index)}
                           className="mt-1"
                         />
