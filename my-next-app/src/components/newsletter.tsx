@@ -52,13 +52,18 @@ export default function Newsletter() {
     const { name, value } = e.target;
 
     // Convert value to number
-    const numericValue = parseFloat(value);
+    let numericValue = parseFloat(value);
+
+    // Format numeric values to 2 decimal places
+    if (name === 'price' || name === 'discountPer' || name === 'discountAmt') {
+      numericValue = isNaN(numericValue) ? 0 : Math.max(0, parseFloat(numericValue.toFixed(2))); // Ensure 2 decimal places
+    }
 
     setTemplate(prev => {
       const updatedProducts = [...prev.products];
       updatedProducts[productIndex] = {
         ...updatedProducts[productIndex],
-        [name]: name === 'price' || name === 'discountPer' || name === 'discountAmt' ? Math.max(0, numericValue) : value // Set min value to 0 for price, discount amount, and percentage
+        [name]: numericValue
       };
       return { ...prev, products: updatedProducts };
     });
@@ -206,6 +211,7 @@ export default function Newsletter() {
                       id={`product-${index}-price`}
                       name="price"
                       type="number"
+                      step="0.01"
                       value={product.price}
                       onChange={(e) => handleChange(e, index)}
                       onBlur={() => {
@@ -279,6 +285,7 @@ export default function Newsletter() {
                           name="discountAmt"
                           type="number"
                           min="0"
+                          step="0.01"
                           value={product.discountAmt}
                           onChange={(e) => {
                             const value = Math.max(0, Math.min(e.target.value, product.price)); // Ensure it does not exceed the price

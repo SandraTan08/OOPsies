@@ -64,6 +64,14 @@ public class Newsletter {
     @OneToMany(mappedBy = "newsletter", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ProductTemplate> products;
 
+    public List<ProductTemplate> getProducts() {
+        return products;
+    }   
+
+    public void setProducts(List<ProductTemplate> products) {
+        this.products = products;
+    }
+
     @Override
     public String toString() {
         return "Newsletter{" +
