@@ -1,6 +1,7 @@
 // newsletter.tsx
 'use client'
 
+import axios from 'axios';
 import { useState, useRef } from 'react'
 import { Save, Copy, Send } from 'lucide-react'
 import { Button } from "@/components/ui/button"
@@ -10,13 +11,16 @@ import { Label } from "@/components/ui/label"
 import { toast, Toaster } from 'sonner'  // Ensure `sonner` is installed and imported
 import { useSession, signIn, signOut } from 'next-auth/react'
 
+const brevoApiKey = process.env.NEXT_PUBLIC_resend_api_key;
+
 export default function Newsletter() {
   const [template, setTemplate] = useState({
     templateName: '[Template Name]',
-    customerName: '[Customer Name]',
+    customerName: '[Customer\'s Name]',
     products: [] // Changed to an array to store products dynamically
   })
 
+  const [customerEmail, setCustomerEmail] = useState(''); // State for customer email
   const [numProducts, setNumProducts] = useState(1); // New state for number of products
   const textAreaRef = useRef(null); // Reference for the textarea
   const { data: session, status } = useSession();
@@ -124,9 +128,80 @@ export default function Newsletter() {
     }
   }
 
-  const handleSend = async () => {
-    console.log('Sending newsletter');
+  const generateTemplateHTML = (template) => {
+    const productList = template.products.map((product, index) => {
+      let productDetails = `<li>${index + 1}. ${product.productName}<br/>Price: $${product.price}`;
+  
+      if (product.discountType === 'discountCode' && product.discountPer && product.promoCode) {
+        productDetails += `<br/>Discount: ${product.discountPer}% off with code: ${product.promoCode}`;
+      }
+  
+      if (product.discountType === 'relatedProduct' && product.discountAmt && product.relatedProduct) {
+        productDetails += `<br/>Discount: Save $${product.discountAmt} when you buy with ${product.relatedProduct}`;
+      }
+  
+      productDetails += `</li>`;
+      return productDetails;
+    }).join('');
+  
+    return `
+      <div>
+        <p>Dear ${template.customerName},</p>
+        <p>We've curated something special for you! Based on your recent purchases and browsing history, here are some exclusive offers:</p>
+        <ul>${productList}</ul>
+        <p>Take advantage of these personalized offers and discover more with Timperio. Shop now and enjoy the best deals tailored just for you!</p>
+        <p>Warm regards,<br/>Marketing team</p>
+      </div>
+    `;
   };
+  
+
+  const handleSend = async () => {
+    if (!customerEmail) {
+      toast.error('Please enter a customer email.');
+      return;
+    }
+  
+    console.log('Sending newsletter to', customerEmail);
+    toast.message('Sending newsletter to ' + customerEmail);
+  
+    // Generate HTML content from the template
+    const htmlContent = generateTemplateHTML(template);
+  
+    try {
+      const emailData = {
+        sender: { email: 'amos.chan.2022@smu.edu.sg', name: 'Amos' },
+        to: [{ email: customerEmail }],
+        subject: 'Personalized Newsletter',
+        htmlContent,
+      };
+
+      const response = await axios.post(
+        'https://api.sendinblue.com/v3/smtp/email',
+        emailData,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'api-key': brevoApiKey,
+          },
+        }
+      );
+
+      if (response.status !== 201) {
+        console.error('Error sending email:', response.data);
+        toast.error('Error sending email');
+        return;
+      }
+
+      console.log('Email sent successfully:', response.data);
+      toast.success('Email sent successfully!');
+    } catch (error) {
+      console.error('Error sending email:', error);
+      toast.error('An error occurred while sending the email.');
+    }
+  };
+
+  
 
   const handleDiscountTypeChange = (e, index) => {
     const { value } = e.target;
@@ -160,6 +235,18 @@ export default function Newsletter() {
                 value={template.templateName}
                 onChange={(e) => setTemplate({ ...template, templateName: e.target.value })}
                 className="mt-1"
+              />
+            </div>
+            <div className="mb-6">
+              <Label> Customer Email</Label>
+              <Input
+                id="customerEmail"
+                name="customerEmail"
+                type="email"
+                value={customerEmail}
+                placeholder="Enter customer email"
+                className="mt-1"
+                onChange={(e) => setCustomerEmail(e.target.value)}
               />
             </div>
             <div className="mb-6">
