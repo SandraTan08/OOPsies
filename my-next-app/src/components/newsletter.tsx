@@ -12,6 +12,7 @@ import { useSession, signIn, signOut } from 'next-auth/react'
 
 export default function Newsletter() {
   const [template, setTemplate] = useState({
+    templateName: '[Template Name]',
     customerName: '[Customer Name]',
     products: [] // Changed to an array to store products dynamically
   })
@@ -141,10 +142,26 @@ export default function Newsletter() {
       <Toaster />
       <div className="min-h-screen bg-gray-50 py-8 text-gray-800">
         <div className="max-w-4xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden">
-          <div className="px-6 py-4 bg-gray-100 border-b">
+          <div className="px-6 py-4 bg-gray-100 border-b flex justify-between items-center">
             <h1 className="text-2xl font-semibold text-gray-800">Personalized Newsletter</h1>
+            <select className="ml-4 py-2 px-3 rounded-lg border ml-auto">
+              <option value="">View Saved Newsletters</option>
+              <option value="newsletter1">Newsletter 1</option>
+              <option value="newsletter2">Newsletter 2</option>
+              <option value="newsletter3">Newsletter 3</option>
+            </select>
           </div>
           <div className="p-6">
+            <div className="mb-6">
+              <Label htmlFor="templateName">Template Name</Label>
+              <Input
+                id="templateName"
+                name="templateName"
+                value={template.templateName}
+                onChange={(e) => setTemplate({ ...template, templateName: e.target.value })}
+                className="mt-1"
+              />
+            </div>
             <div className="mb-6">
               <Label htmlFor="customerName">Customer Name</Label>
               <Input

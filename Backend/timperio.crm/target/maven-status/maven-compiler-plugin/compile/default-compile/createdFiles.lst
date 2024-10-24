@@ -6,6 +6,7 @@ oopsies\timperio\crm\TestController.class
 oopsies\timperio\crm\User.class
 oopsies\timperio\crm\Application.class
 oopsies\timperio\crm\Repository\PurchaseHistoryRepository.class
+oopsies\timperio\crm\config\DatabaseInitializer.class
 oopsies\timperio\crm\Repository\NewsletterRepository.class
 oopsies\timperio\crm\Controller\NewsletterController.class
 oopsies\timperio\crm\PurchaseHistory.class

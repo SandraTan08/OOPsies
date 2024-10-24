@@ -30,7 +30,7 @@ public class NewsletterService {
         if (accountId == null) {
             throw new IllegalArgumentException("Account ID not found in session or newsletter.");
         }
-        if (customerName == null) {
+        if (customerName == "[Customer Name]" || customerName == null) {
             throw new IllegalArgumentException("Customer name not provided.");
         }
 

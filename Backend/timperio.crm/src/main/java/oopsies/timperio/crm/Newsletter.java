@@ -16,7 +16,7 @@ public class Newsletter {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "newsletterId")
+    @Column(name = "newsletterId", nullable = false)
     private Long newsletterId;
 
     public Long getNewsletterId() {
@@ -27,7 +27,18 @@ public class Newsletter {
         this.newsletterId = newsletterId;
     }
 
-    @Column(name = "accountId")
+    @Column(name = "templateName", length=255, nullable = false)
+    private String templateName;
+
+    public String getTemplateName() {
+        return templateName;
+    }
+
+    public void setTemplateName(String templateName) {
+        this.templateName = templateName;
+    }
+
+    @Column(name = "accountId", nullable = false)
     private String accountId;  // Store the ID of the user who created this template
 
     public String getAccountId() {
@@ -38,7 +49,7 @@ public class Newsletter {
         this.accountId = accountId;
     }
 
-    @Column(name = "customerName")
+    @Column(name = "customerName", length=255, nullable = false)
     private String customerName;
 
     public String getCustomerName() {
