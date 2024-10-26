@@ -322,14 +322,18 @@ export default function AccountManagement() {
                       <label htmlFor="role" className="block text-sm font-medium text-gray-700 mb-1">
                         Role
                       </label>
-                      <input
-                        type="text"
+                      <select
                         name="role"
                         id="role"
                         value={newAccount.role}
                         onChange={(e) => setNewAccount({ ...newAccount, role: e.target.value })}
                         className="w-full px-3 py-2 text-gray-700 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      />
+                      >
+                        <option value="">Select Role</option>
+                        <option value="Admin">Admin</option>
+                        <option value="Marketing">Marketing</option>
+                        <option value="Sales">Sales</option>
+                      </select>
                     </div>
                   </div>
                   <button
