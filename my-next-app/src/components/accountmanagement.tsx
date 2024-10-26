@@ -1,6 +1,5 @@
 'use client'
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-
 import { 
   LayoutGrid, 
   Users, 
@@ -18,11 +17,8 @@ import {
 } from 'lucide-react'
 import { useSession, signIn, signOut } from 'next-auth/react';
 import Header from "@/components/header";
-
 import { useState, useEffect, useRef } from 'react'
 
-
-// Default account state
 const initialAccounts = []
 
 export default function AccountManagement() {
@@ -210,25 +206,20 @@ export default function AccountManagement() {
     setShowModal(true)
   }
 
-  const [dropdownOpen, setDropdownOpen] = useState(false);
-  const toggleDropdown = () => setDropdownOpen(!dropdownOpen);
-
   const { data: session, status } = useSession();
-  
 
   if (status === 'loading') {
     return <div>Loading...</div>;
   }
 
   if (!session) {
-    window.location.href = '/'; // Redirect to login page without extra params
-    return null; // Render nothing during the redirect
+    window.location.href = '/';
+    return null;
   }
 
-  
   const Modal = ({ title, onClose, children }) => (
-    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-auto bg-black bg-opacity-50">
-      <div className="bg-white rounded-2xl shadow-xl p-6 w-96 max-w-[90%]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-auto bg-black bg-opacity-50 p-4">
+      <div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-md">
         <h2 className="text-xl font-semibold mb-4">{title}</h2>
         <div>{children}</div>
         <div className="flex justify-end space-x-4 mt-4">
@@ -250,154 +241,152 @@ export default function AccountManagement() {
   )
 
   return (
-    <div className="flex h-screen bg-gray-50">
-      <div className="flex flex-col flex-1 overflow-hidden">
-        <header className="flex items-center justify-between px-6 py-4 bg-white border-b border-gray-200">
-          <h1 className="text-2xl font-semibold text-gray-900">Account Management</h1>
-          <div className="flex items-center">
-            <div className="relative mr-4">
-              <input
-                type="text"
-                placeholder="Search..."
-                className="w-64 px-4 py-2 text-sm text-gray-700 bg-gray-100 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-              <Search className="absolute top-2.5 right-3 w-5 h-5 text-gray-400" />
-            </div>
-            <button className="p-1 text-gray-400 rounded-full hover:bg-gray-100 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500">
-              <Bell className="w-6 h-6" />
-            </button>
-            <button className="p-1 ml-3 text-gray-400 rounded-full hover:bg-gray-100 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500">
-              <User className="w-6 h-6" />
-            </button>
+    <div className="flex flex-col h-screen bg-gray-50">
+      <header className="flex items-center justify-between px-4 py-4 bg-white border-b border-gray-200 sm:px-6">
+        <h1 className="text-xl font-semibold text-gray-900 sm:text-2xl">Account Management</h1>
+        <div className="flex items-center">
+          <div className="relative mr-2 sm:mr-4">
+            <input
+              type="text"
+              placeholder="Search..."
+              className="w-full px-4 py-2 text-sm text-gray-700 bg-gray-100 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 sm:w-64"
+            />
+            <Search className="absolute top-2.5 right-3 w-5 h-5 text-gray-400" />
           </div>
-        </header>
+          <button className="p-1 text-gray-400 rounded-full hover:bg-gray-100 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <Bell className="w-6 h-6" />
+          </button>
+          <button className="p-1 ml-2 text-gray-400 rounded-full hover:bg-gray-100 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 sm:ml-3">
+            <User className="w-6 h-6" />
+          </button>
+        </div>
+      </header>
 
-        <main className="flex-1 overflow-y-auto p-6">
-          <div className="max-w-4xl mx-auto">
-            <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
-              <div className="p-6">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">Create New Account</h2>
-                <form onSubmit={handleCreateAccount} className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label htmlFor="account-id" className="block text-sm font-medium text-gray-700 mb-1">
-                        Account ID
-                      </label>
-                      <input
-                        type="text"
-                        name="account-id"
-                        id="account-id"
-                        value={newAccount.accountId}
-                        onChange={(e) => setNewAccount({ ...newAccount, accountId: e.target.value })}
-                        className="w-full px-3 py-2 text-gray-700 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      />
-                    </div>
-                    <div>
-                      <label htmlFor="user-name" className="block text-sm font-medium text-gray-700 mb-1">
-                        User Name
-                      </label>
-                      <input
-                        type="text"
-                        name="user-name"
-                        id="user-name"
-                        value={newAccount.userName}
-                        onChange={(e) => setNewAccount({ ...newAccount, userName: e.target.value })}
-                        className="w-full px-3 py-2 text-gray-700 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      />
-                    </div>
-                    <div>
-                      <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                        Email
-                      </label>
-                      <input
-                        type="email"
-                        name="email"
-                        id="email"
-                        value={newAccount.email}
-                        onChange={(e) => setNewAccount({ ...newAccount, email: e.target.value })}
-                        className="w-full px-3 py-2 text-gray-700 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      />
-                    </div>
-                    <div>
-                      <label htmlFor="role" className="block text-sm font-medium text-gray-700 mb-1">
-                        Role
-                      </label>
-                      <select
-                        name="role"
-                        id="role"
-                        value={newAccount.role}
-                        onChange={(e) => setNewAccount({ ...newAccount, role: e.target.value })}
-                        className="w-full px-3 py-2 text-gray-700 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      >
-                        <option value="">Select Role</option>
-                        <option value="Admin">Admin</option>
-                        <option value="Marketing">Marketing</option>
-                        <option value="Sales">Sales</option>
-                      </select>
-                    </div>
+      <main className="flex-1 overflow-y-auto p-4 sm:p-6">
+        <div className="max-w-4xl mx-auto">
+          <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
+            <div className="p-4 sm:p-6">
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">Create New Account</h2>
+              <form onSubmit={handleCreateAccount} className="space-y-4">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <div>
+                    <label htmlFor="account-id" className="block text-sm font-medium text-gray-700 mb-1">
+                      Account ID
+                    </label>
+                    <input
+                      type="text"
+                      name="account-id"
+                      id="account-id"
+                      value={newAccount.accountId}
+                      onChange={(e) => setNewAccount({ ...newAccount, accountId: e.target.value })}
+                      className="w-full px-3 py-2 text-gray-700 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
                   </div>
-                  <button
-                    type="submit"
-                    className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                  >
-                    <Plus className="mr-2" /> Create Account
-                  </button>
-                </form>
-              </div>
+                  <div>
+                    <label htmlFor="user-name" className="block text-sm font-medium text-gray-700 mb-1">
+                      User Name
+                    </label>
+                    <input
+                      type="text"
+                      name="user-name"
+                      id="user-name"
+                      value={newAccount.userName}
+                      onChange={(e) => setNewAccount({ ...newAccount, userName: e.target.value })}
+                      className="w-full px-3 py-2 text-gray-700 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                      Email
+                    </label>
+                    <input
+                      type="email"
+                      name="email"
+                      id="email"
+                      value={newAccount.email}
+                      onChange={(e) => setNewAccount({ ...newAccount, email: e.target.value })}
+                      className="w-full px-3 py-2 text-gray-700 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="role" className="block text-sm font-medium text-gray-700 mb-1">
+                      Role
+                    </label>
+                    <select
+                      name="role"
+                      id="role"
+                      value={newAccount.role}
+                      onChange={(e) => setNewAccount({ ...newAccount, role: e.target.value })}
+                      className="w-full px-3 py-2 text-gray-700 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="">Select Role</option>
+                      <option value="Admin">Admin</option>
+                      <option value="Marketing">Marketing</option>
+                      <option value="Sales">Sales</option>
+                    </select>
+                  </div>
+                </div>
+                <button
+                  type="submit"
+                  className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                >
+                  <Plus className="mr-2" /> Create Account
+                </button>
+              </form>
+            </div>
 
-              <div className="overflow-hidden border-t border-gray-200">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Account ID</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User Name</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase  tracking-wider">Role</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+            <div className="overflow-x-auto border-t border-gray-200">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sm:px-6">Account ID</th>
+                    <th className="px-4  py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sm:px-6">User Name</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sm:px-6">Email</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sm:px-6">Role</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sm:px-6">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {accounts.map((account) => (
+                    <tr key={account.accountId}>
+                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 sm:px-6">{account.accountId}</td>
+                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 sm:px-6">{account.accountUserName}</td>
+                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 sm:px-6">{account.accountEmail}</td>
+                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 sm:px-6">{account.role}</td>
+                      <td className="px-4 py-4 whitespace-nowrap text-sm font-medium space-x-2 sm:px-6">
+                        <button
+                          onClick={() => handleEditAccount(account)}
+                          className="text-blue-600 hover:text-blue-900"
+                        >
+                          <Edit2 className="w-5 h-5 inline" />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteAccount(account)}
+                          className="text-red-600 hover:text-red-900"
+                        >
+                          <Trash2 className="w-5 h-5 inline" />
+                        </button>
+                      </td>
                     </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {accounts.map((account) => (
-                      <tr key={account.accountId}>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{account.accountId}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{account.accountUserName}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{account.accountEmail}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{account.role}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-                          <button
-                            onClick={() => handleEditAccount(account)}
-                            className="text-blue-600 hover:text-blue-900"
-                          >
-                            <Edit2 className="w-5 h-5 inline" />
-                          </button>
-                          <button
-                            onClick={() => handleDeleteAccount(account)}
-                            className="text-red-600 hover:text-red-900"
-                          >
-                            <Trash2 className="w-5 h-5 inline" />
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
+        </div>
 
-          {showModal && modalContent && (
-            <Modal title={modalContent.title} onClose={() => setShowModal(false)}>
-              {typeof modalContent.message === 'string' ? <p>{modalContent.message}</p> : modalContent.message}
-            </Modal>
-          )}
+        {showModal && modalContent && (
+          <Modal title={modalContent.title} onClose={() => setShowModal(false)}>
+            {typeof modalContent.message === 'string' ? <p>{modalContent.message}</p> : modalContent.message}
+          </Modal>
+        )}
 
-          {notification && (
-            <div className={`mt-4 p-4 text-sm rounded-md ${notification.type === 'error' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
-              {notification.message}
-            </div>
-          )}
-        </main>
-      </div>
+        {notification && (
+          <div className={`mt-4 p-4 text-sm rounded-md ${notification.type === 'error' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
+            {notification.message}
+          </div>
+        )}
+      </main>
     </div>
   )
 }
