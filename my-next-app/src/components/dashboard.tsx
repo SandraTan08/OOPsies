@@ -1,8 +1,8 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Bar, Line } from 'react-chartjs-2'
-import { useSession, signIn, signOut } from 'next-auth/react';
+import { useSession } from 'next-auth/react'
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 import {
@@ -31,21 +31,6 @@ ChartJS.register(
 import { CSVLink } from 'react-csv'
 import { ShoppingCart, BarChart, Search, Download } from 'lucide-react'
 
-const customerData = {
-  labels: ['High Value', 'Medium Value', 'Low Value'],
-  datasets: [
-    {
-      label: 'Customer Segments',
-      data: [30, 50, 20],
-      backgroundColor: [
-        'rgba(255, 99, 132, 0.6)',
-        'rgba(54, 162, 235, 0.6)',
-        'rgba(255, 206, 86, 0.6)',
-      ],
-    },
-  ],
-}
-
 export default function Dashboard() {
   const [transactionsData, setTransactionsData] = useState<any[]>([]);
   const [filteredTransactions, setFilteredTransactions] = useState<any[]>([]);
@@ -66,21 +51,32 @@ export default function Dashboard() {
     ],
   });
 
+  const customerDataRef = useRef<any>({
+    labels: ['Gold', 'Silver', 'Bronze'],
+    datasets: [{
+      label: 'Customer Segments',
+      data: [0, 0, 0],
+      backgroundColor: [
+        'rgba(255, 215, 0, 0.6)',
+        'rgba(192, 192, 192, 0.6)',
+        'rgba(205, 127, 50, 0.6)',
+      ],
+    }],
+  });
+  const [customerData, setCustomerData] = useState(customerDataRef.current);
+
   const [startMonth, setStartMonth] = useState<string>('Jan');
   const [endMonth, setEndMonth] = useState<string>('Dec');
-  const [startYear, setStartYear] = useState<number | 'all'>('all'); // NEW: Added startYear state
-  const [endYear, setEndYear] = useState<number | 'all'>('all'); // NEW: Added endYear state
+  const [startYear, setStartYear] = useState<number | 'all'>('all');
+  const [endYear, setEndYear] = useState<number | 'all'>('all');
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const toggleDropdown = () => setDropdownOpen(!dropdownOpen);
-  
 
-  // Calculate total sales and average order value
   const totalSales = filteredTransactions.reduce((sum, transaction) => sum + transaction.value, 0).toFixed(2);
   const averageOrderValue = filteredTransactions.length > 0 
     ? (parseFloat(totalSales) / filteredTransactions.length).toFixed(2) 
     : 0;
 
-  // Process sales data for the chart
   const processSalesData = (transactions, viewType) => {
     const salesByPeriod = {};
 
@@ -112,15 +108,11 @@ export default function Dashboard() {
     };
   };
 
-  // Calculate total pages
   const totalPages = Math.ceil(filteredTransactions.length / itemsPerPage);
-
-  // Calculate the transactions for the current page
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
   const currentTransactions = filteredTransactions.slice(startIndex, endIndex);
 
-  // NEW: Filter transactions by selected month and year range
   const filterTransactionsByRange = (transactions) => {
     return transactions.filter(transaction => {
       const date = new Date(transaction.date);
@@ -132,7 +124,6 @@ export default function Dashboard() {
 
       const transactionMonthIndex = date.getMonth();
 
-      // Ensure the transaction is within the selected year and month range
       return (
         (startYear === 'all' || year >= startYear) &&
         (endYear === 'all' || year <= endYear) &&
@@ -142,7 +133,6 @@ export default function Dashboard() {
     });
   };
 
-  // Fetch transactions data (mock or API call)
   useEffect(() => {
     async function fetchSalesData() {
       try {
@@ -163,7 +153,6 @@ export default function Dashboard() {
         const filteredRangeTransactions = filterTransactionsByRange(transactions);
         setFilteredTransactions(filteredRangeTransactions);
 
-        // Process sales data based on the current view type
         const { labels, data: salesChartData } = processSalesData(filteredRangeTransactions, viewType);
         setSalesData({
           labels,
@@ -178,16 +167,53 @@ export default function Dashboard() {
       }
     }
 
+    async function fetchCustomerData() {
+      try {
+        const res = await fetch('http://localhost:8080/api/v1/customers');
+        if (!res.ok) throw new Error('Failed to fetch customer data');
+        const data = await res.json();
+
+        const segmentsCount = { gold: 0, silver: 0, bronze: 0 };
+        data.forEach((customer: any) => {
+          if (customer.tier === "G") {
+            segmentsCount.gold += 1;
+          } else if (customer.tier === "S") {
+            segmentsCount.silver += 1;
+          } else if (customer.tier === "B") {
+            segmentsCount.bronze += 1;
+          }
+        });
+
+        console.log('Segments Count:', segmentsCount);
+
+        customerDataRef.current = {
+          labels: ['Gold', 'Silver', 'Bronze'],
+          datasets: [{
+            label: 'Customer Segments',
+            data: [segmentsCount.gold, segmentsCount.silver, segmentsCount.bronze],
+            backgroundColor: [
+              'rgba(255, 215, 0, 0.6)',
+              'rgba(192, 192, 192, 0.6)',
+              'rgba(205, 127, 50, 0.6)',
+            ],
+          }],
+        };
+        setCustomerData(customerDataRef.current);
+        console.log('Updated Customer Data State:', customerDataRef.current);
+      } catch (error) {
+        console.error('Error fetching customer data:', error);
+      }
+    }
+
     fetchSalesData();
+    fetchCustomerData();
   }, [viewType, startMonth, endMonth, startYear, endYear]);
 
-  // Handle filter form submission
   const handleFilter = (e) => {
     e.preventDefault();
 
     let filtered = transactionsData;
 
-    // Apply filters based on sale type, customer ID, and product ID
     if (saleTypeFilter) {
       filtered = filtered.filter(transaction => transaction.saleType === saleTypeFilter);
     }
@@ -206,14 +232,13 @@ export default function Dashboard() {
 
   const { data: session, status } = useSession();
   
-
   if (status === 'loading') {
     return <div>Loading...</div>;
   }
 
   if (!session) {
-    window.location.href = '/'; // Redirect to login page without extra params
-    return null; // Render nothing during the redirect
+    window.location.href = '/';
+    return null;
   }
 
 
@@ -380,6 +405,9 @@ export default function Dashboard() {
                     <div className="mt-4">
                       <Line data={customerData} options={{ responsive: true }} />
                     </div>
+                    <p className="mt-4 text-sm text-red-600">
+    *Click "Customers" in the sidebar to update Customer Segments.
+  </p>
                   </div>
                 </div>
               </div>

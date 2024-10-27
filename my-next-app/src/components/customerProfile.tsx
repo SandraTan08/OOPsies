@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import Link from 'next/link'; // Import Link for client-side navigation
+import Link from 'next/link';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -16,7 +16,6 @@ import {
 } from 'chart.js';
 import './customerProfile.css';
 
-// Register Chart.js components
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -28,7 +27,6 @@ ChartJS.register(
   Legend
 );
 
-// Define types for the customer and purchase data
 interface Purchase {
   purchaseId: number;        
   saleDate: string;          
@@ -44,11 +42,12 @@ interface Purchase {
 
 interface Customer {
   zipCode: number;
+  tier: string; // Add tier property
 }
 
 interface CustomerProfileProps {
   customerId: number; 
-  role: string; // Include the role prop
+  role: string; 
 }
 
 const CustomerProfile: React.FC<CustomerProfileProps> = ({ customerId, role }) => {
@@ -66,7 +65,7 @@ const CustomerProfile: React.FC<CustomerProfileProps> = ({ customerId, role }) =
           throw new Error('Failed to fetch customer data');
         }
         const customerData = await customerResponse.json();
-        setCustomer({ zipCode: customerData.zipCode });
+        setCustomer({ zipCode: customerData.zipCode, tier: customerData.tier });
 
         const purchaseResponse = await fetch(`http://localhost:8080/api/v1/purchaseHistory/byCustomer?customerId=${customerId}`);
         if (!purchaseResponse.ok) {
@@ -106,11 +105,13 @@ const CustomerProfile: React.FC<CustomerProfileProps> = ({ customerId, role }) =
     fetchCustomerData();
   }, [customerId]);
 
-  const getTier = (total: number): string => {
-    if (total > 3000) return "Gold";
-    if (total > 1000) return "Silver";
-    return "Bronze";
+  const tierMap: Record<string, string> = {
+    G: "Gold",
+    S: "Silver",
+    B: "Bronze",
   };
+
+  const tier = customer ? tierMap[customer.tier] : "N/A"; // Get tier from customer data
 
   if (loading) {
     return <div className="loading">Loading...</div>;
@@ -119,8 +120,6 @@ const CustomerProfile: React.FC<CustomerProfileProps> = ({ customerId, role }) =
   if (error) {
     return <div className="error">Error: {error}</div>;
   }
-
-  const tier = getTier(cumulativeTotal); 
 
   return (
     <div className="customer-profile">
