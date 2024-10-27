@@ -1,6 +1,8 @@
-import Sidebar from '../../components/sidebar'; // Adjust the import path as needed
+// src/app/layout.tsx
+import Sidebar from '../../components/sidebar'; // Adjust import path as needed
 import { getServerSession } from "next-auth"; // Import getServerSession
 import authConfig from '../../auth.config'; // Adjusted import path
+import React from 'react';
 
 export const metadata = {
   title: 'Next.js',
@@ -28,7 +30,9 @@ export default async function RootLayout({
           {/* Main Content */}
           <div className="flex-1 flex flex-col">
             <main className="flex-1 p-8 bg-gray-100">
-              {children}
+              {React.Children.map(children, child => 
+                React.cloneElement(child as React.ReactElement<any>, { role: userRole })
+              )}
             </main>
           </div>
         </div>

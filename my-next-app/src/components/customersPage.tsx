@@ -3,6 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import './CustomerList.css'; // Import the CSS file
 import Header from "@/components/header";
+import Link from 'next/link';
+
 
 interface Customer {
   customerId: number;
@@ -56,19 +58,21 @@ const CustomerList: React.FC = () => {
                 {/* Add other headers as necessary */}
               </tr>
             </thead>
+            
             <tbody>
               {customers.map(customer => (
                 <tr key={customer.customerId}>
                   <td>
-                    <a href={`http://localhost:3000/customerprofile/${customer.customerId}`} rel="noopener noreferrer">
+                    <Link href={`/customerprofile/${customer.customerId}`}>
                       {customer.customerId}
-                    </a>
+                    </Link>
                   </td>
                   <td>{customer.zipCode}</td>
                   {/* Add other fields as necessary */}
                 </tr>
               ))}
             </tbody>
+
           </table>
         ) : (
           <p>No customers available.</p>
