@@ -4,24 +4,22 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import jakarta.persistence.*; // Import JPA annotations
-import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.persistence.*;
 
 @Entity
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn(name = "customer_type", discriminatorType = DiscriminatorType.STRING)
 @Table(name = "customer")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class Customer {
-    
     @Id
-    @JsonProperty("customerId")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer customerId;
 
-    @JsonProperty("zipCode")
     private Integer zipCode;
 
-    // Optionally add the following if there are no other fields
     @Override
     public String toString() {
         return "Customer{" +

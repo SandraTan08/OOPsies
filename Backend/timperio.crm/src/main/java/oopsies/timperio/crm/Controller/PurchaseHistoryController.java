@@ -28,7 +28,7 @@ public class PurchaseHistoryController {
 
     // New endpoint to get purchase history by customerId
     @GetMapping("/byCustomer")
-    public ResponseEntity<List<PurchaseHistory>> getPurchaseHistoryByCustomerId(@RequestParam Long customerId) {
+    public ResponseEntity<List<PurchaseHistory>> getPurchaseHistoryByCustomerId(@RequestParam Integer customerId) {
         List<PurchaseHistory> purchaseHistories = purchaseHistoryService.findByCustomerId(customerId);
         return new ResponseEntity<>(purchaseHistories, HttpStatus.OK);
     }

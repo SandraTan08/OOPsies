@@ -54,4 +54,8 @@ public class PurchaseHistory {
                 ", totalPrice=" + totalPrice +
                 '}';
     }
+
+    public double getTotalPrice() {
+        return totalPrice;
+    }
 }

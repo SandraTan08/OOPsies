@@ -18,7 +18,15 @@ public class PurchaseHistoryService {
     }
 
     // New method to get purchase history by customerId
-    public List<PurchaseHistory> findByCustomerId(Long customerId) {
+    public List<PurchaseHistory> findByCustomerId(Integer customerId) {
         return purchaseHistoryRepository.findByCustomerId(customerId);
+    }
+
+    // New method to calculate total price for a specific customer
+    public double getTotalPriceByCustomerId(Integer customerId) {
+        List<PurchaseHistory> histories = findByCustomerId(customerId);
+        return histories.stream()
+                        .mapToDouble(PurchaseHistory::getTotalPrice) // Assuming getTotalPrice() returns the price for each entry
+                        .sum();
     }
 }

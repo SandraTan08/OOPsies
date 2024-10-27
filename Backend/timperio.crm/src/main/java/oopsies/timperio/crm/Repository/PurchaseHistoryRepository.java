@@ -7,5 +7,5 @@ import oopsies.timperio.crm.PurchaseHistory;
 public interface PurchaseHistoryRepository extends JpaRepository<PurchaseHistory, Long> {
 
     // Custom query method to find by customerId
-    List<PurchaseHistory> findByCustomerId(Long customerId);
+    List<PurchaseHistory> findByCustomerId(Integer customerId);
 }
