@@ -1,3 +1,4 @@
+// src/components/customerProfile.tsx
 "use client";
 
 import React, { useState, useEffect } from 'react';
@@ -46,9 +47,10 @@ interface Customer {
 
 interface CustomerProfileProps {
   customerId: number; 
+  role: string; // Include the role prop
 }
 
-const CustomerProfile: React.FC<CustomerProfileProps> = ({ customerId }) => {
+const CustomerProfile: React.FC<CustomerProfileProps> = ({ customerId, role }) => {
   const [customer, setCustomer] = useState<Customer | null>(null);
   const [purchaseHistory, setPurchaseHistory] = useState<Purchase[]>([]);
   const [loading, setLoading] = useState(true);
@@ -58,7 +60,6 @@ const CustomerProfile: React.FC<CustomerProfileProps> = ({ customerId }) => {
   useEffect(() => {
     const fetchCustomerData = async () => {
       try {
-        // Fetch customer profile
         const customerResponse = await fetch(`http://localhost:8080/api/v1/customers/byCustomer?customerId=${customerId}`);
         if (!customerResponse.ok) {
           throw new Error('Failed to fetch customer data');
@@ -66,14 +67,12 @@ const CustomerProfile: React.FC<CustomerProfileProps> = ({ customerId }) => {
         const customerData = await customerResponse.json();
         setCustomer({ zipCode: customerData.zipCode });
 
-        // Fetch purchase history
         const purchaseResponse = await fetch(`http://localhost:8080/api/v1/purchaseHistory/byCustomer?customerId=${customerId}`);
         if (!purchaseResponse.ok) {
           throw new Error('Failed to fetch purchase history');
         }
         const purchaseData = await purchaseResponse.json();
 
-        // Fetch product details for each purchase
         const productIds = Array.from(new Set(purchaseData.map((purchase: Purchase) => purchase.productId)));
         const productResponses = await Promise.all(
           productIds.map(async (productId) => {
@@ -91,7 +90,6 @@ const CustomerProfile: React.FC<CustomerProfileProps> = ({ customerId }) => {
 
         setPurchaseHistory(purchasesWithProductDetails);
 
-        // Calculate cumulative total price
         const totalPrice = purchasesWithProductDetails.reduce((acc: number, purchase: Purchase) => {
           return acc + purchase.totalPrice;
         }, 0);
@@ -136,12 +134,14 @@ const CustomerProfile: React.FC<CustomerProfileProps> = ({ customerId }) => {
       <h1 className="profile-header">
         Customer Profile for User ID: <span>{customerId}</span>
         <span className="tier-badge">{tier}</span>
-        <button 
-          onClick={handleRedirect} // Redirect to newsletter page
-          className="contact-button"
-        >
-          Contact Me
-        </button>
+        {role === "Marketing" && (
+          <button 
+            onClick={handleRedirect} // Redirect to newsletter page
+            className="contact-button"
+          >
+            Contact Me
+          </button>
+        )}
       </h1>
       {customer && (
         <div className="customer-details">
