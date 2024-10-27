@@ -2,6 +2,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link'; // Import Link for client-side navigation
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -13,7 +14,7 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
-import './customerProfile.css'; // Import your CSS
+import './customerProfile.css';
 
 // Register Chart.js components
 ChartJS.register(
@@ -121,26 +122,17 @@ const CustomerProfile: React.FC<CustomerProfileProps> = ({ customerId, role }) =
 
   const tier = getTier(cumulativeTotal); 
 
-  const handleRedirect = () => {
-    window.location.href = 'http://localhost:3000/newsletter';
-  };
-
-  const handleBack = () => {
-    window.location.href = 'http://localhost:3000/customers'; // Redirect to the customers page
-  };
-
   return (
     <div className="customer-profile">
       <h1 className="profile-header">
         Customer Profile for User ID: <span>{customerId}</span>
         <span className="tier-badge">{tier}</span>
         {role === "Marketing" && (
-          <button 
-            onClick={handleRedirect} // Redirect to newsletter page
-            className="contact-button"
-          >
-            Contact Me
-          </button>
+          <Link href="/newsletter">
+            <button className="contact-button">
+              Contact Me
+            </button>
+          </Link>
         )}
       </h1>
       {customer && (
@@ -149,12 +141,11 @@ const CustomerProfile: React.FC<CustomerProfileProps> = ({ customerId, role }) =
         </div>
       )}
 
-      <button 
-        onClick={handleBack} // Redirect to customers page
-        className="back-button"
-      >
-        Back to Customers
-      </button>
+      <Link href="/customers">
+        <button className="back-button">
+          Back to Customers
+        </button>
+      </Link>
 
       <h2>Purchase History</h2>
       {purchaseHistory.length > 0 ? (
