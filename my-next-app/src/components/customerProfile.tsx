@@ -1,4 +1,3 @@
-// src/components/customerProfile.tsx
 "use client";
 
 import React, { useState, useEffect } from 'react';
@@ -28,31 +27,32 @@ ChartJS.register(
 );
 
 interface Purchase {
-  purchaseId: number;        
-  saleDate: string;          
-  saleType: number;          
-  digital: number;           
-  customerId: number;        
-  shippingMethod: string;     
-  productId: number;         
-  quantity: number;          
-  totalPrice: number;        
-  productName?: string;      
+  purchaseId: number;
+  saleDate: string;
+  saleType: number;
+  digital: number;
+  customerId: number;
+  shippingMethod: string;
+  productId: number;
+  quantity: number;
+  totalPrice: number;
+  productName?: string;
 }
 
 interface Customer {
   zipCode: number;
-  tier: string; // Add tier property
+  tier: string;
 }
 
 interface CustomerProfileProps {
-  customerId: number; 
-  role: string; 
+  customerId: number;
+  role: string;
 }
 
 const CustomerProfile: React.FC<CustomerProfileProps> = ({ customerId, role }) => {
   const [customer, setCustomer] = useState<Customer | null>(null);
   const [purchaseHistory, setPurchaseHistory] = useState<Purchase[]>([]);
+  const [topProducts, setTopProducts] = useState<{ productName: string; quantity: number }[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [cumulativeTotal, setCumulativeTotal] = useState<number>(0);
@@ -85,15 +85,28 @@ const CustomerProfile: React.FC<CustomerProfileProps> = ({ customerId, role }) =
 
         const purchasesWithProductDetails = purchaseData.map((purchase: Purchase) => ({
           ...purchase,
-          productName: productsMap[purchase.productId] || "N/A", 
+          productName: productsMap[purchase.productId] || "N/A",
         }));
 
         setPurchaseHistory(purchasesWithProductDetails);
 
-        const totalPrice = purchasesWithProductDetails.reduce((acc: number, purchase: Purchase) => {
-          return acc + purchase.totalPrice;
-        }, 0);
+        const totalPrice = purchasesWithProductDetails.reduce((acc: number, purchase: Purchase) => acc + purchase.totalPrice, 0);
         setCumulativeTotal(totalPrice);
+
+        // Calculate top 3 most purchased items
+        const productQuantities: Record<string, number> = {};
+        purchasesWithProductDetails.forEach(purchase => {
+          if (purchase.productName) {
+            productQuantities[purchase.productName] = (productQuantities[purchase.productName] || 0) + purchase.quantity;
+          }
+        });
+
+        const sortedTopProducts = Object.entries(productQuantities)
+          .map(([productName, quantity]) => ({ productName, quantity }))
+          .sort((a, b) => b.quantity - a.quantity)
+          .slice(0, 3);
+
+        setTopProducts(sortedTopProducts);
 
       } catch (err: any) {
         setError(err.message);
@@ -111,7 +124,7 @@ const CustomerProfile: React.FC<CustomerProfileProps> = ({ customerId, role }) =
     B: "Bronze",
   };
 
-  const tier = customer ? tierMap[customer.tier] : "N/A"; // Get tier from customer data
+  const tier = customer ? tierMap[customer.tier] : "N/A";
 
   if (loading) {
     return <div className="loading">Loading...</div>;
@@ -137,6 +150,14 @@ const CustomerProfile: React.FC<CustomerProfileProps> = ({ customerId, role }) =
       {customer && (
         <div className="customer-details">
           <p><strong>Zipcode:</strong> {customer.zipCode}</p>
+          <p><strong>Most Purchased Products:</strong></p>
+          <ul>
+            {topProducts.map((product, index) => (
+              <li key={index}>
+                {product.productName} - {product.quantity} purchased
+              </li>
+            ))}
+          </ul>
         </div>
       )}
 

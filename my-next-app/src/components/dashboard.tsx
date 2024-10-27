@@ -189,7 +189,7 @@ export default function Dashboard() {
         customerDataRef.current = {
           labels: ['Gold', 'Silver', 'Bronze'],
           datasets: [{
-            label: 'Customer Segments',
+            label: 'Gold (>=$3000), Silver (>=$1000), Bronze (<$1000)',
             data: [segmentsCount.gold, segmentsCount.silver, segmentsCount.bronze],
             backgroundColor: [
               'rgba(255, 215, 0, 0.6)',
@@ -302,7 +302,7 @@ export default function Dashboard() {
                     <option key={month} value={month}>{month}</option>
                   ))}
                 </select>
-
+                <p> to </p>
                 <select
                   value={endYear}
                   onChange={(e) => setEndYear(e.target.value === 'all' ? 'all' : parseInt(e.target.value))}
@@ -313,7 +313,7 @@ export default function Dashboard() {
                     <option key={year} value={year}>{year}</option>
                   ))}
                 </select>
-
+                  
                 <select
                   value={endMonth}
                   onChange={(e) => setEndMonth(e.target.value)}
