@@ -251,7 +251,8 @@ export default function Dashboard() {
     }
 
     if (productIdFilter) {
-      filtered = filtered.filter(transaction => transaction.product === productIdFilter);
+      filtered = filtered.filter(transaction => transaction.product.toLowerCase().includes(productIdFilter.toLowerCase()));
+      
     }
 
     const filteredRangeTransactions = filterTransactionsByRange(filtered);
@@ -473,14 +474,14 @@ export default function Dashboard() {
                   </div>
 
                   <div>
-                    <label htmlFor="productId" className="block text-sm font-medium text-black">Product ID</label>
+                    <label htmlFor="productId" className="block text-sm font-medium text-black">Product Name</label>
                     <input
                       type="text"
                       id="productId"
                       name="productId"
                       value={productIdFilter}
                       onChange={(e) => setProductIdFilter(e.target.value)}
-                      placeholder="e.g., Product 1"
+                      placeholder="e.g., Chilli oil"
                       className="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-500"
                     />
                   </div>
