@@ -37,7 +37,7 @@ export default function Dashboard() {
   const [viewType, setViewType] = useState<string>('monthly');
   const [saleTypeFilter, setSaleTypeFilter] = useState<string>('');
   const [customerIdFilter, setCustomerIdFilter] = useState<string>('');
-  const [productIdFilter, setProductIdFilter] = useState<string>('');
+  const [productFilter, setProductFilter] = useState<string>('');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 25;
   const [salesData, setSalesData] = useState<any>({
@@ -250,8 +250,8 @@ export default function Dashboard() {
       filtered = filtered.filter(transaction => transaction.customerId === customerIdFilter);
     }
 
-    if (productIdFilter) {
-      filtered = filtered.filter(transaction => transaction.product.toLowerCase().includes(productIdFilter.toLowerCase()));
+    if (productFilter) {
+      filtered = filtered.filter(transaction => transaction.product.toLowerCase().includes(productFilter.toLowerCase()));
       
     }
 
@@ -479,8 +479,8 @@ export default function Dashboard() {
                       type="text"
                       id="productId"
                       name="productId"
-                      value={productIdFilter}
-                      onChange={(e) => setProductIdFilter(e.target.value)}
+                      value={productFilter}
+                      onChange={(e) => setProductFilter(e.target.value)}
                       placeholder="e.g., Chilli oil"
                       className="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-500"
                     />
