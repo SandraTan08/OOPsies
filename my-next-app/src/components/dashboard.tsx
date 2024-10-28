@@ -134,25 +134,52 @@ export default function Dashboard() {
   };
 
   useEffect(() => {
+    async function fetchProductDeets() {
+      try {
+        const res = await fetch('http://localhost:8080/api/v1/product');
+        if (!res.ok) throw new Error('Failed to fetch product data');
+        const data = await res.json();
+    
+        // mapping the data to create a list of objects that map productId to productName
+        const productdeets = data.map(product => ({
+          id: product.productId,
+          name: product.productName
+        }));
+    
+        console.log(productdeets);
+
+        return productdeets; 
+      } catch (error) {
+        console.error('Error fetching product data:', error);
+      }
+    }
+
     async function fetchSalesData() {
       try {
+        // Fetch product details first
+        const productDeets = await fetchProductDeets();
+    
         const res = await fetch('http://localhost:8080/api/v1/purchaseHistory');
         if (!res.ok) throw new Error('Failed to fetch sales data');
         const data = await res.json();
-
+    
+        // Create a product map for quick lookups
+        const productMap = new Map(productDeets.map(product => [product.id, product.name]));
+    
+        // Map transactions and replace productId with productName
         const transactions = data.map((purchase: any) => ({
           id: purchase.purchaseId,
           customerId: purchase.customerId.toString(),
           saleType: purchase.saleType === 1 ? 'Online' : 'In-store',
-          product: `Product ${purchase.productId}`,
+          product: productMap.get(purchase.productId) || `Product ${purchase.productId}`, // use product name, fallback to ID if not found
           value: purchase.totalPrice,
           date: purchase.saleDate,
         }));
-
+    
         setTransactionsData(transactions);
         const filteredRangeTransactions = filterTransactionsByRange(transactions);
         setFilteredTransactions(filteredRangeTransactions);
-
+    
         const { labels, data: salesChartData } = processSalesData(filteredRangeTransactions, viewType);
         setSalesData({
           labels,
@@ -204,7 +231,8 @@ export default function Dashboard() {
         console.error('Error fetching customer data:', error);
       }
     }
-
+    
+    fetchProductDeets();
     fetchSalesData();
     fetchCustomerData();
   }, [viewType, startMonth, endMonth, startYear, endYear]);
