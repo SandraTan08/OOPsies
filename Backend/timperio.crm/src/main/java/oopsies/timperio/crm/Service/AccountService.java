@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import oopsies.timperio.crm.Repository.AccountRepository;
-import oopsies.timperio.crm.Account;
+import oopsies.timperio.crm.Account; 
 
 @Service
 public class AccountService {
@@ -15,8 +15,10 @@ public class AccountService {
     private AccountRepository accountRepository;
 
     // Fetch all accounts
-    public List<Account> allAccounts() {
-        return accountRepository.findAll();
+    public List<Account> allAccounts(){
+        List<Account> accounts = accountRepository.findAll();
+        System.out.println("Fetched accounts: " + accounts); // Debug log
+        return accounts;
     }
     
     // Get account by ID

@@ -1,10 +1,9 @@
+// Newsletter.java
 package oopsies.timperio.crm;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import jakarta.persistence.*;
 import java.util.List;
 
@@ -13,13 +12,11 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Getter
-@Setter
 public class Newsletter {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "newsletterId")
+    @Column(name = "newsletterId", nullable = false)
     private Long newsletterId;
 
     public Long getNewsletterId() {
@@ -30,7 +27,18 @@ public class Newsletter {
         this.newsletterId = newsletterId;
     }
 
-    @Column(name = "accountId")
+    @Column(name = "templateName", length=255, nullable = false)
+    private String templateName;
+
+    public String getTemplateName() {
+        return templateName;
+    }
+
+    public void setTemplateName(String templateName) {
+        this.templateName = templateName;
+    }
+
+    @Column(name = "accountId", nullable = false)
     private String accountId;  // Store the ID of the user who created this template
 
     public String getAccountId() {
@@ -41,7 +49,7 @@ public class Newsletter {
         this.accountId = accountId;
     }
 
-    @Column(name = "customerName")
+    @Column(name = "customerName", length=255, nullable = false)
     private String customerName;
 
     public String getCustomerName() {
@@ -52,9 +60,17 @@ public class Newsletter {
         this.customerName = customerName;
     }
 
-    // One-to-many relationship to ProductTemplate
-    @OneToMany(mappedBy = "newsletter", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<ProductTemplate> products;  // Store product details as part of the newsletter
+    // Use @ElementCollection to store the list of embedded ProductTemplate objects
+    @OneToMany(mappedBy = "newsletter", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    private List<ProductTemplate> products;
+    
+    public List<ProductTemplate> getProducts() {
+        return products;
+    }   
+
+    public void setProducts(List<ProductTemplate> products) {
+        this.products = products;
+    }
 
     @Override
     public String toString() {
