@@ -7,7 +7,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import jakarta.servlet.http.HttpSession;
 import oopsies.timperio.crm.Service.NewsletterService;
+import oopsies.timperio.crm.dto.NewsletterDTO;
 import oopsies.timperio.crm.Newsletter;
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/v1/newsletter")
 public class NewsletterController {
@@ -26,6 +29,16 @@ public class NewsletterController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Error saving template: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/{accountId}")
+    public ResponseEntity<List<NewsletterDTO>> getNewslettersByAccountId(@PathVariable String accountId) {
+        try {
+            List<NewsletterDTO> newsletters = newsletterService.getNewslettersByAccountId(accountId);
+            return ResponseEntity.ok(newsletters);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
 

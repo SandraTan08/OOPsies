@@ -9,7 +9,10 @@ import oopsies.timperio.crm.Repository.NewsletterRepository;
 import oopsies.timperio.crm.Newsletter;
 import oopsies.timperio.crm.ProductTemplate;
 import oopsies.timperio.crm.Repository.ProductTemplateRepository;
+import oopsies.timperio.crm.dto.NewsletterDTO;
+import oopsies.timperio.crm.dto.ProductTemplateDTO;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -20,6 +23,30 @@ public class NewsletterService {
 
     @Autowired
     private ProductTemplateRepository productTemplateRepository;
+
+    public List<NewsletterDTO> getNewslettersByAccountId(String accountId) {
+        List<Newsletter> newsletters = newsletterRepository.findByAccountId(accountId);
+        List<NewsletterDTO> newsletterDTOs = new ArrayList<>();
+
+        for (Newsletter newsletter : newsletters) {
+            NewsletterDTO dto = new NewsletterDTO();
+            dto.setNewsletterId(newsletter.getNewsletterId());
+            dto.setTemplateName(newsletter.getTemplateName());
+            dto.setAccountId(newsletter.getAccountId());
+            dto.setCustomerName(newsletter.getCustomerName());
+
+            List<ProductTemplateDTO> productDTOs = new ArrayList<>();
+            for (ProductTemplate product : newsletter.getProducts()) {
+                ProductTemplateDTO productDTO = new ProductTemplateDTO();
+                productDTO.setProductName(product.getProductName());
+                productDTO.setPrice(product.getPrice());
+                productDTOs.add(productDTO);
+            }
+            dto.setProducts(productDTOs);
+            newsletterDTOs.add(dto);
+        }
+        return newsletterDTOs;
+    }
 
     public void saveNewsletter(Newsletter newsletter, HttpSession session) {
         // Retrieve the accountId and customerName from the session or newsletter object

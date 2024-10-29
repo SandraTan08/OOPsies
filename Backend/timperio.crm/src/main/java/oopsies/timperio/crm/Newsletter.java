@@ -61,7 +61,7 @@ public class Newsletter {
     }
 
     // Use @ElementCollection to store the list of embedded ProductTemplate objects
-    @OneToMany(mappedBy = "newsletter", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "newsletter", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<ProductTemplate> products;
     
     public List<ProductTemplate> getProducts() {

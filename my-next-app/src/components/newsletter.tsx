@@ -2,7 +2,7 @@
 'use client'
 
 import axios from 'axios';
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Save, Copy, Send } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -15,15 +15,16 @@ const brevoApiKey = process.env.NEXT_PUBLIC_resend_api_key;
 
 export default function Newsletter() {
   const [template, setTemplate] = useState({
-    templateName: '',
-    customerName: '',
+    templateName: null,
+    customerName: null,
     products: [] // Changed to an array to store products dynamically
   })
 
   const [customerEmail, setCustomerEmail] = useState(''); // State for customer email
-  const [numProducts, setNumProducts] = useState(0); // New state for number of products
+  const [numProducts, setNumProducts] = useState(0); // New state for number of products 
   const textAreaRef = useRef(null); // Reference for the textarea
   const { data: session, status } = useSession();
+
   if (status === 'loading') {
     return <div>Loading...</div>;
   }
@@ -55,13 +56,13 @@ export default function Newsletter() {
   const handleChange = (e, productIndex) => {
     const { name, value } = e.target;
     let formattedValue = value;
-  
+
     // Check if the field is numeric and needs formatting
     if (name === 'price' || name === 'discountPer' || name === 'discountAmt') {
       let numericValue = parseFloat(value);
       formattedValue = isNaN(numericValue) ? 0 : Math.max(0, parseFloat(numericValue.toFixed(2))); // Ensure 2 decimal places
     }
-  
+
     setTemplate(prev => {
       const updatedProducts = [...prev.products];
       updatedProducts[productIndex] = {
@@ -71,7 +72,7 @@ export default function Newsletter() {
       return { ...prev, products: updatedProducts };
     });
   };
-  
+
   const handleSave = async () => {
     console.log('Saving template');
     console.log(session.account);
@@ -85,9 +86,6 @@ export default function Newsletter() {
       accountId: session.account.accountId,
       ...template
     };
-    console.log(session.account.accountId);
-    console.log("templateWithUser" + templateWithUser);
-    console.log('Session before POST request:', session);
     try {
       const response = await fetch('http://localhost:8080/api/v1/newsletter/save', {
         method: 'POST',
@@ -97,12 +95,11 @@ export default function Newsletter() {
         body: JSON.stringify(templateWithUser), // Send template with userId
         credentials: 'include', // Allow sending session cookies
       });
-      console.log(templateWithUser);
 
       if (!response.ok) {
         // Handle non-2xx responses
         const errorMessage = await response.text();
-        toast.error(`Error saving template: ${errorMessage}`);
+        toast.error(errorMessage);
         return;
       }
 
@@ -134,19 +131,19 @@ export default function Newsletter() {
   const generateTemplateHTML = (template) => {
     const productList = template.products.map((product, index) => {
       let productDetails = `<li>${index + 1}. ${product.productName}<br/>Price: $${product.price}`;
-  
+
       if (product.discountType === 'discountCode' && product.discountPer && product.promoCode) {
         productDetails += `<br/>Discount: ${product.discountPer}% off with code: ${product.promoCode}`;
       }
-  
+
       if (product.discountType === 'relatedProduct' && product.discountAmt && product.relatedProduct) {
         productDetails += `<br/>Discount: Save $${product.discountAmt} when you buy with ${product.relatedProduct}`;
       }
-  
+
       productDetails += `</li>`;
       return productDetails;
     }).join('');
-  
+
     return `
       <div>
         <p>Dear ${template.customerName},</p>
@@ -157,20 +154,20 @@ export default function Newsletter() {
       </div>
     `;
   };
-  
+
 
   const handleSend = async () => {
     if (!customerEmail) {
       toast.error('Please enter a customer email.');
       return;
     }
-  
+
     console.log('Sending newsletter to', customerEmail);
     toast.message('Sending newsletter to ' + customerEmail);
-  
+
     // Generate HTML content from the template
     const htmlContent = generateTemplateHTML(template);
-  
+
     try {
       const emailData = {
         sender: { email: 'amos.chan.2022@smu.edu.sg', name: 'Amos' },
@@ -204,7 +201,7 @@ export default function Newsletter() {
     }
   };
 
-  
+
 
   const handleDiscountTypeChange = (e, index) => {
     const { value } = e.target;
