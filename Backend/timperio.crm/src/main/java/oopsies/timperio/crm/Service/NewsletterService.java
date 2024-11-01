@@ -82,4 +82,41 @@ public class NewsletterService {
             savedNewsletter.setProducts(products);
         }
     }
+
+    public NewsletterDTO getNewsletterById(Long newsletterId) {
+        // Logic to retrieve the newsletter from the database
+        // You would typically use a repository here to find the newsletter by ID
+        Newsletter newsletter = newsletterRepository.findByNewsletterId(newsletterId);
+    
+        return convertToDTO(newsletter); // Convert the entity to a DTO
+    }
+    
+    private NewsletterDTO convertToDTO(Newsletter newsletter) {
+        // Conversion logic from Newsletter to NewsletterDTO
+        if (newsletter == null) {
+            return null;
+        }
+    
+        List<ProductTemplateDTO> productDTOs = new ArrayList<>();
+        for (ProductTemplate product : newsletter.getProducts()) {
+            ProductTemplateDTO productDTO = new ProductTemplateDTO();
+            productDTO.setTemplateId(product.getTemplateId());
+            productDTO.setProductName(product.getProductName());
+            productDTO.setPrice(product.getPrice());
+            productDTO.setDiscountType(product.getDiscountType());
+            productDTO.setPromoCode(product.getPromoCode());
+            productDTO.setDiscountPer(product.getDiscountPer());
+            productDTO.setDiscountAmt(product.getDiscountAmt());
+            productDTO.setRelatedProduct(product.getRelatedProduct());
+            productDTOs.add(productDTO);
+        }
+
+        return new NewsletterDTO(
+            newsletter.getNewsletterId(),
+            newsletter.getTemplateName(),
+            newsletter.getAccountId(),
+            newsletter.getCustomerName(),
+            productDTOs
+        );
+    }
 }

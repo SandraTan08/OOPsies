@@ -32,11 +32,25 @@ public class NewsletterController {
         }
     }
 
-    @GetMapping("/{accountId}")
+    @GetMapping("/account/{accountId}")
     public ResponseEntity<List<NewsletterDTO>> getNewslettersByAccountId(@PathVariable String accountId) {
         try {
             List<NewsletterDTO> newsletters = newsletterService.getNewslettersByAccountId(accountId);
             return ResponseEntity.ok(newsletters);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
+
+    @GetMapping("/{newsletterId}")
+    public ResponseEntity<NewsletterDTO> getNewsletterById(@PathVariable Long newsletterId) {
+        try {
+            NewsletterDTO newsletter = newsletterService.getNewsletterById(newsletterId);
+            if (newsletter != null) {
+                return ResponseEntity.ok(newsletter);
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            }
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }

@@ -9,5 +9,7 @@ import java.util.List;
 @Repository
 public interface NewsletterRepository extends JpaRepository<Newsletter, Long> {
     List<Newsletter> findByAccountId(String accountId);
+
+    Newsletter findByNewsletterId(Long newsletterId);
 }
 

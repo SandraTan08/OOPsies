@@ -20,10 +20,58 @@ export default function Newsletter() {
     products: [] // Changed to an array to store products dynamically
   })
 
+  const [savedNewsletters, setSavedNewsletters] = useState([]); // State for saved newsletters
+  const [selectedNewsletter, setSelectedNewsletter] = useState(''); // State for selected newsletter
   const [customerEmail, setCustomerEmail] = useState(''); // State for customer email
   const [numProducts, setNumProducts] = useState(0); // New state for number of products 
   const textAreaRef = useRef(null); // Reference for the textarea
   const { data: session, status } = useSession();
+
+  useEffect(() => {
+    if (session && session.account) {
+      fetchNewsletters();
+    }
+  }, [session]);
+
+  const fetchNewsletters = async () => {
+    try {
+      const response = await axios.get(`http://localhost:8080/api/v1/newsletter/account/${session.account.accountId}`);
+      if (response.status === 200) {
+        setSavedNewsletters(response.data);
+        console.log('Fetched newsletters:', response.data);
+      } else {
+        console.error('Failed to fetch newsletters.');
+      }
+    } catch (error) {
+      console.error('Error fetching newsletters:', error);
+      // toast.error('Error fetching saved newsletters.');
+    }
+  };
+
+  const fetchNewsletterData = async (newsletterId) => {
+    try {
+      const response = await fetch(`http://localhost:8080/api/v1/newsletter/${newsletterId}`);
+      const data = await response.json();
+      console.log('Fetched newsletter data:', data);
+      console.log('Fetched newsletter template name:', data.templateName);
+      console.log('Fetched newsletter customer name:', data.customerName);
+      console.log('Fetched newsletter data:', data.products);
+
+      setTemplate({
+        templateName: data.templateName,
+        customerName: data.customerName,
+        products: data.products
+      });
+    } catch (error) {
+      console.error("Error fetching newsletter:", error);
+    }
+  };
+
+  const handleSelectChange = (e) => {
+    const selectedNewsletterId = e.target.value;
+    setSelectedNewsletter(selectedNewsletterId);
+    fetchNewsletterData(selectedNewsletterId); // Fetch data when selection changes
+  };
 
   if (status === 'loading') {
     return <div>Loading...</div>;
@@ -155,7 +203,6 @@ export default function Newsletter() {
     `;
   };
 
-
   const handleSend = async () => {
     if (!customerEmail) {
       toast.error('Please enter a customer email.');
@@ -201,8 +248,6 @@ export default function Newsletter() {
     }
   };
 
-
-
   const handleDiscountTypeChange = (e, index) => {
     const { value } = e.target;
     setTemplate(prev => {
@@ -219,11 +264,15 @@ export default function Newsletter() {
         <div className="max-w-4xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden">
           <div className="px-6 py-4 bg-gray-100 border-b flex justify-between items-center">
             <h1 className="text-2xl font-semibold text-gray-800">Personalized Newsletter</h1>
-            <select className="ml-4 py-2 px-3 rounded-lg border ml-auto">
-              <option value="">View Saved Newsletters</option>
-              <option value="newsletter1">Newsletter 1</option>
-              <option value="newsletter2">Newsletter 2</option>
-              <option value="newsletter3">Newsletter 3</option>
+            <select
+              className="ml-4 py-2 px-3 rounded-lg border ml-auto"
+              value={selectedNewsletter}
+              onChange={handleSelectChange}
+            >
+              <option value="" disabled hidden>Select a newsletter</option>
+              {savedNewsletters.map((newsletter) => (
+                <option value={newsletter.newsletterId}>{newsletter.templateName}</option>
+              ))}
             </select>
           </div>
           <div className="p-6">
