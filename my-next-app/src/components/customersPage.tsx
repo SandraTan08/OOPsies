@@ -100,7 +100,6 @@ const CustomerList: React.FC = () => {
 
 return (
   <div className="min-h-screen bg-gray-100">
-    <Header />
     <div className="customer-profile">
       <h1 className="text-2xl font-bold mb-4">Customer List</h1>
 

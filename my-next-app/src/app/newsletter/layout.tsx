@@ -1,6 +1,7 @@
 import Sidebar from '../../components/sidebar'; // Adjust the import path as needed
 import { getServerSession } from "next-auth"; // Import getServerSession
 import authConfig from '../../auth.config'; // Adjusted import path
+import '../globals.css'
 
 export const metadata = {
   title: 'Next.js',

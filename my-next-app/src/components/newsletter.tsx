@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label"
 import { toast, Toaster } from 'sonner'  // Ensure `sonner` is installed and imported
 import { useSession, signIn, signOut } from 'next-auth/react'
 
+
 const brevoApiKey = process.env.NEXT_PUBLIC_resend_api_key;
 
 export default function Newsletter() {

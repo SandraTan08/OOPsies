@@ -1,123 +1,137 @@
+/* Customer Profile Container */
 .customer-profile {
-    max-width: 800px;
-    margin: 20px auto;
-    padding: 20px;
-    border-radius: 8px;
-    background-color: #f9f9f9;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    font-family: Arial, sans-serif;
+  max-width: 800px;
+  margin: 20px auto;
+  padding: 20px;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  font-family: Arial, sans-serif;
+  color: #333; /* Dark color for general text */
 }
 
+/* Profile Header */
 .profile-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  color: #333; /* Ensure header text is dark */
 }
 
+/* Tier Badge */
 .tier-badge {
-    margin-left: 10px;
-    font-size: 0.8em;
-    color: #fff;
-    background-color: #4CAF50; /* Green for Gold/Silver/Bronze */
-    padding: 5px 10px;
-    border-radius: 4px;
+  margin-left: 10px;
+  font-size: 0.8em;
+  color: #fff;
+  background-color: #4CAF50; /* Green for Gold/Silver/Bronze */
+  padding: 5px 10px;
+  border-radius: 4px;
 }
 
+/* Contact Button */
 .contact-button {
-    padding: 8px 16px;
-    margin-left: 10px;
-    background-color: #007BFF; /* Bootstrap primary color */
-    color: #fff;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color 0.3s;
+  padding: 8px 16px;
+  margin-left: 10px;
+  background-color: #007BFF; /* Bootstrap primary color */
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
 }
 
 .contact-button:hover {
-    background-color: #0056b3; /* Darker shade for hover effect */
+  background-color: #0056b3; /* Darker shade for hover effect */
 }
 
+/* Customer Details */
 .customer-details {
-    margin-bottom: 20px;
-    background-color: #fff;
-    padding: 15px;
-    border-radius: 5px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+  background-color: #fff;
+  padding: 15px;
+  border-radius: 5px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  color: #333; /* Explicit dark text color */
 }
 
-h2 {
-    margin-top: 20px;
+/* Headings */
+h2, .filter h3 {
+  margin-top: 20px;
+  color: #333; /* Dark color for headings */
 }
 
+/* Purchase History Table */
 #purchase-history {
-    width: 100%;
-    border-collapse: collapse;
-    margin-bottom: 20px;
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
 }
 
 #purchase-history th,
 #purchase-history td {
-    border: 1px solid #ddd;
-    padding: 10px;
-    text-align: left;
+  border: 1px solid #ddd;
+  padding: 10px;
+  text-align: left;
+  color: #333; /* Dark color for table text */
 }
 
 #purchase-history th {
-    background-color: #007BFF; /* Header background color */
-    color: white;
+  background-color: #007BFF; /* Header background color */
+  color: white;
 }
 
 #purchase-history tr:nth-child(even) {
-    background-color: #f2f2f2; /* Zebra stripe effect */
+  background-color: #f2f2f2; /* Zebra stripe effect */
 }
 
+/* Loading and Error Messages */
 .loading,
 .error {
-    text-align: center;
-    margin: 20px;
-    font-size: 1.2em;
-    color: #ff0000; /* Error color */
+  text-align: center;
+  margin: 20px;
+  font-size: 1.2em;
+  color: #ff0000; /* Error color */
 }
 
+/* Filter Section */
 .filter {
-    background-color: #f9fafb; /* Light gray background */
-    border-radius: 0.5rem;
-    padding: 1rem;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  }
-  
-  .filter h3 {
-    margin-bottom: 0.5rem;
-  }
-  
-  .filter label {
-    padding: 0.5rem;
-    border-radius: 0.25rem;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-  }
-  
-  .filter label:hover {
-    background-color: #e2e8f0; /* Light gray on hover */
-  }
-  
-  table {
-    width: 100%;
-    border-collapse: collapse;
-  }
-  
-  th, td {
-    text-align: left;
-    padding: 0.75rem;
-  }
-  
-  th {
-    background-color: #f7fafc; /* Lighter gray for headers */
-  }
-  
-  tr:hover {
-    background-color: #edf2f7; /* Light hover effect */
-  }
-  
+  background-color: #f9fafb; /* Light gray background */
+  border-radius: 0.5rem;
+  padding: 1rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  color: #333; /* Dark text color for filter section */
+}
+
+.filter label {
+  padding: 0.5rem;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  color: #333; /* Dark label text color */
+}
+
+.filter label:hover {
+  background-color: #e2e8f0; /* Light gray on hover */
+}
+
+/* Table Styles */
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th, td {
+  text-align: left;
+  padding: 0.75rem;
+  color: #333; /* Ensure table cell text is dark */
+}
+
+th {
+  background-color: #f7fafc; /* Lighter gray for headers */
+  color: #333; /* Dark color for table headers */
+}
+
+tr:hover {
+  background-color: #edf2f7; /* Light hover effect */
+}

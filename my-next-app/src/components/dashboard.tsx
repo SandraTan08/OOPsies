@@ -276,31 +276,7 @@ export default function Dashboard() {
   return (
     <div className="flex h-screen bg-gray-100">
       <div className="flex flex-col flex-1 overflow-hidden">
-        <header className="flex items-center justify-between px-4 py-4 bg-white border-b border-gray-200 sm:px-6 lg:px-8">
-          <div className="flex items-center">
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="Search..."
-                className="w-64 px-4 py-2 text-sm text-gray-700 placeholder-gray-400 bg-gray-100 border border-transparent rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-              <Search className="absolute top-2.5 right-3 w-5 h-5 text-gray-400" />
-            </div>
-          </div>
-          <button
-            onClick={toggleDropdown}
-            className="flex items-center max-w-xs text-sm bg-black rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500"
-            id="user-menu"
-            aria-expanded={dropdownOpen}
-            aria-haspopup="true"
-          >
-            <Avatar>
-              <AvatarImage src="https://github.com/shadcn.png" />
-              <AvatarFallback>CN</AvatarFallback>
-            </Avatar>
-            <span className="sr-only">Open user menu</span>
-          </button>
-        </header>
+
 
         <main className="flex-1 overflow-y-auto bg-gray-100">
           <div className="py-6">

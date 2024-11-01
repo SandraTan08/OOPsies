@@ -4,6 +4,7 @@ import '../globals.css'; // Ensure this is correctly referenced
 import Sidebar from '../../components/sidebar'; // Import the Sidebar component
 import { getServerSession } from "next-auth"; // Import getServerSession
 import authConfig from '../../auth.config'; // Adjusted import path
+import '../globals.css'
 
 const geistSans = localFont({
   src: "../fonts/GeistVF.woff", // Updated path
@@ -35,7 +36,7 @@ export default async function RootLayout({
 
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+      <body>
         <div className="flex min-h-screen">
           {/* Sidebar */}
           <Sidebar role={userRole} /> {/* Pass the role prop to Sidebar */}
