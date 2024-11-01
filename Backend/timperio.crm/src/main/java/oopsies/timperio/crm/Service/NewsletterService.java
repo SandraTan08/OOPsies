@@ -52,10 +52,14 @@ public class NewsletterService {
         // Retrieve the accountId and customerName from the session or newsletter object
         String accountId = newsletter.getAccountId();
         String customerName = newsletter.getCustomerName();
+        String templateName = newsletter.getTemplateName();
 
         // Validate if the accountId and customerName are present
         if (accountId == null) {
             throw new IllegalArgumentException("Account ID not found in session or newsletter.");
+        }
+        if (templateName == "[Template Name]" || templateName == null) {
+            throw new IllegalArgumentException("Template name not provided.");
         }
         if (customerName == "[Customer Name]" || customerName == null) {
             throw new IllegalArgumentException("Customer name not provided.");

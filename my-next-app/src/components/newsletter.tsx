@@ -53,9 +53,6 @@ export default function Newsletter() {
       const response = await fetch(`http://localhost:8080/api/v1/newsletter/${newsletterId}`);
       const data = await response.json();
       console.log('Fetched newsletter data:', data);
-      console.log('Fetched newsletter template name:', data.templateName);
-      console.log('Fetched newsletter customer name:', data.customerName);
-      console.log('Fetched newsletter data:', data.products);
 
       setTemplate({
         templateName: data.templateName,
@@ -89,7 +86,7 @@ export default function Newsletter() {
     // Update products array based on new count
     setTemplate(prev => {
       const updatedProducts = Array.from({ length: count }, (_, index) => ({
-        productName: `[Product Name ${index + 1}]`,
+        productName: '',
         price: 0,
         discountType: 'none', // New field to track discount type
         discountPer: 0, // Discount percentage or amount
@@ -271,7 +268,7 @@ export default function Newsletter() {
             >
               <option value="" disabled hidden>Select a newsletter</option>
               {savedNewsletters.map((newsletter) => (
-                <option value={newsletter.newsletterId}>{newsletter.templateName}</option>
+                <option value={newsletter.newsletterId}>{newsletter.newsletterId} - {newsletter.templateName}</option>
               ))}
             </select>
           </div>
