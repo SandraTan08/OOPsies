@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { useTransition } from 'react';
 import { signIn } from 'next-auth/react';
 import { FormInput } from '@/components/auth/form-input';
-import { toast ,Toaster } from 'sonner';  // Ensure `sonner` is installed and imported
+import { toast, Toaster } from 'sonner'; 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
@@ -36,55 +36,47 @@ export const LoginForm = () => {
         },
         body: JSON.stringify(values),
       });
-      
+
       const data = await response.json();
-      console.log('API returned success:', data); 
-  
+      console.log('API returned success:', data);
+
       if (!response.ok) {
         // Display a toast error if the API returns an error response (e.g., user not found)
         toast.error(data.message || 'Invalid account or password.');
         return;
       }
 
-      
       // Perform client-side signIn if the credentials are valid
       const signInResult = await signIn('credentials', {
         accountId: values.accountId,
         password: values.password,
         redirect: false, // Prevent the automatic redirect
       });
-      
+
       if (signInResult?.error) {
-            // Show an error toast if signIn failed (wrong password, etc.)
+        // Show an error toast if signIn failed (wrong password, etc.)
         toast.error(signInResult.error || 'Invalid credentials');
         return;
       }
 
-      console.log('API response:', response);  // Logs the entire response
-      console.log('API data:', data);  // Logs the parsed JSON data
-        
-      
-      // Redirect to the dashboard page upon successful login
       toast.success('Login successful!');
       startTransition(() => {
         router.push('/dashboard');
       });
-    } 
-    catch (error) {
+    } catch (error) {
       console.error('Login error:', error);
       toast.error('Something went wrong. Please try again.');
     }
   });
 
   return (
-    
     <CardWrapper
       headerTitle="Login"
       headerDescription="Timperio Customer Relationship Management System"
       backButtonLabel="Don't have an account? Register"
       backButtonHref="/register"
     >
-    <Toaster />
+      <Toaster />
       <Form {...form}>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-4">
@@ -92,7 +84,7 @@ export const LoginForm = () => {
               control={form.control}
               name="accountId"
               label="Account ID"
-              type="String"
+              type="text"
               placeholder="Enter your Account ID"
               isPending={isPending}
             />
@@ -110,8 +102,7 @@ export const LoginForm = () => {
                 variant="link"
                 className="-mt-6 w-full justify-end p-0 text-xs text-blue-500"
                 asChild
-              >
-              </Button>
+              />
             </div>
           </div>
           <Button type="submit" disabled={isPending} className="w-full">
@@ -119,6 +110,9 @@ export const LoginForm = () => {
           </Button>
         </form>
       </Form>
+      <div className="mt-4 text-center">
+        <Link href="/register" className="text-blue-500 hover:underline">Create an account</Link>
+      </div>
     </CardWrapper>
   );
 };

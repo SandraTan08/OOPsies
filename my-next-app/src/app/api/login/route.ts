@@ -1,7 +1,7 @@
 import { loginSchema } from '@/schemas';
-import { z } from 'zod';
 import { NextResponse } from 'next/server';
 import { NextRequest } from 'next/server';
+import bcrypt from 'bcryptjs';
 
 export async function POST(request: NextRequest) {
   try {
@@ -34,7 +34,14 @@ export async function POST(request: NextRequest) {
 
     const existingUser = await fetchResponse.json();
 
-    if (!existingUser || !existingUser.accountId || existingUser.password !== password) {
+    if (!existingUser || !existingUser.accountId) {
+      return NextResponse.json({ message: 'Invalid accountId' }, { status: 401 });
+    }
+
+    // Use bcrypt to compare the provided password with the hashed password
+    const passwordMatch = await bcrypt.compare(password, existingUser.password);
+
+    if (!passwordMatch) {
       return NextResponse.json({ message: 'Invalid password' }, { status: 401 });
     }
 

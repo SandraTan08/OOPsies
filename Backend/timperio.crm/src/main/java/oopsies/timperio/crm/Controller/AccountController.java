@@ -17,6 +17,13 @@ public class AccountController {
     @Autowired
     private AccountService accountService;
 
+    // Create a new account
+    @PostMapping("/new_account")
+    public ResponseEntity<Account> createAccount(@RequestBody Account account) {
+        Account newAccount = accountService.createAccount(account);
+        return new ResponseEntity<>(newAccount, HttpStatus.CREATED);
+    }
+
     // Get all accounts
     @GetMapping
     public ResponseEntity<List<Account>> allAccounts() {
@@ -34,12 +41,6 @@ public class AccountController {
         }
     }
 
-    // Create a new account
-    @PostMapping("/new_account")
-    public ResponseEntity<Account> createAccount(@RequestBody Account account) {
-        Account newAccount = accountService.createAccount(account);
-        return new ResponseEntity<>(newAccount, HttpStatus.CREATED);
-    }
 
     // Delete account by ID
     @DeleteMapping("/{accountID}")

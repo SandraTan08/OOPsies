@@ -1,6 +1,8 @@
 import { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import GithubProvider from 'next-auth/providers/github';
+import bcrypt from 'bcryptjs';
+
 
 export const authConfig: NextAuthOptions = {
   debug: true,
@@ -12,13 +14,12 @@ export const authConfig: NextAuthOptions = {
     CredentialsProvider({
       name: 'Credentials',
       credentials: {
-        accountId: { label: 'Account Id', type: 'text' }, // use 'text' for userId type
+        accountId: { label: 'Account Id', type: 'text' },
         password: { label: 'Password', type: 'password' }
       },
       async authorize(credentials, req) {
-        // Fetch user data based on userId
         if (!credentials) {
-            throw new Error("Credentials are undefined");
+          throw new Error("Credentials are undefined");
         }
         const response = await fetch(`http://localhost:8080/api/v1/account/${credentials.accountId}`, {
           method: 'GET',
@@ -29,48 +30,44 @@ export const authConfig: NextAuthOptions = {
 
         const account = await response.json();
 
-        // Extract userId and password from credentials
-        const { accountId, password } = credentials || {};
+        const { accountId, password } = credentials;
         console.log('User found:', account); // Log user for debugging
 
         if (!account) {
-          console.log('User ID not found:', accountId); // Log if user is not found
-          return null; // Return null to block login
+          console.log('User ID not found:', accountId);
+          return null;
         }
 
-        // Assuming you're validating that userId == password (for demo purposes)
-        if (account.password === password) {
+        // Use bcrypt to compare the provided password with the hashed password
+        const passwordMatch = await bcrypt.compare(password, account.password);
+
+        if (passwordMatch) {
           console.log('Login successful for userId:', accountId);
-          return account; // If valid, return user object to proceed with login
+          return account;
         } else {
           console.log('Invalid password for userId:', accountId);
-          return null; // Return null to block login
+          return null;
         }
       }
     })
   ],
   session: {
-    strategy: 'jwt', // Use JWT-based sessions
-    maxAge: 24 * 60 * 60, // 24 hours session expiry
+    strategy: 'jwt',
+    maxAge: 24 * 60 * 60,
   },
   callbacks: {
     async jwt({ token, account, user }) {
-      // When the user logs in for the first time (or when they refresh the session)
       if (account && user) {
-        token.accountId = user.accountId || account.providerAccountId;  // Use the `id` from the `user` or `providerAccountId`
-        token.accountUserName = user.accountUserName || '';  // Add the username (if available) from the user
-        token.role = user.role || 'user';  // Add role from `user`, or default to 'user'
-        token.accountEmail = user.accountEmail || '';  // Add email from `user`
-        console.log('JWT token:', token); // Debug: log the token
+        token.accountId = user.accountId || account.providerAccountId;
+        token.accountUserName = user.accountUserName || '';
+        token.role = user.role || 'user';
+        token.accountEmail = user.accountEmail || '';
+        console.log('JWT token:', token);
       }
-  
       return token;
     },
     async session({ session, token }) {
-      // Initialize `session.account` if it does not exist
       session.account = session.account || {};
-  
-      // Populate session fields from the token
       if (token) {
         session.account = {
           accountId: token.accountId as string,
@@ -78,14 +75,13 @@ export const authConfig: NextAuthOptions = {
           role: token.role as string,
           accountEmail: token.accountEmail as string,
         }
-        console.log('Session account:', session.account); 
+        console.log('Session account:', session.account);
       }
-  
       return session;
     }
   },
   pages: {
-    signIn: '/' // Specify the sign-in page
+    signIn: '/'
   }
 };
 
