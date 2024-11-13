@@ -67,6 +67,7 @@ export const authConfig: NextAuthOptions = {
       return token;
     },
     async session({ session, token }) {
+      console.log('Inside session callback', { session, token });
       session.account = session.account || {};
       if (token) {
         session.account = {
