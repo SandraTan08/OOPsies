@@ -5,18 +5,18 @@ import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.boot.CommandLineRunner;
 
-import jakarta.annotation.PostConstruct;
 import javax.sql.DataSource;
 
 @Service
-public class DatabaseInitializer {
+public class DatabaseInitializer implements CommandLineRunner {
 
     @Autowired
     private DataSource dataSource;
 
-    @PostConstruct
-    public void initializeDatabase() {
+    @Override
+    public void run(String... args) throws Exception {
         try {
             JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
 
