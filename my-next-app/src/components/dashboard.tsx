@@ -29,7 +29,7 @@ ChartJS.register(
 )
 
 import { CSVLink } from 'react-csv'
-import { ShoppingCart, BarChart, Search, Download } from 'lucide-react'
+import { ShoppingCart, BarChart, Search, Download, ReceiptText } from 'lucide-react'
 
 export default function Dashboard() {
   const [transactionsData, setTransactionsData] = useState<any[]>([]);
@@ -73,9 +73,17 @@ export default function Dashboard() {
   const toggleDropdown = () => setDropdownOpen(!dropdownOpen);
 
   const totalSales = filteredTransactions.reduce((sum, transaction) => sum + transaction.value, 0).toFixed(2);
-  const averageOrderValue = filteredTransactions.length > 0 
-    ? (parseFloat(totalSales) / filteredTransactions.length).toFixed(2) 
+  const averageOrderValue = filteredTransactions.length > 0
+    ? (parseFloat(totalSales) / filteredTransactions.length).toFixed(2)
     : 0;
+  const totaltransactions = filteredTransactions.length;
+  const totalQuantitybyProduct = filteredTransactions.reduce((acc, transaction) => {
+    if (!acc[transaction.product]) {
+      acc[transaction.product] = 0;
+    }
+    acc[transaction.product] += transaction.quantity;
+    return acc;
+  }, {});
 
   const processSalesData = (transactions, viewType) => {
     const salesByPeriod = {};
@@ -84,9 +92,10 @@ export default function Dashboard() {
       const date = new Date(transaction.date);
       let period;
 
-      if (viewType === 'weekly') {
-        const week = `${date.getFullYear()}-W${Math.ceil((date.getDate() - 1) / 7)}`;
-        period = week;
+      if (viewType === 'quarterly') {
+        const quarter = `Q${Math.floor(date.getMonth() / 3) + 1}`;
+        const year = date.getFullYear();
+        period = `${quarter} ${year}`;
       } else if (viewType === 'monthly') {
         const month = date.toLocaleString('default', { month: 'short' });
         const year = date.getFullYear();
@@ -139,16 +148,16 @@ export default function Dashboard() {
         const res = await fetch('http://localhost:8080/api/v1/product');
         if (!res.ok) throw new Error('Failed to fetch product data');
         const data = await res.json();
-    
+
         // mapping the data to create a list of objects that map productId to productName
         const productdeets = data.map(product => ({
           id: product.productId,
           name: product.productName
         }));
-    
+
         console.log(productdeets);
 
-        return productdeets; 
+        return productdeets;
       } catch (error) {
         console.error('Error fetching product data:', error);
       }
@@ -158,14 +167,14 @@ export default function Dashboard() {
       try {
         // Fetch product details first
         const productDeets = await fetchProductDeets();
-    
+
         const res = await fetch('http://localhost:8080/api/v1/purchaseHistory');
         if (!res.ok) throw new Error('Failed to fetch sales data');
         const data = await res.json();
-    
+
         // Create a product map for quick lookups
         const productMap = new Map(productDeets.map(product => [product.id, product.name]));
-    
+
         // Map transactions and replace productId with productName
         const transactions = data.map((purchase: any) => ({
           id: purchase.purchaseId,
@@ -173,13 +182,14 @@ export default function Dashboard() {
           saleType: purchase.saleType === 1 ? 'Online' : 'In-store',
           product: productMap.get(purchase.productId) || `Product ${purchase.productId}`, // use product name, fallback to ID if not found
           value: purchase.totalPrice,
+          quantity: purchase.quantity,
           date: purchase.saleDate,
         }));
-    
+
         setTransactionsData(transactions);
         const filteredRangeTransactions = filterTransactionsByRange(transactions);
         setFilteredTransactions(filteredRangeTransactions);
-    
+
         const { labels, data: salesChartData } = processSalesData(filteredRangeTransactions, viewType);
         setSalesData({
           labels,
@@ -231,7 +241,7 @@ export default function Dashboard() {
         console.error('Error fetching customer data:', error);
       }
     }
-    
+
     fetchProductDeets();
     fetchSalesData();
     fetchCustomerData();
@@ -252,7 +262,7 @@ export default function Dashboard() {
 
     if (productFilter) {
       filtered = filtered.filter(transaction => transaction.product.toLowerCase().includes(productFilter.toLowerCase()));
-      
+
     }
 
     const filteredRangeTransactions = filterTransactionsByRange(filtered);
@@ -260,7 +270,7 @@ export default function Dashboard() {
   };
 
   const { data: session, status } = useSession();
-  
+
   if (status === 'loading') {
     return <div>Loading...</div>;
   }
@@ -275,10 +285,10 @@ export default function Dashboard() {
 
   return (
     <div className="flex h-screen bg-gray-100">
-      <div className="flex flex-col flex-1 overflow-hidden">
+      <div className="flex flex-col flex-1">
 
 
-        <main className="flex-1 overflow-y-auto bg-gray-100">
+        <main className="flex-1  bg-gray-100">
           <div className="py-6">
             <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
               <h1 className="text-2xl font-semibold text-gray-900 pb-5">Welcome, {session.account.accountUserName}</h1>
@@ -286,7 +296,7 @@ export default function Dashboard() {
 
             <div className="px-4 mx-auto max-w-7xl sm:px-6 md:px-8">
               {/* Month and Year Range Filter */}
-              <div className="flex space-x-4 p-4 overflow-hidden bg-white rounded-lg shadow">
+              <div className="flex space-x-4 p-4 bg-white rounded-lg shadow">
                 <select
                   value={startYear}
                   onChange={(e) => setStartYear(e.target.value === 'all' ? 'all' : parseInt(e.target.value))}
@@ -318,7 +328,7 @@ export default function Dashboard() {
                     <option key={year} value={year}>{year}</option>
                   ))}
                 </select>
-                  
+
                 <select
                   value={endMonth}
                   onChange={(e) => setEndMonth(e.target.value)}
@@ -332,9 +342,11 @@ export default function Dashboard() {
 
               {/* Sales metrics */}
               <div className="mt-8">
-                <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+
+                <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
+                  
                   {/* Total Sales Card */}
-                  <div className="overflow-hidden bg-white rounded-lg shadow">
+                  <div className="bg-white rounded-lg shadow">
                     <div className="p-5">
                       <div className="flex items-center">
                         <div className="flex-shrink-0">
@@ -353,7 +365,7 @@ export default function Dashboard() {
                   </div>
 
                   {/* Average Order Value Card */}
-                  <div className="overflow-hidden bg-white rounded-lg shadow">
+                  <div className="bg-white rounded-lg shadow">
                     <div className="p-5">
                       <div className="flex items-center">
                         <div className="flex-shrink-0">
@@ -369,10 +381,31 @@ export default function Dashboard() {
                         </div>
                       </div>
                     </div>
+                  
                   </div>
-                </div>
-              </div>
 
+                  {/* Total Transactions Card */}
+                  <div className="bg-white rounded-lg shadow">
+                    <div className="p-5">
+                      <div className="flex items-center">
+                        <div className="flex-shrink-0">
+                          <ReceiptText className="w-6 h-6 text-gray-400" />
+                        </div>
+                        <div className="ml-5 w-0 flex-1">
+                          <dl>
+                            <dt className="text-sm font-medium text-gray-500 truncate">Total Number of Transactions</dt>
+                            <dd className="flex items-baseline">
+                              <div className="text-2xl font-semibold text-gray-900">{totaltransactions}</div>
+                            </dd>
+                          </dl>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                
+                </div>
+
+              </div>
 
               {/* Charts */}
               <div className="mt-8">
@@ -382,16 +415,16 @@ export default function Dashboard() {
 
                     <div className="mt-4 flex justify-between">
                       <button
-                        className={`px-4 py-2 ${viewType === 'weekly' ? 'bg-blue-600' : 'bg-gray-200'} text-white rounded`}
-                        onClick={() => setViewType('weekly')}
-                      >
-                        Weekly
-                      </button>
-                      <button
                         className={`px-4 py-2 ${viewType === 'monthly' ? 'bg-blue-600' : 'bg-gray-200'} text-white rounded`}
                         onClick={() => setViewType('monthly')}
                       >
                         Monthly
+                      </button>
+                      <button
+                        className={`px-4 py-2 ${viewType === 'quarterly' ? 'bg-blue-600' : 'bg-gray-200'} text-white rounded`}
+                        onClick={() => setViewType('quarterly')}
+                      >
+                        Quarterly
                       </button>
                       <button
                         className={`px-4 py-2 ${viewType === 'yearly' ? 'bg-blue-600' : 'bg-gray-200'} text-white rounded`}
@@ -411,8 +444,8 @@ export default function Dashboard() {
                       <Line data={customerData} options={{ responsive: true }} />
                     </div>
                     <p className="mt-4 text-sm text-red-600">
-    *Click "Customers" in the sidebar to update Customer Segments.
-  </p>
+                      *Click "Customers" in the sidebar to update Customer Segments.
+                    </p>
                   </div>
                 </div>
               </div>
@@ -474,7 +507,7 @@ export default function Dashboard() {
               </form>
 
               {/* Filtered Transactions Table */}
-              <div className="mt-8 p-4 bg-white rounded-lg shadow">
+              <div className="mt-8 p-4 bg-white rounded-lg shadow overflow-hidden">
                 <h3 className="text-lg font-medium text-gray-900">Sales Transactions</h3>
                 <table className="min-w-full mt-4 divide-y divide-gray-200">
                   <thead>
@@ -484,6 +517,7 @@ export default function Dashboard() {
                       <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Sale Type</th>
                       <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Product</th>
                       <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Value ($)</th>
+                      <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Quantity</th>
                       <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Date</th>
                     </tr>
                   </thead>
@@ -495,6 +529,7 @@ export default function Dashboard() {
                         <td className="px-6 py-4 text-sm text-gray-500">{transaction.saleType}</td>
                         <td className="px-6 py-4 text-sm text-gray-500">{transaction.product}</td>
                         <td className="px-6 py-4 text-sm text-gray-500">{transaction.value.toFixed(2)}</td>
+                        <td className="px-6 py-4 text-sm text-gray-500">{transaction.quantity}</td>
                         <td className="px-6 py-4 text-sm text-gray-500">{new Date(transaction.date).toLocaleDateString()}</td>
                       </tr>
                     ))}
@@ -523,6 +558,9 @@ export default function Dashboard() {
                 </table>
               </div>
             </div>
+
+
+
           </div>
         </main>
       </div>
