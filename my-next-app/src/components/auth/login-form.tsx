@@ -110,9 +110,6 @@ export const LoginForm = () => {
           </Button>
         </form>
       </Form>
-      <div className="mt-4 text-center">
-        <Link href="/register" className="text-blue-500 hover:underline">Create an account</Link>
-      </div>
     </CardWrapper>
   );
 };
