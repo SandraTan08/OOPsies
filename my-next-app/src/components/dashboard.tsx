@@ -358,7 +358,7 @@ export default function Dashboard() {
               <div className="mt-8">
 
                 <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
-                  
+
                   {/* Total Sales Card */}
                   <div className="bg-white rounded-lg shadow">
                     <div className="p-5">
@@ -395,7 +395,7 @@ export default function Dashboard() {
                         </div>
                       </div>
                     </div>
-                  
+
                   </div>
 
                   {/* Total Transactions Card */}
@@ -416,7 +416,7 @@ export default function Dashboard() {
                       </div>
                     </div>
                   </div>
-                
+
                 </div>
 
               </div>
@@ -528,59 +528,85 @@ export default function Dashboard() {
               {/* Filtered Transactions Table */}
               <div className="mt-8 p-4 bg-white rounded-lg shadow overflow-hidden">
                 <h3 className="text-lg font-medium text-gray-900">Sales Transactions</h3>
+
+                <div className="max-h-96 overflow-y-auto">
+
+
+                  <table className="min-w-full mt-4 divide-y divide-gray-200">
+                  <thead className="bg-gray-100 sticky top-0 z-10">
+                      <tr>
+                        <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Transaction ID</th>
+                        <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Customer ID</th>
+                        <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Sale Type</th>
+                        <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Product</th>
+                        <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Value ($)</th>
+                        <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Quantity</th>
+                        <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Date</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-200">
+                      {currentTransactions.map((transaction) => (
+                        <tr key={transaction.id}>
+                          <td className="px-6 py-4 text-sm font-medium text-gray-900">{transaction.id}</td>
+                          <td className="px-6 py-4 text-sm text-gray-500">{transaction.customerId}</td>
+                          <td className="px-6 py-4 text-sm text-gray-500">{transaction.saleType}</td>
+                          <td className="px-6 py-4 text-sm text-gray-500">{transaction.product}</td>
+                          <td className="px-6 py-4 text-sm text-gray-500">{transaction.value.toFixed(2)}</td>
+                          <td className="px-6 py-4 text-sm text-gray-500">{transaction.quantity}</td>
+                          <td className="px-6 py-4 text-sm text-gray-500">{new Date(transaction.date).toLocaleDateString()}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                    <div className="mt-4 flex justify-between">
+                    </div>
+                    <div className="mt-4 flex justify-between">
+                      <button
+                        onClick={() => setCurrentPage(currentPage - 1)}
+                        disabled={currentPage === 1}
+                        className="px-4 py-2 bg-blue-500 text-white rounded disabled:opacity-50"
+                      >
+                        Previous
+                      </button>
+
+                      <span>Page {currentPage} of {totalPages}</span>
+
+                      <button
+                        onClick={() => setCurrentPage(currentPage + 1)}
+                        disabled={currentPage === totalPages}
+                        className="px-4 py-2 bg-blue-500 text-white rounded disabled:opacity-50"
+                      >
+                        Next
+                      </button>
+                    </div>
+                  </table>
+                </div>
+              </div>
+              
+              {/* total qty sold by product table */}
+              <div className="mt-8 p-4 bg-white rounded-lg shadow">
+                <h3 className="text-lg font-medium text-gray-900">Total Quantity Sold by Product</h3>
+                <div className="max-h-96 overflow-y-auto">
+
                 <table className="min-w-full mt-4 divide-y divide-gray-200">
-                  <thead>
+                  <thead className="bg-gray-100 sticky top-0 z-10">
                     <tr>
-                      <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Transaction ID</th>
-                      <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Customer ID</th>
-                      <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Sale Type</th>
                       <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Product</th>
-                      <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Value ($)</th>
-                      <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Quantity</th>
-                      <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Date</th>
+                      <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Total Quantity Sold</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200">
-                    {currentTransactions.map((transaction) => (
-                      <tr key={transaction.id}>
-                        <td className="px-6 py-4 text-sm font-medium text-gray-900">{transaction.id}</td>
-                        <td className="px-6 py-4 text-sm text-gray-500">{transaction.customerId}</td>
-                        <td className="px-6 py-4 text-sm text-gray-500">{transaction.saleType}</td>
-                        <td className="px-6 py-4 text-sm text-gray-500">{transaction.product}</td>
-                        <td className="px-6 py-4 text-sm text-gray-500">{transaction.value.toFixed(2)}</td>
-                        <td className="px-6 py-4 text-sm text-gray-500">{transaction.quantity}</td>
-                        <td className="px-6 py-4 text-sm text-gray-500">{new Date(transaction.date).toLocaleDateString()}</td>
+                    {Object.entries(totalQuantitybyProduct).map(([product, quantity]) => (
+                      <tr key={product}>
+                        <td className="px-6 py-4 text-sm font-medium text-gray-900">{product}</td>
+                        <td className="px-6 py-4 text-sm text-gray-500">{quantity}</td>
                       </tr>
                     ))}
                   </tbody>
-                  <div className="mt-4 flex justify-between">
-                  </div>
-                  <div className="mt-8 flex justify-center items-center space-x-4">
-                    {/* <div className="flex gap-2"> */}
-                    <button
-                      onClick={() => setCurrentPage(currentPage - 1)}
-                      disabled={currentPage === 1}
-                      className="w-24 px-2 py-1 bg-gray-700 hover:bg-gray-500 text-white rounded disabled:opacity-50"
-                    >
-                      Previous
-                    </button>
-
-                    <span className="text-black w-28">Page {currentPage} of {totalPages}</span>
-
-                    <button
-                      onClick={() => setCurrentPage(currentPage + 1)}
-                      disabled={currentPage === totalPages}
-                      className="w-24 px-2 py-1 bg-gray-700 hover:bg-gray-500 text-white rounded disabled:opacity-50"
-                    >
-                      Next
-                    </button>
-                    {/* </div> */}
-                  </div>
                 </table>
+                </div>
               </div>
+
             </div>
-
-
 
           </div>
         </main>
