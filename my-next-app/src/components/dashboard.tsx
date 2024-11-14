@@ -559,21 +559,22 @@ export default function Dashboard() {
                     </tbody>
                     <div className="mt-4 flex justify-between">
                     </div>
-                    <div className="mt-4 flex justify-between">
+                    <div className="mt-8 flex justify-center items-center space-x-4">
+                    {/* <div className="flex gap-2"> */}
                       <button
                         onClick={() => setCurrentPage(currentPage - 1)}
                         disabled={currentPage === 1}
-                        className="px-4 py-2 bg-blue-500 text-white rounded disabled:opacity-50"
+                      className="w-24 px-2 py-1 bg-gray-700 hover:bg-gray-500 text-white rounded disabled:opacity-50"
                       >
                         Previous
                       </button>
 
-                      <span>Page {currentPage} of {totalPages}</span>
+                      <span className="text-black w-28">Page {currentPage} of {totalPages}</span>
 
                       <button
                         onClick={() => setCurrentPage(currentPage + 1)}
                         disabled={currentPage === totalPages}
-                        className="px-4 py-2 bg-blue-500 text-white rounded disabled:opacity-50"
+                      className="w-24 px-2 py-1 bg-gray-700 hover:bg-gray-500 text-white rounded disabled:opacity-50"
                       >
                         Next
                       </button>
