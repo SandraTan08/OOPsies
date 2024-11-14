@@ -26,7 +26,9 @@ CREATE TABLE IF NOT EXISTS `customer` (
     `customerId` int PRIMARY KEY,
     `zipCode` int DEFAULT NULL,
     `customer_type` varchar(14) NOT NULL,
-    `tier` varchar(4) NOT NULL
+    `tier` varchar(4) NOT NULL,
+    `customerName` varchar(255) DEFAULT NULL,
+    `customerEmail` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 
 INSERT INTO `customer` (`customerId`, `zipCode`, `customer_type`, `tier`) VALUES
