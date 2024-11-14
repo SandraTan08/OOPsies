@@ -121,6 +121,20 @@ export default function Dashboard() {
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
   const currentTransactions = filteredTransactions.slice(startIndex, endIndex);
+  const [filterApplied, setFilterApplied] = useState(false);
+    
+  const handleApplyFilter = () => {
+    // Logic to apply the filter goes here
+
+    // Set filterApplied to true to show the message
+    setFilterApplied(true);
+
+    // Optionally, hide the message after a delay
+    setTimeout(() => {
+      setFilterApplied(false);
+    }, 3000); // Message will disappear after 3 seconds
+  }
+
 
   const filterTransactionsByRange = (transactions) => {
     return transactions.filter(transaction => {
@@ -415,19 +429,19 @@ export default function Dashboard() {
 
                     <div className="mt-4 flex justify-between">
                       <button
-                        className={`px-4 py-2 ${viewType === 'monthly' ? 'bg-blue-600' : 'bg-gray-200'} text-white rounded`}
+                        className={`px-4 py-2 ${viewType === 'monthly' ? 'bg-gray-700' : 'hover:bg-gray-700 bg-gray-200'} text-white rounded`}
                         onClick={() => setViewType('monthly')}
                       >
                         Monthly
                       </button>
                       <button
-                        className={`px-4 py-2 ${viewType === 'quarterly' ? 'bg-blue-600' : 'bg-gray-200'} text-white rounded`}
+                        className={`px-4 py-2 ${viewType === 'quarterly' ? 'bg-gray-700' : 'hover:bg-gray-700 bg-gray-200'} text-white rounded`}
                         onClick={() => setViewType('quarterly')}
                       >
                         Quarterly
                       </button>
                       <button
-                        className={`px-4 py-2 ${viewType === 'yearly' ? 'bg-blue-600' : 'bg-gray-200'} text-white rounded`}
+                        className={`px-4 py-2 ${viewType === 'yearly' ? 'bg-gray-700' : 'hover:bg-gray-700 bg-gray-200'} text-white rounded`}
                         onClick={() => setViewType('yearly')}
                       >
                         Yearly
@@ -499,10 +513,15 @@ export default function Dashboard() {
                 <div className="mt-6">
                   <button
                     type="submit"
-                    className="px-4 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700"
+                    onClick={handleApplyFilter}
+                    className="px-4 py-2 text-white bg-gray-700 hover:bg-gray-500 rounded-md "
                   >
                     Apply Filter
+
                   </button>
+                    {filterApplied && (
+                    <p className="mt-2 text-green-500">Filter applied</p>
+                    )}
                 </div>
               </form>
 
@@ -536,24 +555,26 @@ export default function Dashboard() {
                   </tbody>
                   <div className="mt-4 flex justify-between">
                   </div>
-                  <div className="mt-4 flex justify-between">
+                  <div className="mt-8 flex justify-center items-center space-x-4">
+                    {/* <div className="flex gap-2"> */}
                     <button
                       onClick={() => setCurrentPage(currentPage - 1)}
                       disabled={currentPage === 1}
-                      className="px-4 py-2 bg-blue-500 text-white rounded disabled:opacity-50"
+                      className="w-24 px-2 py-1 bg-gray-700 hover:bg-gray-500 text-white rounded disabled:opacity-50"
                     >
                       Previous
                     </button>
 
-                    <span>Page {currentPage} of {totalPages}</span>
+                    <span className="text-black w-28">Page {currentPage} of {totalPages}</span>
 
                     <button
                       onClick={() => setCurrentPage(currentPage + 1)}
                       disabled={currentPage === totalPages}
-                      className="px-4 py-2 bg-blue-500 text-white rounded disabled:opacity-50"
+                      className="w-24 px-2 py-1 bg-gray-700 hover:bg-gray-500 text-white rounded disabled:opacity-50"
                     >
                       Next
                     </button>
+                    {/* </div> */}
                   </div>
                 </table>
               </div>
