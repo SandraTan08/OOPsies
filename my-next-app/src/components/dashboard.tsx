@@ -34,6 +34,8 @@ import { ShoppingCart, BarChart, Search, Download, ReceiptText } from 'lucide-re
 export default function Dashboard() {
   const [transactionsData, setTransactionsData] = useState<any[]>([]);
   const [filteredTransactions, setFilteredTransactions] = useState<any[]>([]);
+  const [minValue, setMinValue] = useState(''); 
+  const [maxValue, setMaxValue] = useState('');
   const [viewType, setViewType] = useState<string>('monthly');
   const [saleTypeFilter, setSaleTypeFilter] = useState<string>('');
   const [customerIdFilter, setCustomerIdFilter] = useState<string>('');
@@ -122,7 +124,7 @@ export default function Dashboard() {
   const endIndex = startIndex + itemsPerPage;
   const currentTransactions = filteredTransactions.slice(startIndex, endIndex);
   const [filterApplied, setFilterApplied] = useState(false);
-    
+
   const handleApplyFilter = () => {
     // Logic to apply the filter goes here
 
@@ -277,6 +279,13 @@ export default function Dashboard() {
     if (productFilter) {
       filtered = filtered.filter(transaction => transaction.product.toLowerCase().includes(productFilter.toLowerCase()));
 
+    }
+    if (minValue) {
+      filtered = filtered.filter(transaction => transaction.value >= parseFloat(minValue));
+    }
+
+    if (maxValue) {
+      filtered = filtered.filter(transaction => transaction.value <= parseFloat(maxValue));
     }
 
     const filteredRangeTransactions = filterTransactionsByRange(filtered);
@@ -508,6 +517,33 @@ export default function Dashboard() {
                       className="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-500"
                     />
                   </div>
+
+                  {/* New Min and Max Value Filters */}
+                  <div>
+                    <label htmlFor="minValue" className="block text-sm font-medium text-black">Min Value ($)</label>
+                    <input
+                      type="number"
+                      id="minValue"
+                      name="minValue"
+                      value={minValue}
+                      onChange={(e) => setMinValue(e.target.value)}
+                      placeholder="e.g., 10"
+                      className="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="maxValue" className="block text-sm font-medium text-black">Max Value ($)</label>
+                    <input
+                      type="number"
+                      id="maxValue"
+                      name="maxValue"
+                      value={maxValue}
+                      onChange={(e) => setMaxValue(e.target.value)}
+                      placeholder="e.g., 100"
+                      className="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-500"
+                    />
+                  </div>
                 </div>
 
                 <div className="mt-6">
@@ -519,9 +555,9 @@ export default function Dashboard() {
                     Apply Filter
 
                   </button>
-                    {filterApplied && (
+                  {filterApplied && (
                     <p className="mt-2 text-green-500">Filter applied</p>
-                    )}
+                  )}
                 </div>
               </form>
 
@@ -533,7 +569,7 @@ export default function Dashboard() {
 
 
                   <table className="min-w-full mt-4 divide-y divide-gray-200">
-                  <thead className="bg-gray-100 sticky top-0 z-10">
+                    <thead className="bg-gray-100 sticky top-0 z-10">
                       <tr>
                         <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Transaction ID</th>
                         <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Customer ID</th>
@@ -559,22 +595,21 @@ export default function Dashboard() {
                     </tbody>
                     <div className="mt-4 flex justify-between">
                     </div>
-                    <div className="mt-8 flex justify-center items-center space-x-4">
-                    {/* <div className="flex gap-2"> */}
+                    <div className="mt-4 flex justify-between">
                       <button
                         onClick={() => setCurrentPage(currentPage - 1)}
                         disabled={currentPage === 1}
-                      className="w-24 px-2 py-1 bg-gray-700 hover:bg-gray-500 text-white rounded disabled:opacity-50"
+                        className="px-4 py-2 bg-blue-500 text-white rounded disabled:opacity-50"
                       >
                         Previous
                       </button>
 
-                      <span className="text-black w-28">Page {currentPage} of {totalPages}</span>
+                      <span>Page {currentPage} of {totalPages}</span>
 
                       <button
                         onClick={() => setCurrentPage(currentPage + 1)}
                         disabled={currentPage === totalPages}
-                      className="w-24 px-2 py-1 bg-gray-700 hover:bg-gray-500 text-white rounded disabled:opacity-50"
+                        className="px-4 py-2 bg-blue-500 text-white rounded disabled:opacity-50"
                       >
                         Next
                       </button>
@@ -582,28 +617,28 @@ export default function Dashboard() {
                   </table>
                 </div>
               </div>
-              
+
               {/* total qty sold by product table */}
               <div className="mt-8 p-4 bg-white rounded-lg shadow">
                 <h3 className="text-lg font-medium text-gray-900">Total Quantity Sold by Product</h3>
                 <div className="max-h-96 overflow-y-auto">
 
-                <table className="min-w-full mt-4 divide-y divide-gray-200">
-                  <thead className="bg-gray-100 sticky top-0 z-10">
-                    <tr>
-                      <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Product</th>
-                      <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Total Quantity Sold</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-200">
-                    {Object.entries(totalQuantitybyProduct).map(([product, quantity]) => (
-                      <tr key={product}>
-                        <td className="px-6 py-4 text-sm font-medium text-gray-900">{product}</td>
-                        <td className="px-6 py-4 text-sm text-gray-500">{quantity}</td>
+                  <table className="min-w-full mt-4 divide-y divide-gray-200">
+                    <thead className="bg-gray-100 sticky top-0 z-10">
+                      <tr>
+                        <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Product</th>
+                        <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Total Quantity Sold</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody className="divide-y divide-gray-200">
+                      {Object.entries(totalQuantitybyProduct).map(([product, quantity]) => (
+                        <tr key={product}>
+                          <td className="px-6 py-4 text-sm font-medium text-gray-900">{product}</td>
+                          <td className="px-6 py-4 text-sm text-gray-500">{quantity}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
               </div>
 
