@@ -1,3 +1,6 @@
+CREATE DATABASE IF NOT EXISTS OOP;
+
+USE oop;
 -- Create the newsletter table if it doesn't exist
 CREATE TABLE IF NOT EXISTS newsletter (
     newsletterId BIGINT AUTO_INCREMENT PRIMARY KEY,
