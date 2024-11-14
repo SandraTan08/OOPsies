@@ -126,7 +126,7 @@ export default function Dashboard() {
       direction = 'descending';
     }
     setSortConfig({ key, direction });
-  
+
     const sortedTransactions = [...filteredTransactions].sort((a, b) => {
       if (a[key] < b[key]) {
         return direction === 'ascending' ? -1 : 1;
@@ -138,7 +138,7 @@ export default function Dashboard() {
     });
     setFilteredTransactions(sortedTransactions);
   };
-  
+
 
   const renderSortIcon = (key: string) => {
     if (!sortConfig || sortConfig.key !== key) return null;
@@ -325,6 +325,7 @@ export default function Dashboard() {
     return null;
   }
 
+  const userRole = session.account.role;
 
 
 
@@ -454,45 +455,68 @@ export default function Dashboard() {
 
               {/* Charts */}
               <div className="mt-8">
-                <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-                  <div className="p-4 bg-white rounded-lg shadow" >
-                    <h2 className="text-lg font-medium text-gray-900">Sales Overview</h2>
 
-                    <div className="mt-4 flex justify-between">
-                      <button
-                        className={`px-4 py-2 ${viewType === 'monthly' ? 'bg-gray-700' : 'hover:bg-gray-700 bg-gray-200'} text-white rounded`}
-                        onClick={() => setViewType('monthly')}
-                      >
-                        Monthly
-                      </button>
-                      <button
-                        className={`px-4 py-2 ${viewType === 'quarterly' ? 'bg-gray-700' : 'hover:bg-gray-700 bg-gray-200'} text-white rounded`}
-                        onClick={() => setViewType('quarterly')}
-                      >
-                        Quarterly
-                      </button>
-                      <button
-                        className={`px-4 py-2 ${viewType === 'yearly' ? 'bg-gray-700' : 'hover:bg-gray-700 bg-gray-200'} text-white rounded`}
-                        onClick={() => setViewType('yearly')}
-                      >
-                        Yearly
-                      </button>
-                    </div>
 
-                    <div className="mt-4">
-                      <Bar data={salesData} options={{ responsive: true }} />
+                {userRole === 'Marketing' ? (
+                  <div className="grid grid-cols-1 gap-5 sm:grid-cols-1">
+
+                    <div className="p-4 bg-white rounded-lg shadow ">
+                      <h2 className="text-lg font-medium text-gray-900">Customer Segments</h2>
+                      <div className="mt-4">
+                        <Line data={customerData} options={{ responsive: true }} />
+                      </div>
+                      <p className="mt-4 text-sm text-red-600">
+                        *Click "Customers" in the sidebar to update Customer Segments.
+                      </p>
                     </div>
                   </div>
-                  <div className="p-4 bg-white rounded-lg shadow ">
-                    <h2 className="text-lg font-medium text-gray-900">Customer Segments</h2>
-                    <div className="mt-4">
-                      <Line data={customerData} options={{ responsive: true }} />
+                ) : (
+                  <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                    <div className="p-4 bg-white rounded-lg shadow" >
+                      <h2 className="text-lg font-medium text-gray-900">Sales Overview</h2>
+
+                      <div className="mt-4 flex justify-between">
+                        <button
+                          className={`px-4 py-2 ${viewType === 'monthly' ? 'bg-gray-700' : 'hover:bg-gray-700 bg-gray-200'} text-white rounded`}
+                          onClick={() => setViewType('monthly')}
+                        >
+                          Monthly
+                        </button>
+                        <button
+                          className={`px-4 py-2 ${viewType === 'quarterly' ? 'bg-gray-700' : 'hover:bg-gray-700 bg-gray-200'} text-white rounded`}
+                          onClick={() => setViewType('quarterly')}
+                        >
+                          Quarterly
+                        </button>
+                        <button
+                          className={`px-4 py-2 ${viewType === 'yearly' ? 'bg-gray-700' : 'hover:bg-gray-700 bg-gray-200'} text-white rounded`}
+                          onClick={() => setViewType('yearly')}
+                        >
+                          Yearly
+                        </button>
+                      </div>
+
+                      <div className="mt-4">
+                        <Bar data={salesData} options={{ responsive: true }} />
+                      </div>
                     </div>
-                    <p className="mt-4 text-sm text-red-600">
-                      *Click "Customers" in the sidebar to update Customer Segments.
-                    </p>
+
+                    <div className="p-4 bg-white rounded-lg shadow ">
+                      <h2 className="text-lg font-medium text-gray-900">Customer Segments</h2>
+                      <div className="mt-4">
+                        <Line data={customerData} options={{ responsive: true }} />
+                      </div>
+                      <p className="mt-4 text-sm text-red-600">
+                        *Click "Customers" in the sidebar to update Customer Segments.
+                      </p>
+                    </div>
                   </div>
-                </div>
+
+                )}
+
+
+
+
               </div>
 
               {/* Filter Form */}
