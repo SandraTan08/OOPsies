@@ -34,8 +34,9 @@ import { ShoppingCart, BarChart, Search, Download, ReceiptText } from 'lucide-re
 export default function Dashboard() {
   const [transactionsData, setTransactionsData] = useState<any[]>([]);
   const [filteredTransactions, setFilteredTransactions] = useState<any[]>([]);
-  const [minValue, setMinValue] = useState(''); 
+  const [minValue, setMinValue] = useState('');
   const [maxValue, setMaxValue] = useState('');
+  const [sortConfig, setSortConfig] = useState<{ key: string; direction: string } | null>(null);
   const [viewType, setViewType] = useState<string>('monthly');
   const [saleTypeFilter, setSaleTypeFilter] = useState<string>('');
   const [customerIdFilter, setCustomerIdFilter] = useState<string>('');
@@ -119,6 +120,31 @@ export default function Dashboard() {
     };
   };
 
+  const handleSort = (key) => {
+    let direction = 'ascending';
+    if (sortConfig && sortConfig.key === key && sortConfig.direction === 'ascending') {
+      direction = 'descending';
+    }
+    setSortConfig({ key, direction });
+  
+    const sortedTransactions = [...filteredTransactions].sort((a, b) => {
+      if (a[key] < b[key]) {
+        return direction === 'ascending' ? -1 : 1;
+      }
+      if (a[key] > b[key]) {
+        return direction === 'ascending' ? 1 : -1;
+      }
+      return 0;
+    });
+    setFilteredTransactions(sortedTransactions);
+  };
+  
+
+  const renderSortIcon = (key: string) => {
+    if (!sortConfig || sortConfig.key !== key) return null;
+    return sortConfig.direction === 'ascending' ? '▲' : '▼';
+  };
+
   const totalPages = Math.ceil(filteredTransactions.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
@@ -126,15 +152,11 @@ export default function Dashboard() {
   const [filterApplied, setFilterApplied] = useState(false);
 
   const handleApplyFilter = () => {
-    // Logic to apply the filter goes here
-
-    // Set filterApplied to true to show the message
     setFilterApplied(true);
 
-    // Optionally, hide the message after a delay
     setTimeout(() => {
       setFilterApplied(false);
-    }, 3000); // Message will disappear after 3 seconds
+    }, 3000);
   }
 
 
@@ -564,20 +586,38 @@ export default function Dashboard() {
               {/* Filtered Transactions Table */}
               <div className="mt-8 p-4 bg-white rounded-lg shadow overflow-hidden">
                 <h3 className="text-lg font-medium text-gray-900">Sales Transactions</h3>
-
                 <div className="max-h-96 overflow-y-auto">
-
-
                   <table className="min-w-full mt-4 divide-y divide-gray-200">
                     <thead className="bg-gray-100 sticky top-0 z-10">
                       <tr>
-                        <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Transaction ID</th>
-                        <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Customer ID</th>
-                        <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Sale Type</th>
-                        <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Product</th>
-                        <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Value ($)</th>
-                        <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Quantity</th>
-                        <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Date</th>
+                        <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase cursor-pointer"
+                          onClick={() => handleSort('id')}>
+                          Transaction ID {renderSortIcon('id')}
+                        </th>
+                        <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase cursor-pointer"
+                          onClick={() => handleSort('customerId')}>
+                          Customer ID {renderSortIcon('customerId')}
+                        </th>
+                        <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase cursor-pointer"
+                          onClick={() => handleSort('saleType')}>
+                          Sale Type {renderSortIcon('saleType')}
+                        </th>
+                        <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase cursor-pointer"
+                          onClick={() => handleSort('product')}>
+                          Product {renderSortIcon('product')}
+                        </th>
+                        <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase cursor-pointer"
+                          onClick={() => handleSort('value')}>
+                          Value ($) {renderSortIcon('value')}
+                        </th>
+                        <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase cursor-pointer"
+                          onClick={() => handleSort('quantity')}>
+                          Quantity {renderSortIcon('quantity')}
+                        </th>
+                        <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase cursor-pointer"
+                          onClick={() => handleSort('date')}>
+                          Date {renderSortIcon('date')}
+                        </th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200">
@@ -595,26 +635,27 @@ export default function Dashboard() {
                     </tbody>
                     <div className="mt-4 flex justify-between">
                     </div>
-                    <div className="mt-4 flex justify-between">
+                    <div className="mt-8 flex justify-center items-center space-x-4">
                       <button
                         onClick={() => setCurrentPage(currentPage - 1)}
                         disabled={currentPage === 1}
-                        className="px-4 py-2 bg-blue-500 text-white rounded disabled:opacity-50"
+                        className="w-24 px-2 py-1 bg-gray-700 hover:bg-gray-500 text-white rounded disabled:opacity-50"
                       >
                         Previous
                       </button>
 
-                      <span>Page {currentPage} of {totalPages}</span>
+                      <span className="text-black w-28">Page {currentPage} of {totalPages}</span>
 
                       <button
                         onClick={() => setCurrentPage(currentPage + 1)}
                         disabled={currentPage === totalPages}
-                        className="px-4 py-2 bg-blue-500 text-white rounded disabled:opacity-50"
+                        className="w-24 px-2 py-1 bg-gray-700 hover:bg-gray-500 text-white rounded disabled:opacity-50"
                       >
                         Next
                       </button>
                     </div>
                   </table>
+
                 </div>
               </div>
 
