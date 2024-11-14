@@ -30,7 +30,7 @@ export default async function RootLayout({
 
           {/* Main Content */}
           <div className="flex-1 flex flex-col">
-            <main className="flex-1 p-8 bg-gray-100">
+            <main className="flex-1 pl-8 pr-8 bg-gray-100">
               {React.Children.map(children, child => 
                 React.cloneElement(child as React.ReactElement<any>, { role: userRole })
               )}

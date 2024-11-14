@@ -43,7 +43,7 @@ export default async function RootLayout({
 
           {/* Main Content */}
           <div className="flex-1 flex flex-col">
-            <main className="flex-1 p-8 bg-gray-100">
+            <main className="flex-1 bg-gray-100">
               {children}
             </main>
           </div>

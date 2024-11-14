@@ -258,7 +258,7 @@ export default function Newsletter() {
   return (
     <div>
       <Toaster />
-      <div className="min-h-screen bg-gray-50 py-8 text-gray-800">
+      <div className="min-h-screen bg-gray-50 text-gray-800">
         <div className="max-w-4xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden">
           <div className="px-6 py-4 bg-gray-100 border-b flex justify-between items-center">
             <h1 className="text-2xl font-semibold text-gray-800">Personalized Newsletter</h1>
@@ -491,15 +491,15 @@ Marketing team`}
             </div>
 
             <div className="mt-6 flex justify-end space-x-4">
-              <Button onClick={handleSave} className="flex items-center">
+              <Button onClick={handleSave} className="bg-gray-700 hover:bg-gray-500 flex items-center">
                 <Save className="w-4 h-4 mr-2" />
                 Save Template
               </Button>
-              <Button onClick={handleCopy} className="flex items-center">
+              <Button onClick={handleCopy} className="bg-gray-700 hover:bg-gray-500 flex items-center">
                 <Copy className="w-4 h-4 mr-2" />
                 Copy to Clipboard
               </Button>
-              <Button onClick={handleSend} className="flex items-center">
+              <Button onClick={handleSend} className="bg-gray-700 hover:bg-gray-500 flex items-center">
                 <Send className="w-4 h-4 mr-2" />
                 Send Newsletter
               </Button>
