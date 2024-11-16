@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { Bar, Line } from 'react-chartjs-2'
 import { useSession } from 'next-auth/react'
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { useRouter } from 'next/navigation';
 
 import {
   Chart as ChartJS,
@@ -40,6 +41,7 @@ export default function Dashboard() {
   const [productFilter, setProductFilter] = useState<string>('');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 25;
+  
   const [salesData, setSalesData] = useState<any>({
     labels: [],
     datasets: [
@@ -71,6 +73,10 @@ export default function Dashboard() {
   const [endYear, setEndYear] = useState<number | 'all'>('all');
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const toggleDropdown = () => setDropdownOpen(!dropdownOpen);
+  const { data: session, status } = useSession();
+  const router = useRouter();
+  const [isAuthorized, setIsAuthorized] = useState(false);
+
 
   const totalSales = filteredTransactions.reduce((sum, transaction) => sum + transaction.value, 0).toFixed(2);
   const averageOrderValue = filteredTransactions.length > 0
@@ -283,19 +289,19 @@ export default function Dashboard() {
     setFilteredTransactions(filteredRangeTransactions);
   };
 
-  const { data: session, status } = useSession();
+    if (status === 'loading') {
+      return <div>Loading...</div>;
+    }
 
-  if (status === 'loading') {
-    return <div>Loading...</div>;
-  }
+    if (session?.account?.role === 'Admin') {
+      // Redirect to a different page if the user is an admin
+      window.location.href = '/account'; 
+    }
 
-  if (!session) {
-    window.location.href = '/';
-    return null;
-  }
-
-
-
+    if (!session) {
+      window.location.href = '/';
+      return null;
+    }
 
   return (
     <div className="flex h-screen bg-gray-100">

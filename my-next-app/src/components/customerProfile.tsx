@@ -1,5 +1,6 @@
 "use client";
 
+import { useSession } from 'next-auth/react';
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import {
@@ -49,13 +50,15 @@ interface CustomerProfileProps {
   role: string;
 }
 
-const CustomerProfile: React.FC<CustomerProfileProps> = ({ customerId, role }) => {
+const CustomerProfile: React.FC<CustomerProfileProps> = ({ customerId }) => {
   const [customer, setCustomer] = useState<Customer | null>(null);
   const [purchaseHistory, setPurchaseHistory] = useState<Purchase[]>([]);
   const [topProducts, setTopProducts] = useState<{ productName: string; quantity: number }[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [cumulativeTotal, setCumulativeTotal] = useState<number>(0);
+  const { data: session } = useSession();
+  const role = session?.account?.role || '';
 
   useEffect(() => {
     const fetchCustomerData = async () => {
@@ -118,6 +121,8 @@ const CustomerProfile: React.FC<CustomerProfileProps> = ({ customerId, role }) =
     fetchCustomerData();
   }, [customerId]);
 
+  
+
   const tierMap: Record<string, string> = {
     G: "Gold",
     S: "Silver",
@@ -166,6 +171,14 @@ const CustomerProfile: React.FC<CustomerProfileProps> = ({ customerId, role }) =
           Back to Customers
         </button>
       </Link>
+
+      {role === 'Marketing' && (
+        <Link href="/newsletter">
+          <button className="back-button">
+            Contact me
+          </button>
+        </Link>
+      )}
 
       <h2>Purchase History</h2>
       {purchaseHistory.length > 0 ? (

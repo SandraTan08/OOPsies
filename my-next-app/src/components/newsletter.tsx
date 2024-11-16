@@ -285,6 +285,7 @@ export default function Newsletter() {
                 className="mt-1"
               />
             </div>
+            {session.account.role !== 'Admin' && (
             <div className="mb-6">
               <Label> Customer Email</Label>
               <Input
@@ -297,6 +298,8 @@ export default function Newsletter() {
                 onChange={(e) => setCustomerEmail(e.target.value)}
               />
             </div>
+              )}
+              {session.account.role !== 'Admin' && (
             <div className="mb-6">
               <Label htmlFor="customerName">Customer Name</Label>
               <Input
@@ -308,7 +311,9 @@ export default function Newsletter() {
                 className="mt-1"
               />
             </div>
+            )}      
 
+          {session.account.role !== 'Admin' && (
             <div className="mb-6">
               <Label htmlFor="numProducts">Number of Products</Label>
               <Input
@@ -322,6 +327,7 @@ export default function Newsletter() {
                 className="mt-1"
               />
             </div>
+            )}
 
             {template.products.map((product, index) => (
               <div key={index} className="mb-6 p-4 bg-gray-50 rounded-lg">
@@ -499,10 +505,12 @@ Marketing team`}
                 <Copy className="w-4 h-4 mr-2" />
                 Copy to Clipboard
               </Button>
+              {session.account.role !== 'Admin' && (
               <Button onClick={handleSend} className="bg-gray-700 hover:bg-gray-500 flex items-center">
                 <Send className="w-4 h-4 mr-2" />
                 Send Newsletter
               </Button>
+              )}
             </div>
           </div>
         </div>

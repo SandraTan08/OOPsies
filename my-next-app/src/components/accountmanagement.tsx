@@ -324,23 +324,28 @@ export default function AccountManagement() {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {accounts.map((account) => (
-                    <tr key={account.accountId}>
-                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 sm:px-6">{account.accountId}</td>
-                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 sm:px-6">{account.accountUserName}</td>
-                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 sm:px-6">{account.accountEmail}</td>
-                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 sm:px-6">{account.role}</td>
-                      <td className="px-4 py-4 whitespace-nowrap text-sm font-medium space-x-2 sm:px-6">
-                        <Button variant="ghost" size="sm" onClick={() => handleEditAccount(account)}>
-                          <Edit2 className="w-4 h-4" />
-                        </Button>
-                        <Button variant="ghost" size="sm" onClick={() => handleDeleteAccount(account)}>
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
+  {accounts.map((account) => (
+    <tr key={account.accountId}>
+      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 sm:px-6">{account.accountId}</td>
+      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 sm:px-6">{account.accountUserName}</td>
+      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 sm:px-6">{account.accountEmail}</td>
+      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 sm:px-6">{account.role}</td>
+      <td className="px-4 py-4 whitespace-nowrap text-sm font-medium space-x-2 sm:px-6">
+        {account.role !== 'Admin' && (
+          <>
+            <Button variant="ghost" size="sm" onClick={() => handleEditAccount(account)}>
+              <Edit2 className="w-4 h-4" />
+            </Button>
+            <Button variant="ghost" size="sm" onClick={() => handleDeleteAccount(account)}>
+              <Trash2 className="w-4 h-4" />
+            </Button>
+          </>
+        )}
+      </td>
+    </tr>
+  ))}
+</tbody>
+
               </table>
             </div>
           </div>
