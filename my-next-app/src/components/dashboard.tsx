@@ -35,6 +35,9 @@ import { ShoppingCart, BarChart, Search, Download, ReceiptText } from 'lucide-re
 export default function Dashboard() {
   const [transactionsData, setTransactionsData] = useState<any[]>([]);
   const [filteredTransactions, setFilteredTransactions] = useState<any[]>([]);
+  const [minValue, setMinValue] = useState('');
+  const [maxValue, setMaxValue] = useState('');
+  const [sortConfig, setSortConfig] = useState<{ key: string; direction: string } | null>(null);
   const [viewType, setViewType] = useState<string>('monthly');
   const [saleTypeFilter, setSaleTypeFilter] = useState<string>('');
   const [customerIdFilter, setCustomerIdFilter] = useState<string>('');
@@ -123,22 +126,43 @@ export default function Dashboard() {
     };
   };
 
+  const handleSort = (key) => {
+    let direction = 'ascending';
+    if (sortConfig && sortConfig.key === key && sortConfig.direction === 'ascending') {
+      direction = 'descending';
+    }
+    setSortConfig({ key, direction });
+
+    const sortedTransactions = [...filteredTransactions].sort((a, b) => {
+      if (a[key] < b[key]) {
+        return direction === 'ascending' ? -1 : 1;
+      }
+      if (a[key] > b[key]) {
+        return direction === 'ascending' ? 1 : -1;
+      }
+      return 0;
+    });
+    setFilteredTransactions(sortedTransactions);
+  };
+
+
+  const renderSortIcon = (key: string) => {
+    if (!sortConfig || sortConfig.key !== key) return null;
+    return sortConfig.direction === 'ascending' ? '▲' : '▼';
+  };
+
   const totalPages = Math.ceil(filteredTransactions.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
   const currentTransactions = filteredTransactions.slice(startIndex, endIndex);
   const [filterApplied, setFilterApplied] = useState(false);
-    
-  const handleApplyFilter = () => {
-    // Logic to apply the filter goes here
 
-    // Set filterApplied to true to show the message
+  const handleApplyFilter = () => {
     setFilterApplied(true);
 
-    // Optionally, hide the message after a delay
     setTimeout(() => {
       setFilterApplied(false);
-    }, 3000); // Message will disappear after 3 seconds
+    }, 3000);
   }
 
 
@@ -246,7 +270,7 @@ export default function Dashboard() {
         customerDataRef.current = {
           labels: ['Gold', 'Silver', 'Bronze'],
           datasets: [{
-            label: 'Gold (>=$3000), Silver (>=$1000), Bronze (<$1000)',
+            label: 'Customer Segment',
             data: [segmentsCount.gold, segmentsCount.silver, segmentsCount.bronze],
             backgroundColor: [
               'rgba(255, 215, 0, 0.6)',
@@ -283,6 +307,13 @@ export default function Dashboard() {
     if (productFilter) {
       filtered = filtered.filter(transaction => transaction.product.toLowerCase().includes(productFilter.toLowerCase()));
 
+    }
+    if (minValue) {
+      filtered = filtered.filter(transaction => transaction.value >= parseFloat(minValue));
+    }
+
+    if (maxValue) {
+      filtered = filtered.filter(transaction => transaction.value <= parseFloat(maxValue));
     }
 
     const filteredRangeTransactions = filterTransactionsByRange(filtered);
@@ -429,50 +460,74 @@ export default function Dashboard() {
 
               {/* Charts */}
               <div className="mt-8">
-                <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-                  <div className="p-4 bg-white rounded-lg shadow" >
-                    <h2 className="text-lg font-medium text-gray-900">Sales Overview</h2>
 
-                    <div className="mt-4 flex justify-between">
-                      <button
-                        className={`px-4 py-2 ${viewType === 'monthly' ? 'bg-gray-700' : 'hover:bg-gray-700 bg-gray-200'} text-white rounded`}
-                        onClick={() => setViewType('monthly')}
-                      >
-                        Monthly
-                      </button>
-                      <button
-                        className={`px-4 py-2 ${viewType === 'quarterly' ? 'bg-gray-700' : 'hover:bg-gray-700 bg-gray-200'} text-white rounded`}
-                        onClick={() => setViewType('quarterly')}
-                      >
-                        Quarterly
-                      </button>
-                      <button
-                        className={`px-4 py-2 ${viewType === 'yearly' ? 'bg-gray-700' : 'hover:bg-gray-700 bg-gray-200'} text-white rounded`}
-                        onClick={() => setViewType('yearly')}
-                      >
-                        Yearly
-                      </button>
-                    </div>
 
-                    <div className="mt-4">
-                      <Bar data={salesData} options={{ responsive: true }} />
+                {userRole === 'Marketing' ? (
+                  <div className="grid grid-cols-1 gap-5 sm:grid-cols-1">
+
+                    <div className="p-4 bg-white rounded-lg shadow ">
+                      <h2 className="text-lg font-medium text-gray-900">Customer Segments</h2>
+                      <div className="mt-4">
+                        <Line data={customerData} options={{ responsive: true }} />
+                      </div>
+                      {/* <p className="mt-4 text-sm text-red-600">
+                        *Click "Customers" in the sidebar to update Customer Segments.
+                      </p> */}
                     </div>
                   </div>
-                  <div className="p-4 bg-white rounded-lg shadow ">
-                    <h2 className="text-lg font-medium text-gray-900">Customer Segments</h2>
-                    <div className="mt-4">
-                      <Line data={customerData} options={{ responsive: true }} />
+                ) : (
+                  <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                    <div className="p-4 bg-white rounded-lg shadow" >
+                      <h2 className="text-lg font-medium text-gray-900">Sales Overview</h2>
+
+                      <div className="mt-4 flex justify-between">
+                        <button
+                          className={`px-4 py-2 ${viewType === 'monthly' ? 'bg-gray-700' : 'hover:bg-gray-700 bg-gray-200'} text-white rounded`}
+                          onClick={() => setViewType('monthly')}
+                        >
+                          Monthly
+                        </button>
+                        <button
+                          className={`px-4 py-2 ${viewType === 'quarterly' ? 'bg-gray-700' : 'hover:bg-gray-700 bg-gray-200'} text-white rounded`}
+                          onClick={() => setViewType('quarterly')}
+                        >
+                          Quarterly
+                        </button>
+                        <button
+                          className={`px-4 py-2 ${viewType === 'yearly' ? 'bg-gray-700' : 'hover:bg-gray-700 bg-gray-200'} text-white rounded`}
+                          onClick={() => setViewType('yearly')}
+                        >
+                          Yearly
+                        </button>
+                      </div>
+
+                      <div className="mt-4">
+                        <Bar data={salesData} options={{ responsive: true }} />
+                      </div>
                     </div>
-                    <p className="mt-4 text-sm text-red-600">
-                      *Click "Customers" in the sidebar to update Customer Segments.
-                    </p>
+
+                    <div className="p-4 bg-white rounded-lg shadow ">
+                      <h2 className="text-lg font-medium text-gray-900">Customer Segments</h2>
+                      <div className="mt-4">
+                        <Line data={customerData} options={{ responsive: true }} />
+                      </div>
+                      {/* <p className="mt-4 text-sm text-red-600">
+                        *Click "Customers" in the sidebar to update Customer Segments.
+                      </p> */}
+                    </div>
                   </div>
-                </div>
+
+                )}
+
+
+
+
               </div>
 
               {/* Filter Form */}
               <form className="mt-8 p-4 bg-white rounded-lg shadow" onSubmit={handleFilter}>
                 <h3 className="text-lg font-medium text-gray-900">Filter Sales Transactions</h3>
+        
                 <div className="grid grid-cols-1 gap-4 mt-4 sm:grid-cols-2 lg:grid-cols-3">
                   <div>
                     <label htmlFor="saleType" className="block text-sm font-medium text-black">Sale Type</label>
@@ -514,6 +569,33 @@ export default function Dashboard() {
                       className="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-500"
                     />
                   </div>
+
+                  {/* New Min and Max Value Filters */}
+                  <div>
+                    <label htmlFor="minValue" className="block text-sm font-medium text-black">Min Value ($)</label>
+                    <input
+                      type="number"
+                      id="minValue"
+                      name="minValue"
+                      value={minValue}
+                      onChange={(e) => setMinValue(e.target.value)}
+                      placeholder="e.g., 10"
+                      className="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="maxValue" className="block text-sm font-medium text-black">Max Value ($)</label>
+                    <input
+                      type="number"
+                      id="maxValue"
+                      name="maxValue"
+                      value={maxValue}
+                      onChange={(e) => setMaxValue(e.target.value)}
+                      placeholder="e.g., 100"
+                      className="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-500"
+                    />
+                  </div>
                 </div>
 
                 <div className="mt-6">
@@ -525,29 +607,57 @@ export default function Dashboard() {
                     Apply Filter
 
                   </button>
-                    {filterApplied && (
+                  {filterApplied && (
                     <p className="mt-2 text-green-500">Filter applied</p>
-                    )}
+                  )}
                 </div>
               </form>
 
               {/* Filtered Transactions Table */}
-              <div className="mt-8 p-4 bg-white rounded-lg shadow overflow-hidden">
-                <h3 className="text-lg font-medium text-gray-900">Sales Transactions</h3>
-
+<div className="mt-8 p-4 bg-white rounded-lg shadow overflow-hidden">
+  <div className="flex justify-between items-center">
+    <h3 className="text-lg font-medium text-gray-900">Sales Transactions</h3>
+    {/* Export CSV Button */}
+    <CSVLink
+      data={filteredTransactions}  // Use the filtered transactions for export
+      filename="transactions.csv"
+      className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+    >
+      Export CSV
+    </CSVLink>
+        </div>
                 <div className="max-h-96 overflow-y-auto">
-
-
                   <table className="min-w-full mt-4 divide-y divide-gray-200">
-                  <thead className="bg-gray-100 sticky top-0 z-10">
+                    <thead className="bg-gray-100 sticky top-0 z-10">
                       <tr>
-                        <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Transaction ID</th>
-                        <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Customer ID</th>
-                        <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Sale Type</th>
-                        <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Product</th>
-                        <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Value ($)</th>
-                        <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Quantity</th>
-                        <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Date</th>
+                        <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase cursor-pointer"
+                          onClick={() => handleSort('id')}>
+                          Transaction ID {renderSortIcon('id')}
+                        </th>
+                        <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase cursor-pointer"
+                          onClick={() => handleSort('customerId')}>
+                          Customer ID {renderSortIcon('customerId')}
+                        </th>
+                        <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase cursor-pointer"
+                          onClick={() => handleSort('saleType')}>
+                          Sale Type {renderSortIcon('saleType')}
+                        </th>
+                        <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase cursor-pointer"
+                          onClick={() => handleSort('product')}>
+                          Product {renderSortIcon('product')}
+                        </th>
+                        <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase cursor-pointer"
+                          onClick={() => handleSort('value')}>
+                          Value ($) {renderSortIcon('value')}
+                        </th>
+                        <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase cursor-pointer"
+                          onClick={() => handleSort('quantity')}>
+                          Quantity {renderSortIcon('quantity')}
+                        </th>
+                        <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase cursor-pointer"
+                          onClick={() => handleSort('date')}>
+                          Date {renderSortIcon('date')}
+                        </th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200">
@@ -566,11 +676,10 @@ export default function Dashboard() {
                     <div className="mt-4 flex justify-between">
                     </div>
                     <div className="mt-8 flex justify-center items-center space-x-4">
-                    {/* <div className="flex gap-2"> */}
                       <button
                         onClick={() => setCurrentPage(currentPage - 1)}
                         disabled={currentPage === 1}
-                      className="w-24 px-2 py-1 bg-gray-700 hover:bg-gray-500 text-white rounded disabled:opacity-50"
+                        className="w-24 px-2 py-1 bg-gray-700 hover:bg-gray-500 text-white rounded disabled:opacity-50"
                       >
                         Previous
                       </button>
@@ -580,36 +689,37 @@ export default function Dashboard() {
                       <button
                         onClick={() => setCurrentPage(currentPage + 1)}
                         disabled={currentPage === totalPages}
-                      className="w-24 px-2 py-1 bg-gray-700 hover:bg-gray-500 text-white rounded disabled:opacity-50"
+                        className="w-24 px-2 py-1 bg-gray-700 hover:bg-gray-500 text-white rounded disabled:opacity-50"
                       >
                         Next
                       </button>
                     </div>
                   </table>
+
                 </div>
               </div>
-              
+
               {/* total qty sold by product table */}
               <div className="mt-8 p-4 bg-white rounded-lg shadow">
                 <h3 className="text-lg font-medium text-gray-900">Total Quantity Sold by Product</h3>
                 <div className="max-h-96 overflow-y-auto">
 
-                <table className="min-w-full mt-4 divide-y divide-gray-200">
-                  <thead className="bg-gray-100 sticky top-0 z-10">
-                    <tr>
-                      <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Product</th>
-                      <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Total Quantity Sold</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-200">
-                    {Object.entries(totalQuantitybyProduct).map(([product, quantity]) => (
-                      <tr key={product}>
-                        <td className="px-6 py-4 text-sm font-medium text-gray-900">{product}</td>
-                        <td className="px-6 py-4 text-sm text-gray-500">{quantity}</td>
+                  <table className="min-w-full mt-4 divide-y divide-gray-200">
+                    <thead className="bg-gray-100 sticky top-0 z-10">
+                      <tr>
+                        <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Product</th>
+                        <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Total Quantity Sold</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody className="divide-y divide-gray-200">
+                      {Object.entries(totalQuantitybyProduct).map(([product, quantity]) => (
+                        <tr key={product}>
+                          <td className="px-6 py-4 text-sm font-medium text-gray-900">{product}</td>
+                          <td className="px-6 py-4 text-sm text-gray-500">{quantity}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
               </div>
 

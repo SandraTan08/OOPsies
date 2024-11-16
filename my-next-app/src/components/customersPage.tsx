@@ -27,6 +27,9 @@ const CustomerList: React.FC = () => {
         const customerData = await response.json();
         setCustomers(customerData);
 
+        // Save customer data to local storage
+        localStorage.setItem('customerData', JSON.stringify(customerData));
+
         // Update the customer tiers after fetching
         await updateCustomerTiers(customerData);
       } catch (err: any) {
@@ -36,7 +39,17 @@ const CustomerList: React.FC = () => {
       }
     };
 
-    fetchCustomers();
+    // Check local storage for saved customer data
+    const savedData = localStorage.getItem('customerData');
+    if (savedData) {
+      // If data is found in local storage, use it
+      const parsedData = JSON.parse(savedData);
+      setCustomers(parsedData);
+      setLoading(false);
+    } else {
+      // If no saved data, fetch from the server
+      fetchCustomers();
+    }
   }, []);
 
   const updateCustomerTiers = async (customers: Customer[]) => {
@@ -58,6 +71,13 @@ const CustomerList: React.FC = () => {
               c.customerId === customer.customerId ? { ...c, tier: updatedTier } : c
             )
           );
+
+          // Update local storage after changing customer data
+          localStorage.setItem('customerData', JSON.stringify(
+            prevCustomers.map(c =>
+              c.customerId === customer.customerId ? { ...c, tier: updatedTier } : c
+            )
+          ));
 
           updatedIds.add(customer.customerId); // Mark this ID as updated
         } catch (err: any) {
@@ -97,60 +117,58 @@ const CustomerList: React.FC = () => {
   }
 
   // Inside the CustomerList component
+  return (
+    <div className="min-h-screen bg-gray-100">
+      <div className="customer-profile">
+        <h1 className="text-2xl font-bold mb-4">Customer List</h1>
 
-return (
-  <div className="min-h-screen bg-gray-100">
-    <div className="customer-profile">
-      <h1 className="text-2xl font-bold mb-4">Customer List</h1>
-
-      {/* Filter UI */}
-      <div className="filter mb-4 p-4 bg-white rounded shadow-md">
-        <h3 className="text-lg font-semibold">Filter by Tier:</h3>
-        <div className="flex space-x-4 mt-2">
-          {["G", "B", "S"].map(tier => (
-            <label key={tier} className="flex items-center">
-              <input
-                type="checkbox"
-                checked={filteredTiers.includes(tier)}
-                onChange={() => handleTierChange(tier)}
-                className="mr-2"
-              />
-              <span className="text-gray-700">{tierDisplayNames[tier]}</span>
-            </label>
-          ))}
-        </div>
-      </div>
-
-      {filteredCustomers.length > 0 ? (
-        <table id="purchase-history" className="min-w-full bg-white rounded shadow">
-          <thead>
-            <tr>
-              <th className="py-2 px-4 border-b">Customer ID</th>
-              <th className="py-2 px-4 border-b">Zip Code</th>
-              <th className="py-2 px-4 border-b">Tier</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredCustomers.map(customer => (
-              <tr key={customer.customerId} className="hover:bg-gray-100">
-                <td className="py-2 px-4 border-b">
-                  <Link href={`/customerprofile/${customer.customerId}`}>
-                    {customer.customerId}
-                  </Link>
-                </td>
-                <td className="py-2 px-4 border-b">{customer.zipCode}</td>
-                <td className="py-2 px-4 border-b">{tierDisplayNames[customer.tier]}</td>
-              </tr>
+        {/* Filter UI */}
+        <div className="filter mb-4 p-4 bg-white rounded shadow-md">
+          <h3 className="text-lg font-semibold">Filter by Tier:</h3>
+          <div className="flex space-x-4 mt-2">
+            {["G", "B", "S"].map(tier => (
+              <label key={tier} className="flex items-center">
+                <input
+                  type="checkbox"
+                  checked={filteredTiers.includes(tier)}
+                  onChange={() => handleTierChange(tier)}
+                  className="mr-2"
+                />
+                <span className="text-gray-700">{tierDisplayNames[tier]}</span>
+              </label>
             ))}
-          </tbody>
-        </table>
-      ) : (
-        <p>No customers available for the selected tier(s).</p>
-      )}
-    </div>
-  </div>
-);
+          </div>
+        </div>
 
+        {filteredCustomers.length > 0 ? (
+          <table id="purchase-history" className="min-w-full bg-white rounded shadow">
+            <thead>
+              <tr>
+                <th className="py-2 px-4 border-b">Customer ID</th>
+                <th className="py-2 px-4 border-b">Zip Code</th>
+                <th className="py-2 px-4 border-b">Tier</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredCustomers.map(customer => (
+                <tr key={customer.customerId} className="hover:bg-gray-100">
+                  <td className="py-2 px-4 border-b">
+                    <Link href={`/customerprofile/${customer.customerId}`}>
+                      {customer.customerId}
+                    </Link>
+                  </td>
+                  <td className="py-2 px-4 border-b">{customer.zipCode}</td>
+                  <td className="py-2 px-4 border-b">{tierDisplayNames[customer.tier]}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        ) : (
+          <p>No customers available for the selected tier(s).</p>
+        )}
+      </div>
+    </div>
+  );
 };
 
 export default CustomerList;

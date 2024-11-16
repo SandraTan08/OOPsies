@@ -72,6 +72,15 @@ public class Newsletter {
         this.products = products;
     }
 
+    @Column(name = "introduction", nullable = false)
+    private String introduction;  // Store the ID of the user who created this template
+
+    @Column(name = "conclusion", nullable = false)
+    private String conclusion;
+
+    @Column(name = "image", nullable = true)
+    private byte[] image;  // Storing image as byte array
+
     @Override
     public String toString() {
         return "Newsletter{" +
@@ -79,6 +88,9 @@ public class Newsletter {
                 ", customerName='" + customerName + '\'' +
                 ", accountId='" + accountId + '\'' +
                 ", products=" + products +
+                ", introduction='" + introduction + '\'' +
+                ", conclusion='" + conclusion + '\'' +
+                ", image='" + image + '\'' +
                 '}';
     }
 }

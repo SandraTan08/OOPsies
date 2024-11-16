@@ -50,9 +50,13 @@ export default function AccountManagement() {
                 ref={inputRef}
                 type="text"
                 id="edit-user-name"
-                value={editingAccount.accountUserName}
-                onChange={(e) =>
-                  setEditingAccount((prev) => ({ ...prev, accountUserName: e.target.value }))}
+                defaultValue={editingAccount.accountUserName} // Use defaultValue instead of value
+                onBlur={(e) =>
+                  setEditingAccount((prev) => ({
+                    ...prev,
+                    accountUserName: e.target.value,
+                  }))
+                }
               />
             </div>
             <div>
@@ -60,17 +64,26 @@ export default function AccountManagement() {
               <Input
                 type="email"
                 id="edit-email"
-                value={editingAccount.accountEmail}
-                onChange={(e) =>
-                  setEditingAccount((prev) => ({ ...prev, accountEmail: e.target.value }))}
+                defaultValue={editingAccount.accountEmail} // Use defaultValue instead of value
+                onBlur={(e) =>
+                  setEditingAccount((prev) => ({
+                    ...prev,
+                    accountEmail: e.target.value,
+                  }))
+                }
               />
             </div>
             <div>
               <Label htmlFor="edit-role">Role</Label>
               <select
                 id="edit-role"
-                value={editingAccount.role}
-                onChange={(e) => setEditingAccount((prev) => ({ ...prev, role: e.target.value }))}
+                defaultValue={editingAccount.role} // Use defaultValue instead of value
+                onBlur={(e) =>
+                  setEditingAccount((prev) => ({
+                    ...prev,
+                    role: e.target.value,
+                  }))
+                }
                 className="w-full px-3 py-2 text-gray-700 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">Select a role</option>
@@ -84,19 +97,24 @@ export default function AccountManagement() {
               <Input
                 type="password"
                 id="edit-password"
-                value={editingAccount.password || ''}
-                onChange={(e) =>
-                  setEditingAccount((prev) => ({ ...prev, password: e.target.value }))}
+                defaultValue={editingAccount.password || ''} // Use defaultValue instead of value
+                onBlur={(e) =>
+                  setEditingAccount((prev) => ({
+                    ...prev,
+                    password: e.target.value,
+                  }))
+                }
                 placeholder="Leave blank to keep current password"
               />
             </div>
           </form>
         ),
         action: handleUpdateAccount,
-      })
-      setShowModal(true)
+      });
+      setShowModal(true);
     }
-  }, [editingAccount])
+  }, [editingAccount]);
+  
 
   const handleCreateAccount = async (e) => {
     e.preventDefault()
