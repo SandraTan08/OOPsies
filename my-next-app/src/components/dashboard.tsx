@@ -522,6 +522,7 @@ export default function Dashboard() {
               {/* Filter Form */}
               <form className="mt-8 p-4 bg-white rounded-lg shadow" onSubmit={handleFilter}>
                 <h3 className="text-lg font-medium text-gray-900">Filter Sales Transactions</h3>
+        
                 <div className="grid grid-cols-1 gap-4 mt-4 sm:grid-cols-2 lg:grid-cols-3">
                   <div>
                     <label htmlFor="saleType" className="block text-sm font-medium text-black">Sale Type</label>
@@ -608,8 +609,18 @@ export default function Dashboard() {
               </form>
 
               {/* Filtered Transactions Table */}
-              <div className="mt-8 p-4 bg-white rounded-lg shadow overflow-hidden">
-                <h3 className="text-lg font-medium text-gray-900">Sales Transactions</h3>
+<div className="mt-8 p-4 bg-white rounded-lg shadow overflow-hidden">
+  <div className="flex justify-between items-center">
+    <h3 className="text-lg font-medium text-gray-900">Sales Transactions</h3>
+    {/* Export CSV Button */}
+    <CSVLink
+      data={filteredTransactions}  // Use the filtered transactions for export
+      filename="transactions.csv"
+      className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+    >
+      Export CSV
+    </CSVLink>
+        </div>
                 <div className="max-h-96 overflow-y-auto">
                   <table className="min-w-full mt-4 divide-y divide-gray-200">
                     <thead className="bg-gray-100 sticky top-0 z-10">
