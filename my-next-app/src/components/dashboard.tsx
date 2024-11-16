@@ -264,7 +264,7 @@ export default function Dashboard() {
         customerDataRef.current = {
           labels: ['Gold', 'Silver', 'Bronze'],
           datasets: [{
-            label: 'Gold (>=$3000), Silver (>=$1000), Bronze (<$1000)',
+            label: 'Customer Segment',
             data: [segmentsCount.gold, segmentsCount.silver, segmentsCount.bronze],
             backgroundColor: [
               'rgba(255, 215, 0, 0.6)',
@@ -465,9 +465,9 @@ export default function Dashboard() {
                       <div className="mt-4">
                         <Line data={customerData} options={{ responsive: true }} />
                       </div>
-                      <p className="mt-4 text-sm text-red-600">
+                      {/* <p className="mt-4 text-sm text-red-600">
                         *Click "Customers" in the sidebar to update Customer Segments.
-                      </p>
+                      </p> */}
                     </div>
                   </div>
                 ) : (
@@ -506,9 +506,9 @@ export default function Dashboard() {
                       <div className="mt-4">
                         <Line data={customerData} options={{ responsive: true }} />
                       </div>
-                      <p className="mt-4 text-sm text-red-600">
+                      {/* <p className="mt-4 text-sm text-red-600">
                         *Click "Customers" in the sidebar to update Customer Segments.
-                      </p>
+                      </p> */}
                     </div>
                   </div>
 
