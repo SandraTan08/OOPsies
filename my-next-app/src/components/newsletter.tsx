@@ -36,7 +36,7 @@ export default function Newsletter() {
 
   const fetchNewsletters = async () => {
     try {
-      const response = await axios.get(`http://localhost:8080/api/v1/newsletter/account/${session.account.accountId}`);
+      const response = await axios.get(`http://localhost:8080/api/v1/newsletter`);
       if (response.status === 200) {
         setSavedNewsletters(response.data);
         console.log('Fetched newsletters:', response.data);

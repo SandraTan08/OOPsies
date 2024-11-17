@@ -14,6 +14,7 @@ import oopsies.timperio.crm.dto.ProductTemplateDTO;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class NewsletterService {
@@ -24,83 +25,104 @@ public class NewsletterService {
     @Autowired
     private ProductTemplateRepository productTemplateRepository;
 
-    public List<NewsletterDTO> getNewslettersByAccountId(String accountId) {
-        List<Newsletter> newsletters = newsletterRepository.findByAccountId(accountId);
-        List<NewsletterDTO> newsletterDTOs = new ArrayList<>();
-
-        for (Newsletter newsletter : newsletters) {
-            NewsletterDTO dto = new NewsletterDTO();
-            dto.setNewsletterId(newsletter.getNewsletterId());
-            dto.setTemplateName(newsletter.getTemplateName());
-            dto.setAccountId(newsletter.getAccountId());
-            dto.setCustomerName(newsletter.getCustomerName());
-
-            List<ProductTemplateDTO> productDTOs = new ArrayList<>();
-            for (ProductTemplate product : newsletter.getProducts()) {
-                ProductTemplateDTO productDTO = new ProductTemplateDTO();
-                productDTO.setProductName(product.getProductName());
-                productDTO.setPrice(product.getPrice());
-                productDTOs.add(productDTO);
-            }
-            dto.setProducts(productDTOs);
-            newsletterDTOs.add(dto);
-        }
-        return newsletterDTOs;
+    public List<NewsletterDTO> getAllNewsletters() {
+        List<Newsletter> newsletters = newsletterRepository.findAll();
+        return newsletters.stream()
+                .map(this::convertToDTO) // Custom mapping method
+                .toList();
     }
 
-    public void saveNewsletter(Newsletter newsletter, HttpSession session) {
-        // Retrieve the accountId and customerName from the session or newsletter object
-        String accountId = newsletter.getAccountId();
-        String customerName = newsletter.getCustomerName();
-        String templateName = newsletter.getTemplateName();
+    public Newsletter createNewsletter(Newsletter newsletter) {
+        // Validate basic fields
+        if (newsletter.getTemplateName() == null || newsletter.getTemplateName().trim().isEmpty()) {
+            throw new IllegalArgumentException("Template name is required.");
+        }
+        // if (newsletter.getAccountId() == null ||
+        // newsletter.getAccountId().trim().isEmpty()) {
+        // throw new IllegalArgumentException("Please sign in to update newsletter.");
+        // }
 
-        // Validate if the accountId and customerName are present
-        if (accountId == null) {
-            throw new IllegalArgumentException("Account ID not found in session or newsletter.");
-        }
-        if (templateName == "[Template Name]" || templateName == null) {
-            throw new IllegalArgumentException("Template name not provided.");
-        }
-        if (customerName == "[Customer Name]" || customerName == null) {
-            throw new IllegalArgumentException("Customer name not provided.");
+        if (newsletter.getIntroduction() == null || newsletter.getIntroduction().trim().isEmpty()) {
+            throw new IllegalArgumentException("Introduction is required.");
         }
 
-        // Detach the product list from the newsletter before saving the newsletter
-        List<ProductTemplate> products = newsletter.getProducts();
-        newsletter.setProducts(null); // Temporarily detach the product list
+        if (newsletter.getConclusion() == null || newsletter.getConclusion().trim().isEmpty()) {
+            throw new IllegalArgumentException("Conclusion is required.");
+        }
 
-        // Step 1: Save the newsletter first (without products)
-        Newsletter savedNewsletter = newsletterRepository.save(newsletter);
+        // Save the newsletter
+        return newsletterRepository.save(newsletter);
+    }
 
-        // Step 2: Now associate each product with the saved newsletter and save the
-        // products
+    public void updateNewsletter(Long newsletterId, Newsletter updatedNewsletter, HttpSession session) {
+        // Fetch the existing newsletter by ID
+        Optional<Newsletter> optionalNewsletter = newsletterRepository.findById(newsletterId);
+        if (optionalNewsletter.isEmpty()) {
+            throw new IllegalArgumentException("Newsletter with ID " + newsletterId + " not found.");
+        }
+
+        Newsletter existingNewsletter = optionalNewsletter.get();
+
+        // Retrieve and validate session or newsletter details
+        String accountId = (String) session.getAttribute("accountId");
+        if (accountId == null || accountId.trim().isEmpty()) {
+            throw new IllegalArgumentException("Please sign in to update newsletter.");
+        }
+
+        String customerName = updatedNewsletter.getCustomerName();
+        if (customerName == null || customerName.trim().isEmpty()) {
+            throw new IllegalArgumentException("Customer name is required.");
+        }
+
+        String templateName = updatedNewsletter.getTemplateName();
+        if (templateName == null || templateName.trim().isEmpty()) {
+            throw new IllegalArgumentException("Template name is required.");
+        }
+
+        // Update existing fields
+        existingNewsletter.setTemplateName(templateName);
+        existingNewsletter.setCustomerName(customerName);
+
+        // Detach and update products if provided
+        List<ProductTemplate> products = updatedNewsletter.getProducts();
         if (products != null && !products.isEmpty()) {
-            for (ProductTemplate product : products) {
-                // Associate each product with the saved newsletter
-                product.setNewsletter(savedNewsletter);
-            }
-            // Save all the associated product templates
-            productTemplateRepository.saveAll(products);
+            // Clear existing products to avoid duplicates
+            productTemplateRepository.deleteAll(existingNewsletter.getProducts());
 
-            // Step 3: Re-attach the products to the newsletter if needed
-            savedNewsletter.setProducts(products);
+            for (ProductTemplate product : products) {
+                product.setNewsletter(existingNewsletter); // Associate each product with the newsletter
+            }
+
+            // Save the new product list
+            productTemplateRepository.saveAll(products);
+            existingNewsletter.setProducts(products);
         }
+
+        // Save the updated newsletter
+        newsletterRepository.save(existingNewsletter);
+    }
+
+    public boolean deleteNewsletter(Long newsletterId) {
+        if (newsletterRepository.existsById(newsletterId)) {
+            newsletterRepository.deleteById(newsletterId);
+            return true;
+        }
+        return false;
     }
 
     public NewsletterDTO getNewsletterById(Long newsletterId) {
         // Logic to retrieve the newsletter from the database
         // You would typically use a repository here to find the newsletter by ID
         Newsletter newsletter = newsletterRepository.findByNewsletterId(newsletterId);
-    
+
         return convertToDTO(newsletter); // Convert the entity to a DTO
     }
-    
+
     private NewsletterDTO convertToDTO(Newsletter newsletter) {
-        // Conversion logic from Newsletter to NewsletterDTO
         if (newsletter == null) {
             return null;
         }
-    
+
         List<ProductTemplateDTO> productDTOs = new ArrayList<>();
         for (ProductTemplate product : newsletter.getProducts()) {
             ProductTemplateDTO productDTO = new ProductTemplateDTO();
@@ -115,12 +137,17 @@ public class NewsletterService {
             productDTOs.add(productDTO);
         }
 
-        return new NewsletterDTO(
-            newsletter.getNewsletterId(),
-            newsletter.getTemplateName(),
-            newsletter.getAccountId(),
-            newsletter.getCustomerName(),
-            productDTOs
-        );
+        NewsletterDTO dto = new NewsletterDTO();
+        dto.setNewsletterId(newsletter.getNewsletterId());
+        dto.setTemplateName(newsletter.getTemplateName());
+        dto.setAccountId(newsletter.getAccountId());
+        dto.setCustomerName(newsletter.getCustomerName());
+        dto.setIntroduction(newsletter.getIntroduction());
+        dto.setConclusion(newsletter.getConclusion());
+        dto.setImage(newsletter.getImage());
+        dto.setProducts(productDTOs);
+
+        return dto;
+
     }
 }
