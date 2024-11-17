@@ -82,11 +82,13 @@ export default function Sidebar() {
                   Account
                 </Link>
               )}
-              <Link
-                href="/"
-                onClick={handleLogout} // Attach the handleLogout function to onClick
-                className="flex items-center px-2 py-2 pl-7 text-sm font-medium text-gray-300 rounded-md hover:bg-gray-700 hover:text-white group"
-              >
+              <Link href="/" className="flex items-center px-2 py-2 text-sm pl-7 font-medium text-gray-300 rounded-md hover:bg-gray-700 hover:text-white group"
+        onClick={() => {
+          // Remove specific item from local storage
+          localStorage.removeItem('customerData');
+          // Optionally, clear all local storage:
+          localStorage.clear();
+        }}>
                 <LogOut className="w-6 h-6 mr-3 text-gray-400 group-hover:text-gray-300" />
                 Sign Out
               </Link>
