@@ -6,6 +6,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import downloadImage from '../img/logo.png';
 import { useSession } from 'next-auth/react';
+import { signOut } from "next-auth/react";
 
 interface SidebarProps {
   role: string | null; // Make role nullable
@@ -17,6 +18,11 @@ export default function Sidebar() {
   const role = session?.account?.role || '';
 
   const toggleSidebar = () => setIsOpen(!isOpen);
+  const handleLogout = async () => {
+    await signOut({ redirect: false }); // Sign out without redirecting
+    // Optional: You can manually redirect after logout if needed
+    window.location.href = '/'; // Redirect to login page after signing out
+  };
 
   return role ? (
     <div>
@@ -70,14 +76,12 @@ export default function Sidebar() {
                   Account
                 </Link>
               )}
-              <Link href="/" className="flex items-center px-2 py-2 text-sm pl-7 font-medium text-gray-300 rounded-md hover:bg-gray-700 hover:text-white group"
-        onClick={() => {
-          // Remove specific item from local storage
-          localStorage.removeItem('customerData');
-          // Optionally, clear all local storage:
-          // localStorage.clear();
-        }}>
-          <LogOut className="w-6 h-6 mr-3 text-gray-400 group-hover:text-gray-300" />
+              <Link
+                href="/"
+                onClick={handleLogout} // Attach the handleLogout function to onClick
+                className="flex items-center px-2 py-2 pl-7 text-sm font-medium text-gray-300 rounded-md hover:bg-gray-700 hover:text-white group"
+              >
+                <LogOut className="w-6 h-6 mr-3 text-gray-400 group-hover:text-gray-300" />
                 Sign Out
               </Link>
             </nav>

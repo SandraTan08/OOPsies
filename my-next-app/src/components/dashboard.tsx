@@ -204,7 +204,7 @@ export default function Dashboard() {
           name: product.productName
         }));
 
-        console.log(productdeets);
+        // console.log(productdeets);
 
         return productdeets;
       } catch (error) {
@@ -270,7 +270,7 @@ export default function Dashboard() {
           }
         });
 
-        console.log('Segments Count:', segmentsCount);
+        // console.log('Segments Count:', segmentsCount);
 
         customerDataRef.current = {
           labels: ['Gold', 'Silver', 'Bronze'],
@@ -285,16 +285,31 @@ export default function Dashboard() {
           }],
         };
         setCustomerData(customerDataRef.current);
-        console.log('Updated Customer Data State:', customerDataRef.current);
+        // console.log('Updated Customer Data State:', customerDataRef.current);
       } catch (error) {
         console.error('Error fetching customer data:', error);
       }
     }
 
+    if (session === undefined) return; // Wait for session to load
+
+    if (!session) {
+      router.push('/');
+      console.log('Session is missing, redirecting to login');
+      return;
+    }
+  
+    if (session?.account?.role === 'Admin') {
+      router.push('/account');
+      console.log(session);
+      return;
+    }
+
+    console.log('Session:', session);  // Log session details
     fetchProductDeets();
     fetchSalesData();
     fetchCustomerData();
-  }, [viewType, startMonth, endMonth, startYear, endYear]);
+  }, [viewType, startMonth, endMonth, startYear, endYear, session, router]);
 
   const handleFilter = (e) => {
     e.preventDefault();
@@ -325,17 +340,18 @@ export default function Dashboard() {
     setFilteredTransactions(filteredRangeTransactions);
   };
 
-    if (status === 'loading') {
-      return <div>Loading...</div>;
+    if (session === undefined) {
+      return <div>Loading...</div>; // You can show a loading spinner or message
     }
 
-    if (session?.account?.role === 'Admin') {
-      // Redirect to a different page if the user is an admin
-      window.location.href = '/account'; 
-    }
+    // if (session?.account?.role === 'Admin') {
+    //   // Redirect to a different page if the user is an admin
+    //   window.location.href = '/account'; 
+    // }
 
     if (!session) {
       window.location.href = '/';
+      console.log('Session is missing, redirecting to login');
       return null;
     }
 
@@ -345,7 +361,9 @@ export default function Dashboard() {
 
 
         <main className="flex-1  bg-gray-100">
+          
           <div className="py-6">
+
             <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
               <h1 className="text-2xl font-semibold text-gray-900 pb-5">Welcome, {session.account.accountUserName}</h1>
             </div>

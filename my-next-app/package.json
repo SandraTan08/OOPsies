@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
+    "@next-auth/upstash-redis-adapter": "^3.0.4",
     "@prisma/client": "^5.19.1",
     "@radix-ui/react-avatar": "^1.1.1",
     "@radix-ui/react-label": "^2.1.0",
@@ -18,6 +19,7 @@
     "@radix-ui/react-separator": "^1.1.0",
     "@radix-ui/react-slot": "^1.1.0",
     "@tanstack/react-table": "^8.20.5",
+    "@upstash/redis": "^1.34.3",
     "autoprefixer": "^10.4.20",
     "axios": "^1.7.7",
     "bcryptjs": "^2.4.3",
@@ -25,10 +27,11 @@
     "clsx": "^2.1.1",
     "eslint": "^9.11.1",
     "input": "^1.0.1",
+    "ioredis": "^5.4.1",
     "lucide-react": "^0.441.0",
     "my-next-app": "file:",
     "next": "14.2.13",
-    "next-auth": "^4.24.8",
+    "next-auth": "^4.24.10",
     "postcss": "^8.4.47",
     "react": "^18",
     "react-avatar": "^5.0.3",
@@ -47,6 +50,8 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/ioredis": "^5.0.0",
     "@types/jest": "^29.5.13",
     "@types/node": "^20",
     "@types/react": "^18",

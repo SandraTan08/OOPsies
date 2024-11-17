@@ -8,6 +8,7 @@ oopsies/timperio/crm/TestController.class
 oopsies/timperio/crm/Repository/PurchaseHistoryRepository.class
 oopsies/timperio/crm/Service/CustomerService.class
 oopsies/timperio/crm/Controller/AccountController.class
+oopsies/timperio/crm/Controller/SessionTestController.class
 oopsies/timperio/crm/dto/NewsletterDTO.class
 oopsies/timperio/crm/Service/NewsletterService.class
 oopsies/timperio/crm/config/GlobalCorsConfig.class

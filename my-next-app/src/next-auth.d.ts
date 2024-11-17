@@ -17,9 +17,10 @@ declare module "next-auth" {
       accountUserName:string;
       role: string;
       accountEmail:string;
-      name?: string | null;  // Ensure the default fields are still present
-      email?: string | null;
-      image?: string | null;
+      
+      // name?: string | null;  // Ensure the default fields are still present
+      // email?: string | null;
+      // image?: string | null;
     };
   }
 }
