@@ -647,7 +647,7 @@ export default function Dashboard() {
                   <CSVLink
                     data={filteredTransactions}  // Use the filtered transactions for export
                     filename="transactions.csv"
-                    className="inline-flex items-center px-4 py-2 text-sm font-medium text-white hover:bg-gray-500 bg-gray-700 border border-transparent rounded-md shadow-sm  focus:outline-none focus:ring-2 focus:ring-offset-2"
+                    className="inline-flex items-center px-4 py-2 font-medium text-white hover:bg-gray-500 bg-gray-700 border border-transparent rounded-md shadow-sm  focus:outline-none focus:ring-2 focus:ring-offset-2"
                   >
                     Export CSV
                   </CSVLink>
