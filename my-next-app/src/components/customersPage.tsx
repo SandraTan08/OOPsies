@@ -167,10 +167,10 @@ const CustomerList: React.FC = () => {
           <table id="purchase-history" className="min-w-full bg-white rounded shadow">
             <thead>
               <tr>
-                <th className="py-2 px-4 border-b">Customer ID</th>
-                <th className="py-2 px-4 border-b">Zip Code</th>
-                <th className="py-2 px-4 border-b">Tier</th>
-                <th className="py-2 px-4 border-b">Amount Spent</th>
+                <th className="py-2 px-4 border-b bg-gray-500">Customer ID</th>
+                <th className="py-2 px-4 border-b bg-gray-500">Zip Code</th>
+                <th className="py-2 px-4 border-b bg-gray-500">Tier</th>
+                <th className="py-2 px-4 border-b bg-gray-500">Amount Spent</th>
               </tr>
             </thead>
             <tbody>
