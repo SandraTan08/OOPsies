@@ -18,6 +18,9 @@ export default function Newsletter() {
   const [template, setTemplate] = useState({
     templateName: null,
     customerName: null,
+    introduction: null,
+    conclusion: null,
+    image: null,
     products: [] // Changed to an array to store products dynamically
   })
 
@@ -58,6 +61,9 @@ export default function Newsletter() {
       setTemplate({
         templateName: data.templateName,
         customerName: data.customerName,
+        introduction: data.introduction,
+        conclusion: data.conclusion,
+        image: data.image,
         products: data.products
       });
     } catch (error) {
@@ -280,9 +286,10 @@ export default function Newsletter() {
                 id="templateName"
                 name="templateName"
                 value={template.templateName}
-                placeholder="Enter template name"
+                placeholder="Choose template from above"
                 onChange={(e) => setTemplate({ ...template, templateName: e.target.value })}
                 className="mt-1"
+                readOnly
               />
             </div>
             <div className="mb-6">
@@ -464,7 +471,7 @@ export default function Newsletter() {
                 className="mt-1 h-64"
                 value={`Dear ${template.customerName},
 
-We've curated something special for you! Based on your recent purchases and browsing history, here are some exclusive offers and recommendations we think you'll love.
+${template.introduction}
 
 Personalized Product Recommendations:
 Top Picks for You:
@@ -482,7 +489,7 @@ ${template.products.map((product, index) => {
                   return productDetails;
                 }).join('\n\n')}
 
-Take advantage of these personalized offers and discover more with Timperio. Shop now and enjoy the best deals tailored just for you!
+${template.conclusion}
 
 Warm regards,
 Marketing team`}
