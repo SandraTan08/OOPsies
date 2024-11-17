@@ -28,6 +28,9 @@ ChartJS.register(
   Tooltip,
   Legend
 )
+interface SidebarProps {
+  role: string | null; // Make role nullable
+}
 
 import { CSVLink } from 'react-csv'
 import { ShoppingCart, BarChart, Search, Download, ReceiptText } from 'lucide-react'
@@ -44,6 +47,8 @@ export default function Dashboard() {
   const [productFilter, setProductFilter] = useState<string>('');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 25;
+  const { data: session } = useSession();
+  const role = session?.account?.role || '';
   
   const [salesData, setSalesData] = useState<any>({
     labels: [],
@@ -76,7 +81,7 @@ export default function Dashboard() {
   const [endYear, setEndYear] = useState<number | 'all'>('all');
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const toggleDropdown = () => setDropdownOpen(!dropdownOpen);
-  const { data: session, status } = useSession();
+  // const { data: session, status } = useSession();
   const router = useRouter();
   const [isAuthorized, setIsAuthorized] = useState(false);
 
@@ -462,7 +467,7 @@ export default function Dashboard() {
               <div className="mt-8">
 
 
-                {userRole === 'Marketing' ? (
+                {role === 'Marketing' ? (
                   <div className="grid grid-cols-1 gap-5 sm:grid-cols-1">
 
                     <div className="p-4 bg-white rounded-lg shadow ">
