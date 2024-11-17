@@ -1,9 +1,7 @@
-// NewsletterService.java
 package oopsies.timperio.crm.Service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import jakarta.servlet.http.HttpSession;
 import oopsies.timperio.crm.Repository.NewsletterRepository;
 import oopsies.timperio.crm.Newsletter;
@@ -13,6 +11,7 @@ import oopsies.timperio.crm.dto.NewsletterDTO;
 import oopsies.timperio.crm.dto.ProductTemplateDTO;
 
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 
@@ -37,10 +36,6 @@ public class NewsletterService {
         if (newsletter.getTemplateName() == null || newsletter.getTemplateName().trim().isEmpty()) {
             throw new IllegalArgumentException("Template name is required.");
         }
-        // if (newsletter.getAccountId() == null ||
-        // newsletter.getAccountId().trim().isEmpty()) {
-        // throw new IllegalArgumentException("Please sign in to update newsletter.");
-        // }
 
         if (newsletter.getIntroduction() == null || newsletter.getIntroduction().trim().isEmpty()) {
             throw new IllegalArgumentException("Introduction is required.");
@@ -50,7 +45,7 @@ public class NewsletterService {
             throw new IllegalArgumentException("Conclusion is required.");
         }
 
-        if (newsletter.getImage() != null && newsletter.getImage().length > 15 * 1024 * 1024) { // 10 MB limit
+        if (newsletter.getImage() != null && newsletter.getImage().length > 15 * 1024 * 1024) { // 15 MB limit
             throw new IllegalArgumentException("File size exceeds the limit");
         }
 
@@ -115,10 +110,8 @@ public class NewsletterService {
     }
 
     public NewsletterDTO getNewsletterById(Long newsletterId) {
-        // Logic to retrieve the newsletter from the database
-        // You would typically use a repository here to find the newsletter by ID
+        // Retrieve the newsletter from the database
         Newsletter newsletter = newsletterRepository.findByNewsletterId(newsletterId);
-
         return convertToDTO(newsletter); // Convert the entity to a DTO
     }
 
@@ -141,6 +134,12 @@ public class NewsletterService {
             productDTOs.add(productDTO);
         }
 
+        // Convert the image to Base64 if it exists
+        String base64Image = null;
+        if (newsletter.getImage() != null) {
+            base64Image = Base64.getEncoder().encodeToString(newsletter.getImage());
+        }
+
         NewsletterDTO dto = new NewsletterDTO();
         dto.setNewsletterId(newsletter.getNewsletterId());
         dto.setTemplateName(newsletter.getTemplateName());
@@ -148,10 +147,9 @@ public class NewsletterService {
         dto.setCustomerName(newsletter.getCustomerName());
         dto.setIntroduction(newsletter.getIntroduction());
         dto.setConclusion(newsletter.getConclusion());
-        dto.setImage(newsletter.getImage());
+        dto.setImage(base64Image); // Set Base64 image in the DTO
         dto.setProducts(productDTOs);
 
         return dto;
-
     }
 }

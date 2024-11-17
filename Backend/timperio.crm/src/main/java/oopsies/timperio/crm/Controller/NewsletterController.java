@@ -1,4 +1,3 @@
-// NewsletterController.java
 package oopsies.timperio.crm.Controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,8 +10,8 @@ import jakarta.servlet.http.HttpSession;
 import oopsies.timperio.crm.Service.NewsletterService;
 import oopsies.timperio.crm.dto.NewsletterDTO;
 import oopsies.timperio.crm.Newsletter;
+
 import java.util.List;
-import java.util.Base64;
 
 @RestController
 @RequestMapping("/api/v1/newsletter")
@@ -27,12 +26,9 @@ public class NewsletterController {
             @RequestParam("introduction") String introduction,
             @RequestParam("conclusion") String conclusion,
             @RequestParam(value = "image", required = false) MultipartFile image
-    // HttpSession session
+            // HttpSession session
     ) {
         try {
-            // Retrieve accountId from the session
-            // String accountId = (String) session.getAttribute("accountId");
-
             // Validate input
             if (templateName == null || templateName.trim().isEmpty()) {
                 return ResponseEntity.badRequest().body(null);
@@ -43,10 +39,11 @@ public class NewsletterController {
             if (conclusion == null || conclusion.trim().isEmpty()) {
                 return ResponseEntity.badRequest().body(null);
             }
+
             final long MAX_SIZE = 15 * 1024 * 1024; // 15 MB in bytes
 
-            // Validate image size
-            if (image.getSize() > MAX_SIZE) {
+            // Validate image size if provided
+            if (image != null && image.getSize() > MAX_SIZE) {
                 return ResponseEntity.badRequest().body(null);
             }
 
@@ -61,7 +58,6 @@ public class NewsletterController {
             newsletter.setTemplateName(templateName);
             newsletter.setIntroduction(introduction);
             newsletter.setConclusion(conclusion);
-            // newsletter.setAccountId(accountId);
             newsletter.setImage(imageBytes); // Save image as byte array
 
             System.out.println("Creating newsletter: " + newsletter);
@@ -107,12 +103,6 @@ public class NewsletterController {
         try {
             NewsletterDTO newsletter = newsletterService.getNewsletterById(newsletterId);
             if (newsletter != null) {
-                // Convert BLOB to Base64 if the image is present
-                if (newsletter.getImage() != null) {
-                    String base64Image = Base64.getEncoder().encodeToString(newsletter.getImage());
-                    newsletter.setBase64Image(base64Image); // Add Base64 image to the DTO
-                    newsletter.setImage(null); // Optional: remove raw image bytes from response
-                }
                 return ResponseEntity.ok(newsletter);
             } else {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
@@ -137,5 +127,4 @@ public class NewsletterController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to delete newsletter.");
         }
     }
-
 }

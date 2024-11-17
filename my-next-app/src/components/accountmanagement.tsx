@@ -340,16 +340,18 @@ export default function AccountManagement() {
       <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 sm:px-6">{account.accountEmail}</td>
       <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 sm:px-6">{account.role}</td>
       <td className="px-4 py-4 whitespace-nowrap text-sm font-medium space-x-2 sm:px-6">
-        {account.role !== 'Admin' && (
-          <>
-            <Button variant="ghost" size="sm" onClick={() => handleEditAccount(account)}>
-              <Edit2 className="w-4 h-4" />
-            </Button>
+      {(account.role !== 'Admin' || account.accountId === session.account.accountId) && (
+        <>
+          <Button variant="ghost" size="sm" onClick={() => handleEditAccount(account)}>
+            <Edit2 className="w-4 h-4" />
+          </Button>
+          {account.role !== 'Admin' && (
             <Button variant="ghost" size="sm" onClick={() => handleDeleteAccount(account)}>
               <Trash2 className="w-4 h-4" />
             </Button>
-          </>
-        )}
+          )}
+        </>
+      )}
       </td>
     </tr>
   ))}

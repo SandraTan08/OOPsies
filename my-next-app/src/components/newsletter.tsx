@@ -196,15 +196,22 @@ export default function Newsletter() {
       return productDetails;
     }).join('');
 
-    return `
-      <div>
-        <p>Dear ${template.customerName},</p>
-        <p>We've curated something special for you! Based on your recent purchases and browsing history, here are some exclusive offers:</p>
-        <ul>${productList}</ul>
-        <p>Take advantage of these personalized offers and discover more with Timperio. Shop now and enjoy the best deals tailored just for you!</p>
-        <p>Warm regards,<br/>Marketing team</p>
-      </div>
-    `;
+    const imageSection = template.image
+    ? `<p><img src="data:image/png;base64,${template.image}" alt="Newsletter Image" style="max-width:100%; height:auto;" /></p>`
+    : '';
+  
+  return `
+    <div>
+      <p>Dear ${template.customerName},</p>
+      <p>${template.introduction}</p>
+      <p>${imageSection} <!-- Insert image here --> hello </p>
+      <p>We've curated something special for you! Based on your recent purchases and browsing history, here are some exclusive offers:</p>
+      <ul>${productList}</ul>
+      <p>Take advantage of these personalized offers and discover more with Timperio. Shop now and enjoy the best deals tailored just for you!</p>
+      <p>${template.conclusion}</p>
+      <p>Warm regards,<br/>Marketing team</p>
+    </div>
+  `;
   };
 
   const handleSend = async () => {
@@ -478,6 +485,9 @@ export default function Newsletter() {
                 value={`Dear ${template.customerName},
 
 ${template.introduction}
+
+${template.image ? '[Image Preview: Embedded Image Below]' : '[No Image Provided]'}
+
 
 Personalized Product Recommendations:
 Top Picks for You:
