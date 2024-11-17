@@ -43,6 +43,12 @@ public class NewsletterController {
             if (conclusion == null || conclusion.trim().isEmpty()) {
                 return ResponseEntity.badRequest().body(null);
             }
+            final long MAX_SIZE = 15 * 1024 * 1024; // 15 MB in bytes
+
+            // Validate image size
+            if (image.getSize() > MAX_SIZE) {
+                return ResponseEntity.badRequest().body(null);
+            }
 
             // Convert image to byte array if provided
             byte[] imageBytes = null;

@@ -49,7 +49,7 @@ export default function TemplateNewsletter() {
       setIntroduction(data.introduction);
       setConclusion(data.conclusion);
       if (data.image) {
-        setImagePreview(`data:image/jpeg;base64,${data.image}`); // Change MIME type if needed
+        setImagePreview(`data:image/png;base64,${data.image}`);
       } else {
         setImagePreview(null);
       }
@@ -82,7 +82,10 @@ export default function TemplateNewsletter() {
     const errors = [];
     if (!templateName.trim()) errors.push('Please enter a template name');
     if (!introduction.trim()) errors.push('Introduction cannot be empty');
+    if (introduction.length > 5000) errors.push('Introduction cannot exceed 5000 characters');
     if (!conclusion.trim()) errors.push('Conclusion cannot be empty');
+    if (conclusion.length > 5000) errors.push('Conclusion cannot exceed 5000 characters');
+    if (image && image.size > 15 * 1024 * 1024) errors.push('Image size should be less than 15MB');
 
     if (errors.length > 0) {
       toast.error(errors.join('. '));

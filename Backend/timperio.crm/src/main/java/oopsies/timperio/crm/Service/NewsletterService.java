@@ -50,6 +50,10 @@ public class NewsletterService {
             throw new IllegalArgumentException("Conclusion is required.");
         }
 
+        if (newsletter.getImage() != null && newsletter.getImage().length > 15 * 1024 * 1024) { // 10 MB limit
+            throw new IllegalArgumentException("File size exceeds the limit");
+        }
+
         // Save the newsletter
         return newsletterRepository.save(newsletter);
     }
