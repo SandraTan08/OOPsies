@@ -9,6 +9,7 @@ interface Customer {
   customerId: number;
   zipCode: number;
   tier: string; // Include the tier field
+  totalSpent?: number; // New field to store the total spent amount
 }
 
 const CustomerList: React.FC = () => {
@@ -16,6 +17,7 @@ const CustomerList: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [filteredTiers, setFilteredTiers] = useState<string[]>(["G", "B", "S"]); // Default to show all
+  const [arrangeByTopSpending, setArrangeByTopSpending] = useState<boolean>(false); // State for spending filter
 
   useEffect(() => {
     const fetchCustomers = async () => {
@@ -25,13 +27,22 @@ const CustomerList: React.FC = () => {
           throw new Error('Failed to fetch customers');
         }
         const customerData = await response.json();
-        setCustomers(customerData);
+
+        // Fetch the purchase history and calculate total spent for each customer
+        const customersWithSpent = await Promise.all(
+          customerData.map(async (customer: Customer) => {
+            const totalSpent = await fetchTotalSpent(customer.customerId);
+            return { ...customer, totalSpent };
+          })
+        );
+
+        setCustomers(customersWithSpent);
 
         // Save customer data to local storage
-        localStorage.setItem('customerData', JSON.stringify(customerData));
+        localStorage.setItem('customerData', JSON.stringify(customersWithSpent));
 
         // Update the customer tiers after fetching
-        await updateCustomerTiers(customerData);
+        await updateCustomerTiers(customersWithSpent);
       } catch (err: any) {
         setError(err.message);
       } finally {
@@ -51,6 +62,22 @@ const CustomerList: React.FC = () => {
       fetchCustomers();
     }
   }, []);
+
+  // Function to fetch the total spent for a customer
+  const fetchTotalSpent = async (customerId: number): Promise<number> => {
+    try {
+      const response = await fetch(`http://localhost:8080/api/v1/purchaseHistory/byCustomer?customerId=${customerId}`);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch purchase history for customer ID ${customerId}`);
+      }
+      const purchaseHistory = await response.json();
+      // Sum up the totalPrice values
+      return purchaseHistory.reduce((total: number, purchase: { totalPrice: number }) => total + purchase.totalPrice, 0);
+    } catch (err: any) {
+      console.error(err.message);
+      return 0; // Default to 0 if there was an error fetching
+    }
+  };
 
   const updateCustomerTiers = async (customers: Customer[]) => {
     const updatedIds = new Set<number>(); // To keep track of updated customer IDs
@@ -88,7 +115,9 @@ const CustomerList: React.FC = () => {
   };
 
   // Function to filter customers based on selected tiers
-  const filteredCustomers = customers.filter(customer => filteredTiers.includes(customer.tier));
+  const filteredCustomers = customers
+    .filter(customer => filteredTiers.includes(customer.tier))
+    .sort((a, b) => arrangeByTopSpending ? (b.totalSpent || 0) - (a.totalSpent || 0) : 0); // Sorting logic based on checkbox state
 
   // Function to handle tier filter change
   const handleTierChange = (tier: string) => {
@@ -116,7 +145,6 @@ const CustomerList: React.FC = () => {
     return <div className="error">Error: {error}</div>;
   }
 
-  // Inside the CustomerList component
   return (
     <div className="min-h-screen bg-gray-100">
       <div className="customer-profile">
@@ -138,6 +166,19 @@ const CustomerList: React.FC = () => {
               </label>
             ))}
           </div>
+
+          {/* Arrange by Top Spending checkbox */}
+          <div className="mt-4">
+            <label className="flex items-center">
+              <input
+                type="checkbox"
+                checked={arrangeByTopSpending}
+                onChange={() => setArrangeByTopSpending(prev => !prev)}
+                className="mr-2"
+              />
+              <span className="text-gray-700">Arrange by Top Spending</span>
+            </label>
+          </div>
         </div>
 
         {filteredCustomers.length > 0 ? (
@@ -147,6 +188,7 @@ const CustomerList: React.FC = () => {
                 <th className="py-2 px-4 border-b">Customer ID</th>
                 <th className="py-2 px-4 border-b">Zip Code</th>
                 <th className="py-2 px-4 border-b">Tier</th>
+                <th className="py-2 px-4 border-b">Amount Spent</th>
               </tr>
             </thead>
             <tbody>
@@ -154,11 +196,14 @@ const CustomerList: React.FC = () => {
                 <tr key={customer.customerId} className="hover:bg-gray-100">
                   <td className="py-2 px-4 border-b">
                     <Link href={`/customerprofile/${customer.customerId}`}>
-                      {customer.customerId}
+                      <span className="text-blue-600 underline hover:text-blue-800">
+                        {customer.customerId}
+                      </span>
                     </Link>
                   </td>
                   <td className="py-2 px-4 border-b">{customer.zipCode}</td>
                   <td className="py-2 px-4 border-b">{tierDisplayNames[customer.tier]}</td>
+                  <td className="py-2 px-4 border-b">${customer.totalSpent?.toFixed(2)}</td>
                 </tr>
               ))}
             </tbody>
