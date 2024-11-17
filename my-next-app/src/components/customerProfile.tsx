@@ -142,9 +142,12 @@ const CustomerProfile: React.FC<CustomerProfileProps> = ({ customerId }) => {
   return (
     <div className="customer-profile">
       <h1 className="profile-header">
-        Customer Profile for User ID: <span>{customerId}</span>
+        <span className="profile-left">
+          Customer Profile for User ID: <span className="customer-id">{customerId}</span>
+        </span>
         <span className="tier-badge">{tier}</span>
       </h1>
+
       {customer && (
         <div className="customer-details">
           <p><strong>Zipcode:</strong> {customer.zipCode}</p>
