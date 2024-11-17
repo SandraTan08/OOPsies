@@ -144,13 +144,6 @@ const CustomerProfile: React.FC<CustomerProfileProps> = ({ customerId }) => {
       <h1 className="profile-header">
         Customer Profile for User ID: <span>{customerId}</span>
         <span className="tier-badge">{tier}</span>
-        {role === "Marketing" && (
-          <Link href="/newsletter">
-            <button className="contact-button">
-              Contact Me
-            </button>
-          </Link>
-        )}
       </h1>
       {customer && (
         <div className="customer-details">
@@ -189,6 +182,7 @@ const CustomerProfile: React.FC<CustomerProfileProps> = ({ customerId }) => {
               <th>Product Name</th>
               <th>Quantity</th>
               <th>Sale Type</th>
+              <th>Digital</th>
               <th>Total Price</th>
               <th>Purchase Date</th>
             </tr>
@@ -199,6 +193,7 @@ const CustomerProfile: React.FC<CustomerProfileProps> = ({ customerId }) => {
                 <td>{purchase.purchaseId}</td>
                 <td>{purchase.productName}</td>
                 <td>{purchase.saleType}</td>
+                <td>{purchase.digital}</td>
                 <td>{purchase.quantity}</td>
                 <td>${purchase.totalPrice.toFixed(2)}</td>
                 <td>{purchase.saleDate}</td>
