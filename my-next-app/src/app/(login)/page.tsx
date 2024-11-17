@@ -3,14 +3,17 @@ import { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 
 export const metadata: Metadata = {
-  title: 'Login'
+  title: 'Login',
 };
 
-export default async function LoginPage({
-  searchParams
+export default function LoginPage({
+  searchParams,
 }: {
-  searchParams: { error: string };
+  searchParams: { error?: string }; // Ensure the error is optional
 }) {
-  if (searchParams.error) redirect(`/error?message=${searchParams.error}`);
+  if (searchParams?.error) {
+    redirect(`/error?message=${searchParams.error}`);
+  }
+
   return <LoginForm />;
 }
