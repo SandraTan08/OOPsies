@@ -19,6 +19,17 @@ export default function AccountManagement() {
   const [notification, setNotification] = useState(null)
   const inputRef = useRef(null)
 
+  // New useEffect hook for handling notification timeout
+  useEffect(() => {
+    if (notification) {
+      const timer = setTimeout(() => {
+        setNotification(null)
+      }, 5000) // Notification will disappear after 5 seconds
+
+      return () => clearTimeout(timer)
+    }
+  }, [notification])
+
   useEffect(() => {
     const fetchAccounts = async () => {
       try {
@@ -356,7 +367,9 @@ export default function AccountManagement() {
         )}
 
         {notification && (
-          <div className={`mt-4 p-4 text-sm rounded-md ${notification.type === 'error' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
+          <div className={`fixed bottom-4 right-4 mt-4 p-4 text-sm rounded-md ${
+            notification.type === 'error' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'
+          }`}>
             {notification.message}
           </div>
         )}
