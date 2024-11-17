@@ -1,5 +1,4 @@
 "use client";
-
 import React, { useState, useEffect } from 'react';
 import './CustomerList.css'; // Import the CSS file
 import Header from "@/components/header";
@@ -8,8 +7,8 @@ import Link from 'next/link';
 interface Customer {
   customerId: number;
   zipCode: number;
-  tier: string; // Include the tier field
-  totalSpent?: number; // New field to store the total spent amount
+  tier: string;
+  totalSpent?: number;
 }
 
 const CustomerList: React.FC = () => {
@@ -17,7 +16,12 @@ const CustomerList: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [filteredTiers, setFilteredTiers] = useState<string[]>(["G", "B", "S"]); // Default to show all
-  const [arrangeByTopSpending, setArrangeByTopSpending] = useState<boolean>(false); // State for spending filter
+  const [arrangeByTopSpending, setArrangeByTopSpending] = useState<boolean>(false);
+
+  // Pagination States
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 30; // Increase the items per page to 50
+  const [searchTerm, setSearchTerm] = useState<string>(''); // State to handle search input for customerId
 
   useEffect(() => {
     const fetchCustomers = async () => {
@@ -28,7 +32,7 @@ const CustomerList: React.FC = () => {
         }
         const customerData = await response.json();
 
-        // Fetch the purchase history and calculate total spent for each customer
+        // Fetch total spent for each customer
         const customersWithSpent = await Promise.all(
           customerData.map(async (customer: Customer) => {
             const totalSpent = await fetchTotalSpent(customer.customerId);
@@ -40,9 +44,6 @@ const CustomerList: React.FC = () => {
 
         // Save customer data to local storage
         localStorage.setItem('customerData', JSON.stringify(customersWithSpent));
-
-        // Update the customer tiers after fetching
-        await updateCustomerTiers(customersWithSpent);
       } catch (err: any) {
         setError(err.message);
       } finally {
@@ -50,20 +51,16 @@ const CustomerList: React.FC = () => {
       }
     };
 
-    // Check local storage for saved customer data
     const savedData = localStorage.getItem('customerData');
     if (savedData) {
-      // If data is found in local storage, use it
       const parsedData = JSON.parse(savedData);
       setCustomers(parsedData);
       setLoading(false);
     } else {
-      // If no saved data, fetch from the server
       fetchCustomers();
     }
   }, []);
 
-  // Function to fetch the total spent for a customer
   const fetchTotalSpent = async (customerId: number): Promise<number> => {
     try {
       const response = await fetch(`http://localhost:8080/api/v1/purchaseHistory/byCustomer?customerId=${customerId}`);
@@ -71,66 +68,39 @@ const CustomerList: React.FC = () => {
         throw new Error(`Failed to fetch purchase history for customer ID ${customerId}`);
       }
       const purchaseHistory = await response.json();
-      // Sum up the totalPrice values
       return purchaseHistory.reduce((total: number, purchase: { totalPrice: number }) => total + purchase.totalPrice, 0);
     } catch (err: any) {
       console.error(err.message);
-      return 0; // Default to 0 if there was an error fetching
+      return 0;
     }
   };
 
-  const updateCustomerTiers = async (customers: Customer[]) => {
-    const updatedIds = new Set<number>(); // To keep track of updated customer IDs
-
-    for (const customer of customers) {
-      if (!updatedIds.has(customer.customerId)) {
-        try {
-          const response = await fetch(`http://localhost:8080/api/v1/customers/customerTier?customerId=${customer.customerId}`, {
-            method: 'PUT',
-          });
-          if (!response.ok) {
-            throw new Error(`Failed to update tier for customer ID ${customer.customerId}`);
-          }
-          const updatedTier = await response.text();
-
-          setCustomers(prevCustomers =>
-            prevCustomers.map(c =>
-              c.customerId === customer.customerId ? { ...c, tier: updatedTier } : c
-            )
-          );
-
-          // Update local storage after changing customer data
-          localStorage.setItem('customerData', JSON.stringify(
-            prevCustomers.map(c =>
-              c.customerId === customer.customerId ? { ...c, tier: updatedTier } : c
-            )
-          ));
-
-          updatedIds.add(customer.customerId); // Mark this ID as updated
-        } catch (err: any) {
-          console.error(err.message);
-        }
-      }
-    }
-  };
-
-  // Function to filter customers based on selected tiers
   const filteredCustomers = customers
     .filter(customer => filteredTiers.includes(customer.tier))
-    .sort((a, b) => arrangeByTopSpending ? (b.totalSpent || 0) - (a.totalSpent || 0) : 0); // Sorting logic based on checkbox state
+    .filter(customer => customer.customerId.toString().includes(searchTerm)) // Search filter by customerId
+    .sort((a, b) => arrangeByTopSpending ? (b.totalSpent || 0) - (a.totalSpent || 0) : 0);
 
-  // Function to handle tier filter change
+  // Paginate the customers
+  const indexOfLastCustomer = currentPage * itemsPerPage;
+  const indexOfFirstCustomer = indexOfLastCustomer - itemsPerPage;
+  const currentCustomers = filteredCustomers.slice(indexOfFirstCustomer, indexOfLastCustomer);
+
+  const totalPages = Math.ceil(filteredCustomers.length / itemsPerPage);
+
   const handleTierChange = (tier: string) => {
     setFilteredTiers(prev => {
       if (prev.includes(tier)) {
-        return prev.filter(t => t !== tier); // Remove tier if already included
+        return prev.filter(t => t !== tier);
       } else {
-        return [...prev, tier]; // Add tier if not included
+        return [...prev, tier];
       }
     });
   };
 
-  // Mapping of tier codes to display names
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
   const tierDisplayNames: { [key: string]: string } = {
     G: "Gold",
     S: "Silver",
@@ -149,6 +119,18 @@ const CustomerList: React.FC = () => {
     <div className="min-h-screen bg-gray-100">
       <div className="customer-profile">
         <h1 className="text-2xl font-bold mb-4">Customer List</h1>
+
+        {/* Search Bar for Customer ID */}
+        <div className="search-bar mb-4 p-4 bg-white rounded shadow-md">
+          <h3 className="text-lg font-semibold">Search by Customer ID:</h3>
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Enter Customer ID"
+            className="w-full p-2 mt-2 border border-gray-300 rounded"
+          />
+        </div>
 
         {/* Filter UI */}
         <div className="filter mb-4 p-4 bg-white rounded shadow-md">
@@ -181,7 +163,7 @@ const CustomerList: React.FC = () => {
           </div>
         </div>
 
-        {filteredCustomers.length > 0 ? (
+        {currentCustomers.length > 0 ? (
           <table id="purchase-history" className="min-w-full bg-white rounded shadow">
             <thead>
               <tr>
@@ -192,7 +174,7 @@ const CustomerList: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredCustomers.map(customer => (
+              {currentCustomers.map(customer => (
                 <tr key={customer.customerId} className="hover:bg-gray-100">
                   <td className="py-2 px-4 border-b">
                     <Link href={`/customerprofile/${customer.customerId}`}>
@@ -209,8 +191,27 @@ const CustomerList: React.FC = () => {
             </tbody>
           </table>
         ) : (
-          <p>No customers available for the selected tier(s).</p>
+          <p>No customers available for the selected tier(s) or search query.</p>
         )}
+
+        {/* Pagination controls */}
+        <div className="pagination mt-4">
+          <button
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+            className="px-4 py-2 bg-gray-300 rounded disabled:bg-gray-500"
+          >
+            Previous
+          </button>
+          <span className="mx-4">{`Page ${currentPage} of ${totalPages}`}</span>
+          <button
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={currentPage === totalPages}
+            className="px-4 py-2 bg-gray-300 rounded disabled:bg-gray-500"
+          >
+            Next
+          </button>
+        </div>
       </div>
     </div>
   );
