@@ -19,6 +19,17 @@ export default function AccountManagement() {
   const [notification, setNotification] = useState(null)
   const inputRef = useRef(null)
 
+  // New useEffect hook for handling notification timeout
+  useEffect(() => {
+    if (notification) {
+      const timer = setTimeout(() => {
+        setNotification(null)
+      }, 5000) // Notification will disappear after 5 seconds
+
+      return () => clearTimeout(timer)
+    }
+  }, [notification])
+
   useEffect(() => {
     const fetchAccounts = async () => {
       try {
@@ -246,26 +257,6 @@ export default function AccountManagement() {
 
   return (
     <div className="flex flex-col h-screen bg-gray-50">
-      <header className="flex items-center justify-between px-4 py-4 bg-white border-b border-gray-200 sm:px-6">
-        <h1 className="text-xl font-semibold text-gray-900 sm:text-2xl">Account Management</h1>
-        <div className="flex items-center">
-          <div className="relative mr-2 sm:mr-4">
-            <Input
-              type="text"
-              placeholder="Search..."
-              className="w-full sm:w-64"
-            />
-            <Search className="absolute top-2.5 right-3 w-5 h-5 text-gray-400" />
-          </div>
-          <Button variant="ghost" size="icon" className="text-gray-400">
-            <Bell className="w-6 h-6" />
-          </Button>
-          <Button variant="ghost" size="icon" className="text-gray-400 ml-2 sm:ml-3">
-            <User className="w-6 h-6" />
-          </Button>
-        </div>
-      </header>
-
       <main className="flex-1 overflow-y-auto p-4 sm:p-6">
         <div className="max-w-4xl mx-auto">
           <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
@@ -376,7 +367,9 @@ export default function AccountManagement() {
         )}
 
         {notification && (
-          <div className={`mt-4 p-4 text-sm rounded-md ${notification.type === 'error' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
+          <div className={`fixed bottom-4 right-4 mt-4 p-4 text-sm rounded-md ${
+            notification.type === 'error' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'
+          }`}>
             {notification.message}
           </div>
         )}

@@ -23,6 +23,12 @@ body, .customer-profile {
   margin-bottom: 20px;
 }
 
+/* Wrapper for left-aligned items */
+.profile-left {
+  display: flex;
+  align-items: center; /* Keeps the items vertically centered */
+}
+
 /* Tier Badge */
 .tier-badge {
   margin-left: 10px;
@@ -111,3 +117,4 @@ h2 {
 .back-button:hover {
   background-color: #0056b3; /* Darker shade for hover effect */
 }
+
