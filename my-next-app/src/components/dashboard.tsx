@@ -167,7 +167,7 @@ export default function Dashboard() {
 
   const handleApplyFilter = () => {
     setFilterApplied(true);
-
+    setCurrentPage(1);
     setTimeout(() => {
       setFilterApplied(false);
     }, 3000);
@@ -647,82 +647,99 @@ export default function Dashboard() {
                   <CSVLink
                     data={filteredTransactions}  // Use the filtered transactions for export
                     filename="transactions.csv"
-                    className="inline-flex items-center px-4 py-2 font-medium text-white hover:bg-gray-500 bg-gray-700 border border-transparent rounded-md shadow-sm  focus:outline-none focus:ring-2 focus:ring-offset-2"
+                    className="inline-flex items-center px-4 py-2 text-xs font-medium text-white hover:bg-gray-500 bg-gray-700 border border-transparent rounded-md shadow-sm  focus:outline-none focus:ring-2 focus:ring-offset-2"
                   >
                     Export CSV
                   </CSVLink>
                 </div>
                 <div className="max-h-96 overflow-y-auto">
-                  <table className="min-w-full mt-4 divide-y divide-gray-200">
-                    <thead className="bg-gray-100 sticky top-0 z-10">
-                      <tr>
-                        <th
-                          className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase cursor-pointer"
-                          onClick={() => handleSort('id')}
-                        >
-                          Transaction ID {renderSortIcon('id')}
-                        </th>
-                        <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase cursor-pointer"
-                          onClick={() => handleSort('customerId')}>
-                          Customer ID {renderSortIcon('customerId')}
-                        </th>
-                        <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase cursor-pointer"
-                          onClick={() => handleSort('saleType')}>
-                          Sale Type {renderSortIcon('saleType')}
-                        </th>
-                        <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase cursor-pointer"
-                          onClick={() => handleSort('product')}>
-                          Product {renderSortIcon('product')}
-                        </th>
-                        <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase cursor-pointer"
-                          onClick={() => handleSort('value')}>
-                          Value ($) {renderSortIcon('value')}
-                        </th>
-                        <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase cursor-pointer"
-                          onClick={() => handleSort('quantity')}>
-                          Quantity {renderSortIcon('quantity')}
-                        </th>
-                        <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase cursor-pointer"
-                          onClick={() => handleSort('date')}>
-                          Date {renderSortIcon('date')}
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-200">
-                      {currentTransactions.map((transaction) => (
-                        <tr key={transaction.id}>
-                          <td className="px-6 py-4 text-sm font-medium text-gray-900">{transaction.id}</td>
-                          <td className="px-6 py-4 text-sm text-gray-500">{transaction.customerId}</td>
-                          <td className="px-6 py-4 text-sm text-gray-500">{transaction.saleType}</td>
-                          <td className="px-6 py-4 text-sm text-gray-500">{transaction.product}</td>
-                          <td className="px-6 py-4 text-sm text-gray-500">{transaction.value.toFixed(2)}</td>
-                          <td className="px-6 py-4 text-sm text-gray-500">{transaction.quantity}</td>
-                          <td className="px-6 py-4 text-sm text-gray-500">{new Date(transaction.date).toLocaleDateString()}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                    <div className="mt-4 flex justify-between">
-                    </div>
-                    <div className="mt-8 flex justify-center items-center space-x-4">
-                      <button
-                        onClick={() => setCurrentPage(currentPage - 1)}
-                        disabled={currentPage === 1}
-                        className="w-24 px-2 py-1 bg-gray-700 hover:bg-gray-500 text-white rounded disabled:opacity-50"
-                      >
-                        Previous
-                      </button>
+                <table className="min-w-full mt-4 divide-y divide-gray-200 bg-white rounded-lg shadow overflow-hidden">
+  <thead className="bg-gray-700 sticky top-0 z-10 text-white rounded-t-lg">
+    <tr>
+      <th
+        className="px-6 py-3 text-sm font-lg tracking-wider text-left uppercase cursor-pointer"
+        onClick={() => handleSort('id')}
+      >
+        Transaction ID {renderSortIcon('id')}
+      </th>
+      <th
+        className="px-6 py-3 text-sm font-lg tracking-wider text-left uppercase cursor-pointer"
+        onClick={() => handleSort('customerId')}
+      >
+        Customer ID {renderSortIcon('customerId')}
+      </th>
+      <th
+        className="px-6 py-3 text-sm font-lg tracking-wider text-left uppercase cursor-pointer"
+        onClick={() => handleSort('saleType')}
+      >
+        Sale Type {renderSortIcon('saleType')}
+      </th>
+      <th
+        className="px-6 py-3 text-sm font-lg tracking-wider text-left uppercase cursor-pointer"
+        onClick={() => handleSort('product')}
+      >
+        Product {renderSortIcon('product')}
+      </th>
+      <th
+        className="px-6 py-3 text-sm font-lg tracking-wider text-left uppercase cursor-pointer"
+        onClick={() => handleSort('value')}
+      >
+        Value ($) {renderSortIcon('value')}
+      </th>
+      <th
+        className="px-6 py-3 text-sm font-lg tracking-wider text-left uppercase cursor-pointer"
+        onClick={() => handleSort('quantity')}
+      >
+        Quantity {renderSortIcon('quantity')}
+      </th>
+      <th
+        className="px-6 py-3 text-sm font-lg tracking-wider text-left uppercase cursor-pointer"
+        onClick={() => handleSort('date')}
+      >
+        Date {renderSortIcon('date')}
+      </th>
+    </tr>
+  </thead>
+  <tbody className="divide-y divide-gray-200">
+    {currentTransactions.map((transaction, index) => (
+      <tr
+        key={transaction.id}
+        className={`hover:bg-gray-100 ${
+          index === currentTransactions.length - 1 ? 'rounded-b-lg' : ''
+        }`}
+      >
+        <td className="px-6 py-4 text-sm font-medium text-gray-900">{transaction.id}</td>
+        <td className="px-6 py-4 text-sm text-gray-500">{transaction.customerId}</td>
+        <td className="px-6 py-4 text-sm text-gray-500">{transaction.saleType}</td>
+        <td className="px-6 py-4 text-sm text-gray-500">{transaction.product}</td>
+        <td className="px-6 py-4 text-sm text-gray-500">{transaction.value.toFixed(2)}</td>
+        <td className="px-6 py-4 text-sm text-gray-500">{transaction.quantity}</td>
+        <td className="px-6 py-4 text-sm text-gray-500">{new Date(transaction.date).toLocaleDateString()}</td>
+      </tr>
+    ))}
+  </tbody>
+  <div className="mt-4 flex justify-between"></div>
+  <div className="mt-8 flex justify-center items-center space-x-4">
+    <button
+      onClick={() => setCurrentPage(currentPage - 1)}
+      disabled={currentPage === 1}
+      className="w-24 px-2 py-1 bg-gray-700 hover:bg-gray-500 text-white rounded disabled:opacity-50"
+    >
+      Previous
+    </button>
 
-                      <span className="text-black w-28">Page {currentPage} of {totalPages}</span>
+    <span className="text-black w-28">Page {currentPage} of {totalPages}</span>
 
-                      <button
-                        onClick={() => setCurrentPage(currentPage + 1)}
-                        disabled={currentPage === totalPages}
-                        className="w-24 px-2 py-1 bg-gray-700 hover:bg-gray-500 text-white rounded disabled:opacity-50"
-                      >
-                        Next
-                      </button>
-                    </div>
-                  </table>
+    <button
+      onClick={() => setCurrentPage(currentPage + 1)}
+      disabled={currentPage === totalPages}
+      className="w-24 px-2 py-1 bg-gray-700 hover:bg-gray-500 text-white rounded disabled:opacity-50"
+    >
+      Next
+    </button>
+  </div>
+</table>
+
 
                 </div>
               </div>
@@ -732,22 +749,28 @@ export default function Dashboard() {
                 <h3 className="text-lg font-medium text-gray-900">Total Quantity Sold by Product</h3>
                 <div className="max-h-96 overflow-y-auto">
 
-                  <table className="min-w-full mt-4 divide-y divide-gray-200">
-                    <thead className="bg-gray-100 sticky top-0 z-10">
-                      <tr>
-                        <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Product</th>
-                        <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Total Quantity Sold</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-200">
-                      {Object.entries(totalQuantitybyProduct).map(([product, quantity]) => (
-                        <tr key={product}>
-                          <td className="px-6 py-4 text-sm font-medium text-gray-900">{product}</td>
-                          <td className="px-6 py-4 text-sm text-gray-500">{quantity}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                <table className="min-w-full mt-4 divide-y divide-gray-200 bg-white rounded-lg shadow overflow-hidden">
+  <thead className="bg-gray-700 text-white rounded-t-lg sticky top-0 z-10">
+    <tr>
+      <th className="px-6 py-3 text-sm font-lg tracking-wider text-left uppercase">Product</th>
+      <th className="px-6 py-3 text-sm font-lg tracking-wider text-left uppercase">Total Quantity Sold</th>
+    </tr>
+  </thead>
+  <tbody className="divide-y divide-gray-200">
+    {Object.entries(totalQuantitybyProduct).map(([product, quantity], index) => (
+      <tr
+        key={product}
+        className={`hover:bg-gray-100 ${
+          index === Object.entries(totalQuantitybyProduct).length - 1 ? 'rounded-b-lg' : ''
+        }`}
+      >
+        <td className="px-6 py-4 text-sm font-medium text-gray-900">{product}</td>
+        <td className="px-6 py-4 text-sm text-gray-500">{quantity}</td>
+      </tr>
+    ))}
+  </tbody>
+</table>
+
                 </div>
               </div>
 

@@ -89,6 +89,7 @@ const CustomerList: React.FC = () => {
 
   const handleTierChange = (tier: string) => {
     setFilteredTiers(prev => {
+      setCurrentPage(1)
       if (prev.includes(tier)) {
         return prev.filter(t => t !== tier);
       } else {
@@ -126,10 +127,14 @@ const CustomerList: React.FC = () => {
           <input
             type="text"
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+              setCurrentPage(1);
+            }}
             placeholder="Enter Customer ID"
             className="w-full p-2 mt-2 border border-gray-300 rounded"
           />
+
         </div>
 
         {/* Filter UI */}
@@ -164,32 +169,49 @@ const CustomerList: React.FC = () => {
         </div>
 
         {currentCustomers.length > 0 ? (
-          <table id="purchase-history" className="min-w-full bg-white rounded shadow">
-            <thead>
+          <table className="min-w-full mt-4 divide-y divide-gray-200 bg-white rounded-lg shadow overflow-hidden">
+            <thead className="sticky top-0 z-10 bg-gray-700 text-white rounded-t-lg">
               <tr>
-                <th className="py-2 px-4 border-b bg-gray-500">Customer ID</th>
-                <th className="py-2 px-4 border-b bg-gray-500">Zip Code</th>
-                <th className="py-2 px-4 border-b bg-gray-500">Tier</th>
-                <th className="py-2 px-4 border-b bg-gray-500">Amount Spent</th>
+                <th className="px-6 py-3 text-sm font-medium tracking-wider text-left uppercase">
+                  Customer ID
+                </th>
+                <th className="px-6 py-3 text-sm font-medium tracking-wider text-left uppercase">
+                  Zip Code
+                </th>
+                <th className="px-6 py-3 text-sm font-medium tracking-wider text-left uppercase">
+                  Tier
+                </th>
+                <th className="px-6 py-3 text-sm font-medium tracking-wider text-left uppercase">
+                  Amount Spent
+                </th>
               </tr>
             </thead>
-            <tbody>
-              {currentCustomers.map(customer => (
-                <tr key={customer.customerId} className="hover:bg-gray-100">
-                  <td className="py-2 px-4 border-b">
+            <tbody className="divide-y divide-gray-200">
+              {currentCustomers.map((customer, index) => (
+                <tr
+                  key={customer.customerId}
+                  className={`hover:bg-gray-100 ${index === currentCustomers.length - 1 ? 'rounded-b-lg' : ''
+                    }`}
+                >
+                  <td className="px-6 py-4 text-sm font-medium text-gray-900">
                     <Link href={`/customerprofile/${customer.customerId}`}>
                       <span className="text-blue-600 underline hover:text-blue-800">
                         {customer.customerId}
                       </span>
                     </Link>
                   </td>
-                  <td className="py-2 px-4 border-b">{customer.zipCode}</td>
-                  <td className="py-2 px-4 border-b">{tierDisplayNames[customer.tier]}</td>
-                  <td className="py-2 px-4 border-b">${customer.totalSpent?.toFixed(2)}</td>
+                  <td className="px-6 py-4 text-sm text-gray-500">{customer.zipCode}</td>
+                  <td className="px-6 py-4 text-sm text-gray-500">
+                    {tierDisplayNames[customer.tier]}
+                  </td>
+                  <td className="px-6 py-4 text-sm text-gray-500">
+                    ${customer.totalSpent?.toFixed(2)}
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
+
         ) : (
           <p>No customers available for the selected tier(s) or search query.</p>
         )}
