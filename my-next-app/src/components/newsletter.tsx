@@ -18,6 +18,9 @@ export default function Newsletter() {
   const [template, setTemplate] = useState({
     templateName: null,
     customerName: null,
+    introduction: null,
+    conclusion: null,
+    image: null,
     products: [] // Changed to an array to store products dynamically
   })
 
@@ -36,7 +39,7 @@ export default function Newsletter() {
 
   const fetchNewsletters = async () => {
     try {
-      const response = await axios.get(`http://localhost:8080/api/v1/newsletter/account/${session.account.accountId}`);
+      const response = await axios.get(`http://localhost:8080/api/v1/newsletter`);
       if (response.status === 200) {
         setSavedNewsletters(response.data);
         console.log('Fetched newsletters:', response.data);
@@ -58,6 +61,9 @@ export default function Newsletter() {
       setTemplate({
         templateName: data.templateName,
         customerName: data.customerName,
+        introduction: data.introduction,
+        conclusion: data.conclusion,
+        image: data.image,
         products: data.products
       });
     } catch (error) {
@@ -190,15 +196,22 @@ export default function Newsletter() {
       return productDetails;
     }).join('');
 
-    return `
-      <div>
-        <p>Dear ${template.customerName},</p>
-        <p>We've curated something special for you! Based on your recent purchases and browsing history, here are some exclusive offers:</p>
-        <ul>${productList}</ul>
-        <p>Take advantage of these personalized offers and discover more with Timperio. Shop now and enjoy the best deals tailored just for you!</p>
-        <p>Warm regards,<br/>Marketing team</p>
-      </div>
-    `;
+    const imageSection = template.image
+    ? `<p><img src="data:image/png;base64,${template.image}" alt="Newsletter Image" style="max-width:100%; height:auto;" /></p>`
+    : '';
+  
+  return `
+    <div>
+      <p>Dear ${template.customerName},</p>
+      <p>${template.introduction}</p>
+      <p>${imageSection} <!-- Insert image here --> hello </p>
+      <p>We've curated something special for you! Based on your recent purchases and browsing history, here are some exclusive offers:</p>
+      <ul>${productList}</ul>
+      <p>Take advantage of these personalized offers and discover more with Timperio. Shop now and enjoy the best deals tailored just for you!</p>
+      <p>${template.conclusion}</p>
+      <p>Warm regards,<br/>Marketing team</p>
+    </div>
+  `;
   };
 
   const handleSend = async () => {
@@ -280,9 +293,10 @@ export default function Newsletter() {
                 id="templateName"
                 name="templateName"
                 value={template.templateName}
-                placeholder="Enter template name"
+                placeholder="Choose template from above"
                 onChange={(e) => setTemplate({ ...template, templateName: e.target.value })}
                 className="mt-1"
+                readOnly
               />
             </div>
             {session.account.role !== 'Admin' && (
@@ -470,7 +484,10 @@ export default function Newsletter() {
                 className="mt-1 h-64"
                 value={`Dear ${template.customerName},
 
-We've curated something special for you! Based on your recent purchases and browsing history, here are some exclusive offers and recommendations we think you'll love.
+${template.introduction}
+
+${template.image ? '[Image Preview: Embedded Image Below]' : '[No Image Provided]'}
+
 
 Personalized Product Recommendations:
 Top Picks for You:
@@ -488,7 +505,7 @@ ${template.products.map((product, index) => {
                   return productDetails;
                 }).join('\n\n')}
 
-Take advantage of these personalized offers and discover more with Timperio. Shop now and enjoy the best deals tailored just for you!
+${template.conclusion}
 
 Warm regards,
 Marketing team`}
