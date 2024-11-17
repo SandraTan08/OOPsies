@@ -1,86 +1,148 @@
-'use client'
+'use client';
 
-import axios from 'axios'
-import { useState, useEffect } from 'react'
-import { Save, Upload, Trash2 } from 'lucide-react'
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Label } from "@/components/ui/label"
-import { toast, Toaster } from 'sonner'
+import axios from 'axios';
+import { useState, useEffect, useRef } from 'react';
+import { Save, Upload, Trash2 } from 'lucide-react';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { toast, Toaster } from 'sonner';
+import { useSession } from 'next-auth/react';
+import { set } from 'zod';
 
 export default function TemplateNewsletter() {
-  const [templateName, setTemplateName] = useState('')
-  const [introduction, setIntroduction] = useState('')
-  const [conclusion, setConclusion] = useState('')
-  const [image, setImage] = useState<File | null>(null)
-  const [templates, setTemplates] = useState<string[]>([])
-  const [selectedTemplate, setSelectedTemplate] = useState('')
+  const [savedNewsletters, setSavedNewsletters] = useState([]);
+  const [selectedNewsletter, setSelectedNewsletter] = useState('');
+  const [templateName, setTemplateName] = useState('');
+  const [introduction, setIntroduction] = useState('');
+  const [conclusion, setConclusion] = useState('');
+  const [image, setImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const textAreaRef = useRef(null);
+  const { data: session } = useSession();
 
   useEffect(() => {
-    fetchTemplates()
-  }, [])
-
-  const fetchTemplates = async () => {
-    try {
-      const response = await axios.get('http://localhost:8080/api/v1/templateNewsletter')
-      setTemplates(response.data)
-    } catch (error) {
-      toast.error('Failed to fetch templates')
+    if (session && session.account) {
+      fetchNewsletters();
     }
-  }
+  }, [session]);
+
+  const fetchNewsletters = async () => {
+    try {
+      const response = await axios.get(`http://localhost:8080/api/v1/newsletter`);
+      if (response.status === 200) {
+        setSavedNewsletters(response.data);
+        console.log('Fetched newsletters:', response.data);
+      }
+    } catch (error) {
+      console.error('Error fetching newsletters:', error);
+      toast.error('Failed to fetch newsletters.');
+    }
+  };
+
+  const fetchNewsletterData = async (newsletterId) => {
+    try {
+      const response = await axios.get(`http://localhost:8080/api/v1/newsletter/${newsletterId}`);
+      const data = response.data;
+      setTemplateName(data.templateName);
+      setIntroduction(data.introduction);
+      setConclusion(data.conclusion);
+      if (data.image) {
+        setImagePreview(`data:image/png;base64,${data.image}`);
+      } else {
+        setImagePreview(null);
+      }
+    } catch (error) {
+      console.error('Error fetching newsletter:', error);
+      toast.error('Failed to fetch newsletter data.');
+    }
+  };
+
+  const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedNewsletterId = e.target.value;
+    setSelectedNewsletter(selectedNewsletterId);
+
+    if (selectedNewsletterId) {
+      fetchNewsletterData(selectedNewsletterId); // Fetch data of the selected newsletter
+    } else {
+      resetForm(); // Clear the form if no newsletter is selected
+    }
+  };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      setImage(e.target.files[0])
+      const file = e.target.files[0];
+      setImage(file);
+      setImagePreview(URL.createObjectURL(file));
     }
-  }
+  };
 
   const handleSaveTemplate = async () => {
-    if (!templateName.trim()) {
-      toast.error('Please enter a template name')
-      return
+    const errors = [];
+    if (!templateName.trim()) errors.push('Please enter a template name');
+    if (!introduction.trim()) errors.push('Introduction cannot be empty');
+    if (introduction.length > 5000) errors.push('Introduction cannot exceed 5000 characters');
+    if (!conclusion.trim()) errors.push('Conclusion cannot be empty');
+    if (conclusion.length > 5000) errors.push('Conclusion cannot exceed 5000 characters');
+    if (image && image.size > 15 * 1024 * 1024) errors.push('Image size should be less than 15MB');
+
+    if (errors.length > 0) {
+      toast.error(errors.join('. '));
+      return;
     }
 
     try {
-      const formData = new FormData()
-      formData.append('name', templateName)
-      formData.append('introduction', introduction)
-      formData.append('conclusion', conclusion)
+      const formData = new FormData();
+      formData.append('templateName', templateName);
+      formData.append('introduction', introduction);
+      formData.append('conclusion', conclusion);
       if (image) {
-        formData.append('image', image)
+        formData.append('image', image);
       }
 
-      await axios.post('http://localhost:8080/api/v1/templateNewsletter', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      })
-      toast.success('Template saved successfully')
-      fetchTemplates()
-      setTemplateName('')
-      setIntroduction('')
-      setConclusion('')
-      setImage(null)
+      console.log(formData.get('image'));
+      await axios.post('http://localhost:8080/api/v1/newsletter/create', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      toast.success('Template saved successfully');
+      fetchNewsletters();
+      resetForm();
     } catch (error) {
-      toast.error('Failed to save template')
+      console.error('Error saving template:', error);
+      toast.error('Failed to save template. Please try again');
     }
-  }
+  };
 
   const handleRemoveTemplate = async () => {
-    if (!selectedTemplate) return
+    if (!selectedNewsletter) return;
 
     try {
-      await axios.delete(`http://localhost:8080/api/v1/templateNewsletter/${selectedTemplate}`)
-      toast.success('Template removed successfully')
-      setSelectedTemplate('')
-      fetchTemplates()
+      await axios.delete(`http://localhost:8080/api/v1/newsletter/delete/${selectedNewsletter}`);
+      toast.success('Template removed successfully');
+      setSelectedNewsletter('');
+      fetchNewsletters();
     } catch (error) {
-      toast.error('Failed to remove template')
+      console.error('Error removing template:', error);
+      toast.error('Failed to remove template.');
     }
-  }
+  };
+
+  const resetForm = () => {
+    setTemplateName('');
+    setIntroduction('');
+    setConclusion('');
+    setImage(null);
+    setImagePreview(null);
+  };
 
   return (
     <div className="max-w-2xl mx-auto p-6 space-y-6">
       <Toaster />
+
       <div className="space-y-2">
         <Label htmlFor="templateName">Template Name</Label>
         <Input
@@ -121,14 +183,42 @@ export default function TemplateNewsletter() {
             onChange={handleImageChange}
             className="hidden"
           />
-          <Button
-            variant="outline"
-            onClick={() => document.getElementById('image')?.click()}
-          >
+          <Button onClick={() => document.getElementById('image')?.click()}>
             <Upload className="mr-2 h-4 w-4" /> Choose Image
           </Button>
           {image && <span className="text-sm text-muted-foreground">{image.name}</span>}
         </div>
+        {imagePreview ? (
+          <img
+            src={imagePreview}
+            alt="Template Preview"
+            className="mt-4 rounded-md max-h-64"
+          />
+        ) : (
+          <p className="text-sm text-muted-foreground">No image available</p>
+        )}
+      </div>
+
+      <div className="mt-8">
+        <Label htmlFor="preview">Preview</Label>
+        <Textarea
+          ref={textAreaRef}
+          id="preview"
+          className="mt-1 h-64"
+          value={`Dear Customer,
+
+${introduction}
+
+Personalized Product Recommendations:
+Top Picks for You:
+
+${conclusion}
+
+Warm regards,
+Marketing team
+[Image placed here]`}
+          readOnly
+        />
       </div>
 
       <Button onClick={handleSaveTemplate}>
@@ -140,22 +230,22 @@ export default function TemplateNewsletter() {
         <div className="flex items-center space-x-2">
           <select
             id="removeTemplate"
-            value={selectedTemplate}
-            onChange={(e) => setSelectedTemplate(e.target.value)}
-            className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            value={selectedNewsletter}
+            onChange={handleSelectChange}
+            className="flex h-10 w-full items-center rounded-md border bg-background px-3 py-2 text-sm"
           >
             <option value="">Select template</option>
-            {templates.map((template) => (
-              <option key={template} value={template}>
-                {template}
+            {savedNewsletters.map((newsletter) => (
+              <option key={newsletter.newsletterId} value={newsletter.newsletterId}>
+                {newsletter.newsletterId} - {newsletter.templateName}
               </option>
             ))}
           </select>
-          <Button variant="destructive" onClick={handleRemoveTemplate} disabled={!selectedTemplate}>
-            <Trash2 className="mr-2 h-4 w-4" /> Remove
+          <Button variant="destructive" onClick={handleRemoveTemplate} disabled={!selectedNewsletter}>
+            <Trash2 className="mr-2 h-4 w-4" /> Delete
           </Button>
         </div>
       </div>
     </div>
-  )
+  );
 }

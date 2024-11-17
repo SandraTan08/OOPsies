@@ -18,5 +18,9 @@ public class NewsletterDTO {
     private String templateName;
     private String accountId;
     private String customerName;
+    private String introduction;
+    private String conclusion;
+    private byte[] image;
+    private String base64Image;
     private List<ProductTemplateDTO> products;
 }
