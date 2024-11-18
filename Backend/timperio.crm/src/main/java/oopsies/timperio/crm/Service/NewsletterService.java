@@ -32,9 +32,15 @@ public class NewsletterService {
     }
 
     public Newsletter createNewsletter(Newsletter newsletter) {
+        System.out.println("Creating newsletter: " + newsletter);
         // Validate basic fields
         if (newsletter.getTemplateName() == null || newsletter.getTemplateName().trim().isEmpty()) {
             throw new IllegalArgumentException("Template name is required.");
+        }
+
+        if (newsletter.getAccountId() == null ||
+                newsletter.getAccountId().trim().isEmpty()) {
+            throw new IllegalArgumentException("Please sign in to update newsletter.");
         }
 
         if (newsletter.getIntroduction() == null || newsletter.getIntroduction().trim().isEmpty()) {

@@ -22,6 +22,7 @@ export default function TemplateNewsletter() {
   const { data: session } = useSession();
 
   useEffect(() => {
+    console.log("Session data:", session);
     if (session && session.account) {
       fetchNewsletters();
     }
@@ -73,13 +74,20 @@ export default function TemplateNewsletter() {
       toast.error("Please fill in all fields.");
       return;
     }
+    if (!session || !session.user) {
+      toast.error('You must be logged in to save the template.');
+      return;
+    }
 
     try {
       const formData = new FormData();
+      formData.append('accountId', session.account.accountId);
       formData.append('templateName', templateName);
       formData.append('introduction', introduction);
       formData.append('conclusion', conclusion);
       if (image) formData.append('image', image);
+
+      console.log("Form data:", formData.get('accountId'), formData.get('templateName'), formData.get('introduction'), formData.get('conclusion'), formData.get('image'));
 
       await axios.post('http://localhost:8080/api/v1/newsletter/create', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },

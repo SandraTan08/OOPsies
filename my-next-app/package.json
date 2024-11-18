@@ -41,6 +41,7 @@
     "react-hook-form": "^7.53.0",
     "react-router-dom": "^6.27.0",
     "react-toastify": "^10.0.6",
+    "redis": "^4.7.0",
     "select": "^1.1.2",
     "sib-api-v3-sdk": "^8.5.0",
     "sonner": "^1.5.0",

@@ -22,14 +22,17 @@ public class NewsletterController {
 
     @PostMapping("/create")
     public ResponseEntity<Long> createNewsletter(
+            @RequestParam("accountId") String accountId,
             @RequestParam("templateName") String templateName,
             @RequestParam("introduction") String introduction,
             @RequestParam("conclusion") String conclusion,
-            @RequestParam(value = "image", required = false) MultipartFile image
-            // HttpSession session
-    ) {
+            @RequestParam(value = "image", required = false) MultipartFile image) {
         try {
             // Validate input
+            if (accountId == null || accountId.trim().isEmpty()) {
+                return ResponseEntity.badRequest().body(null);
+            }
+
             if (templateName == null || templateName.trim().isEmpty()) {
                 return ResponseEntity.badRequest().body(null);
             }
@@ -55,6 +58,7 @@ public class NewsletterController {
 
             // Create and save newsletter
             Newsletter newsletter = new Newsletter();
+            newsletter.setAccountId(accountId);
             newsletter.setTemplateName(templateName);
             newsletter.setIntroduction(introduction);
             newsletter.setConclusion(conclusion);
