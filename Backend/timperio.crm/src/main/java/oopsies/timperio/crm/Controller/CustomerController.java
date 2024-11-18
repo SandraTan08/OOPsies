@@ -43,6 +43,23 @@ public class CustomerController {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+    // Endpoint to get the first customer by ID using @RequestParam
+    @GetMapping("/byCustomer")
+    public ResponseEntity<TieredCustomer> getCustomerById(@RequestParam Integer customerId) {
+        log.info("Fetching first customer with ID: {}", customerId);
+        
+        // Fetch the first customer directly
+        TieredCustomer customer = customerService.getLatestCustomerById(customerId);
+        
+        if (customer != null) {
+            log.info("Customer found: {}", customer);
+            return new ResponseEntity<>(customer, HttpStatus.OK);
+        } else {
+            log.warn("Customer not found with ID: {}", customerId);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        
+    }
 
     // Endpoint to get customers by tier
     @GetMapping("/byTier")
