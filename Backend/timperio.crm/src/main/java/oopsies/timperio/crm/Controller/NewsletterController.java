@@ -6,7 +6,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import jakarta.servlet.http.HttpSession;
 import oopsies.timperio.crm.Service.NewsletterService;
 import oopsies.timperio.crm.dto.NewsletterDTO;
 import oopsies.timperio.crm.Newsletter;
@@ -75,17 +74,15 @@ public class NewsletterController {
         }
     }
 
-    @PutMapping("/update/{id}")
+    @PutMapping("/update/{newsletterId}")
     public ResponseEntity<String> updateNewsletter(
-            @PathVariable Long id,
-            @RequestBody Newsletter updatedNewsletter,
-            HttpSession session) {
+            @PathVariable Long newsletterId, 
+            @RequestBody NewsletterDTO newsletterDTO) {
         try {
-            newsletterService.updateNewsletter(id, updatedNewsletter, session);
-            return ResponseEntity.ok("Newsletter updated successfully");
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+            newsletterService.updateNewsletter(newsletterId, newsletterDTO);
+            return ResponseEntity.status(HttpStatus.OK).body("Newsletter updated successfully.");
         } catch (Exception e) {
+            e.printStackTrace(); // Log the error for debugging
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Failed to update newsletter: " + e.getMessage());
         }

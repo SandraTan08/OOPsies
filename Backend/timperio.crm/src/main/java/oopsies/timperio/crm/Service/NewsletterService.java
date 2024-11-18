@@ -2,27 +2,21 @@ package oopsies.timperio.crm.Service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import jakarta.servlet.http.HttpSession;
 import oopsies.timperio.crm.Repository.NewsletterRepository;
 import oopsies.timperio.crm.Newsletter;
 import oopsies.timperio.crm.ProductTemplate;
-import oopsies.timperio.crm.Repository.ProductTemplateRepository;
 import oopsies.timperio.crm.dto.NewsletterDTO;
 import oopsies.timperio.crm.dto.ProductTemplateDTO;
 
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class NewsletterService {
 
     @Autowired
     private NewsletterRepository newsletterRepository;
-
-    @Autowired
-    private ProductTemplateRepository productTemplateRepository;
 
     public List<NewsletterDTO> getAllNewsletters() {
         List<Newsletter> newsletters = newsletterRepository.findAll();
@@ -59,54 +53,41 @@ public class NewsletterService {
         return newsletterRepository.save(newsletter);
     }
 
-    public void updateNewsletter(Long newsletterId, Newsletter updatedNewsletter, HttpSession session) {
+    public void updateNewsletter(Long newsletterId, NewsletterDTO newsletterDTO) {
         // Fetch the existing newsletter by ID
-        Optional<Newsletter> optionalNewsletter = newsletterRepository.findById(newsletterId);
-        if (optionalNewsletter.isEmpty()) {
-            throw new IllegalArgumentException("Newsletter with ID " + newsletterId + " not found.");
+        Newsletter existingNewsletter = newsletterRepository.findById(newsletterId)
+                .orElseThrow(() -> new RuntimeException("Newsletter not found with ID: " + newsletterId));
+    
+        // Update only specific fields
+        if (newsletterDTO.getCustomerName() != null) {
+            existingNewsletter.setCustomerName(newsletterDTO.getCustomerName());
         }
-
-        Newsletter existingNewsletter = optionalNewsletter.get();
-
-        // Retrieve and validate session or newsletter details
-        String accountId = (String) session.getAttribute("accountId");
-        if (accountId == null || accountId.trim().isEmpty()) {
-            throw new IllegalArgumentException("Please sign in to update newsletter.");
+        if (newsletterDTO.getAccountId() != null) {
+            existingNewsletter.setAccountId(newsletterDTO.getAccountId());
         }
-
-        String customerName = updatedNewsletter.getCustomerName();
-        if (customerName == null || customerName.trim().isEmpty()) {
-            throw new IllegalArgumentException("Customer name is required.");
-        }
-
-        String templateName = updatedNewsletter.getTemplateName();
-        if (templateName == null || templateName.trim().isEmpty()) {
-            throw new IllegalArgumentException("Template name is required.");
-        }
-
-        // Update existing fields
-        existingNewsletter.setTemplateName(templateName);
-        existingNewsletter.setCustomerName(customerName);
-
-        // Detach and update products if provided
-        List<ProductTemplate> products = updatedNewsletter.getProducts();
-        if (products != null && !products.isEmpty()) {
-            // Clear existing products to avoid duplicates
-            productTemplateRepository.deleteAll(existingNewsletter.getProducts());
-
-            for (ProductTemplate product : products) {
-                product.setNewsletter(existingNewsletter); // Associate each product with the newsletter
+    
+        // Clear the existing products and update with new ones
+        if (newsletterDTO.getProducts() != null) {
+            existingNewsletter.getProducts().clear();
+            for (ProductTemplateDTO productDTO : newsletterDTO.getProducts()) {
+                ProductTemplate product = new ProductTemplate();
+                product.setProductName(productDTO.getProductName());
+                product.setPrice(productDTO.getPrice());
+                product.setDiscountType(productDTO.getDiscountType());
+                product.setPromoCode(productDTO.getPromoCode());
+                product.setDiscountPer(productDTO.getDiscountPer());
+                product.setDiscountAmt(productDTO.getDiscountAmt());
+                product.setRelatedProduct(productDTO.getRelatedProduct());
+                product.setNewsletter(existingNewsletter); // Set parent relationship
+    
+                existingNewsletter.getProducts().add(product);
             }
-
-            // Save the new product list
-            productTemplateRepository.saveAll(products);
-            existingNewsletter.setProducts(products);
         }
-
+    
         // Save the updated newsletter
         newsletterRepository.save(existingNewsletter);
     }
-
+    
     public boolean deleteNewsletter(Long newsletterId) {
         if (newsletterRepository.existsById(newsletterId)) {
             newsletterRepository.deleteById(newsletterId);
