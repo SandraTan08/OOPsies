@@ -17,7 +17,7 @@ public class Customer {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer customerId;
-
+    private String customerEmail;
     private Integer zipCode;
 
     @Override
@@ -26,5 +26,12 @@ public class Customer {
                 "customerId=" + customerId +
                 ", zipCode=" + zipCode +
                 '}';
+    }
+    public String getEmail() {
+        return customerEmail;
+    }
+
+    public void setEmail(String email) {
+        this.customerEmail = email;
     }
 }

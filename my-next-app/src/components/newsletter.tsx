@@ -21,15 +21,24 @@ export default function Newsletter() {
     introduction: null,
     conclusion: null,
     image: null,
+    customerTier: null as string | null,
     products: [] // Changed to an array to store products dynamically
   })
 
   const [savedNewsletters, setSavedNewsletters] = useState([]); // State for saved newsletters
   const [selectedNewsletter, setSelectedNewsletter] = useState(''); // State for selected newsletter
   const [customerEmail, setCustomerEmail] = useState(''); // State for customer email
+
   const [numProducts, setNumProducts] = useState(0); // New state for number of products 
   const textAreaRef = useRef(null); // Reference for the textarea
   const { data: session, status } = useSession();
+  const [emailType, setEmailType] = useState(''); // Track selected email type
+  const [customerTier, setCustomerTier] = useState(''); // State for customer tier
+  const tierDisplayNames = {
+    B: "Bronze",
+    S: "Silver",
+    G: "Gold",
+  };
 
   useEffect(() => {
     if (session && session.account) {
@@ -181,6 +190,10 @@ export default function Newsletter() {
   }
 
   const generateTemplateHTML = (template) => {
+    const displayName = template.customerName 
+    ? template.customerName 
+    : `${tierDisplayNames[template.customerTier] || template.customerTier} Customer`;
+
     const productList = template.products.map((product, index) => {
       let productDetails = `<li>${index + 1}. ${product.productName}<br/>Price: $${product.price}`;
 
@@ -202,7 +215,7 @@ export default function Newsletter() {
   
   return `
     <div>
-      <p>Dear ${template.customerName},</p>
+      <p>Dear ${displayName},</p>
       <p>${template.introduction}</p>
       <p>${imageSection} <!-- Insert image here --> hello </p>
       <p>We've curated something special for you! Based on your recent purchases and browsing history, here are some exclusive offers:</p>
@@ -215,25 +228,54 @@ export default function Newsletter() {
   };
 
   const handleSend = async () => {
-    if (!customerEmail) {
+    // Validate input based on email type
+    if (emailType === 'personalized' && !customerEmail) {
       toast.error('Please enter a customer email.');
       return;
     }
-
-    console.log('Sending newsletter to', customerEmail);
-    toast.message('Sending newsletter to ' + customerEmail);
-
+    if (emailType === 'mass' && !template.customerTier) {
+      toast.error('Please select a customer tier.');
+      return;
+    }
+  
+    let recipientEmails = [];
+  
+    // Fetch recipient emails for mass emails
+    if (emailType === 'mass') {
+      try {
+        const response = await fetch(`http://localhost:8080/api/v1/customers/byTier?tier=${template.customerTier}`);
+        const customers = await response.json();
+  
+        // Filter out customers with null or empty emails
+        recipientEmails = customers
+          .filter(customer => customer.customerEmail) // Ensure email is non-null and non-empty
+          .map(customer => ({ email: customer.customerEmail }));
+  
+        if (recipientEmails.length === 0) {
+          toast.error('No valid emails found for the selected tier.');
+          return;
+        }
+  
+        toast.message(`Sending newsletter to ${recipientEmails.length} customers in tier ${template.customerTier}`);
+      } catch (error) {
+        console.error('Error fetching customers by tier:', error);
+        toast.error('Failed to retrieve customers for the selected tier.');
+        return;
+      }
+    }
+  
     // Generate HTML content from the template
     const htmlContent = generateTemplateHTML(template);
-
+  
     try {
+      // Prepare email data based on email type
       const emailData = {
         sender: { email: 'amos.chan.2022@smu.edu.sg', name: 'Amos' },
-        to: [{ email: customerEmail }],
+        to: emailType === 'personalized' ? [{ email: customerEmail }] : recipientEmails,
         subject: 'Personalized Newsletter',
         htmlContent,
       };
-
+  
       const response = await axios.post(
         'https://api.sendinblue.com/v3/smtp/email',
         emailData,
@@ -244,13 +286,13 @@ export default function Newsletter() {
           },
         }
       );
-
+  
       if (response.status !== 201) {
         console.error('Error sending email:', response.data);
         toast.error('Error sending email');
         return;
       }
-
+  
       console.log('Email sent successfully:', response.data);
       toast.success('Email sent successfully!');
     } catch (error) {
@@ -258,6 +300,10 @@ export default function Newsletter() {
       toast.error('An error occurred while sending the email.');
     }
   };
+  
+  
+  
+  ;
 
   const handleDiscountTypeChange = (e, index) => {
     const { value } = e.target;
@@ -299,7 +345,35 @@ export default function Newsletter() {
                 readOnly
               />
             </div>
-            {session.account.role !== 'Admin' && (
+            <div>
+              {session.account.role !== 'Admin' && (
+              <div className="mb-6">
+                <Label>Email Type</Label>
+                <div className="flex space-x-4 mt-1">
+                  <label className="flex items-center space-x-2">
+                    <input
+                      type="radio"
+                      name="emailType"
+                      value="personalized"
+                      checked={emailType === 'personalized'}
+                      onChange={() => setEmailType('personalized')}
+                    />
+                    <span>Personalized Email</span>
+                  </label>
+                  <label className="flex items-center space-x-2">
+                    <input
+                      type="radio"
+                      name="emailType"
+                      value="mass"
+                      checked={emailType === 'mass'}
+                      onChange={() => setEmailType('mass')}
+                    />
+                    <span>Mass Email</span>
+                  </label>
+                </div>
+              </div>
+            )}
+            {session.account.role !== 'Admin' && emailType === 'personalized' && (
             <div className="mb-6">
               <Label> Customer Email</Label>
               <Input
@@ -313,7 +387,26 @@ export default function Newsletter() {
               />
             </div>
               )}
-              {session.account.role !== 'Admin' && (
+            {session.account.role !== 'Admin' && emailType === 'mass' &&  (
+              <div className="mb-6">
+                <Label htmlFor="customerTier">Customer Tier</Label>
+                <select
+                  id="customerTier"
+                  name="customerTier"
+                  value={template.customerTier} // Assuming this state will now represent the selected tier
+                  onChange={(e) => setTemplate((prevTemplate) => ({...prevTemplate,customerTier: e.target.value,}))
+                  } // Update this state based on selection
+                  className="w-full mt-1 px-3 py-2 text-sm text-gray-700 border border-gray-200 rounded-md"
+                >
+                  <option value="" disabled>Select a tier</option>
+                  <option value="B">Bronze</option>
+                  <option value="S">Silver</option>
+                  <option value="G">Gold</option>
+                </select>
+              </div>
+            )}
+
+              {session.account.role !== 'Admin' && emailType === 'personalized' && (
             <div className="mb-6">
               <Label htmlFor="customerName">Customer Name</Label>
               <Input
@@ -344,7 +437,7 @@ export default function Newsletter() {
             )}
 
             {template.products.map((product, index) => (
-              <div key={index} className="mb-6 p-4 bg-gray-50 rounded-lg">
+              <div  key={index} className="mb-6 p-4 bg-gray-50 rounded-lg">
                 <h2 className="text-lg font-semibold mb-2">Product {index + 1}</h2>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
@@ -482,7 +575,11 @@ export default function Newsletter() {
                 ref={textAreaRef}
                 id="preview"
                 className="mt-1 h-64"
-                value={`Dear ${template.customerName},
+                value={`Dear ${
+                  emailType === 'personalized'
+                    ? template.customerName
+                    : `${tierDisplayNames[template.customerTier || ""] || "Unknown"} Customers`
+                },
 
 ${template.introduction}
 
@@ -532,6 +629,7 @@ Marketing team`}
           </div>
         </div>
       </div>
+    </div>
     </div>
   )
 }
