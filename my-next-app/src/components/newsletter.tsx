@@ -32,7 +32,7 @@ export default function Newsletter() {
   const [customerEmail, setCustomerEmail] = useState(''); // State for customer email
   const [customerName, setCustomerName] = useState(''); // State for customer Name
 
-  const [numProducts, setNumProducts] = useState(1); // New state for number of products 
+  const [numProducts, setNumProducts] = useState(); // New state for number of products 
   const textAreaRef = useRef(null); // Reference for the textarea
   const { data: session, status } = useSession();
   const [emailType, setEmailType] = useState('mass'); // Track selected email type
@@ -500,7 +500,7 @@ export default function Newsletter() {
     <Input
       id="numProducts"
       type="number"
-      min="1"
+      min="0"
       max="10"
       value={numProducts ? numProducts : ''}
       placeholder="Enter number of products"
@@ -530,25 +530,26 @@ export default function Newsletter() {
                       />
                     </div>
                     <div>
-                      <Label htmlFor={`product-${index}-price`}>Price</Label>
-                      <Input
-                        id={`product-${index}-price`}
-                        name="price"
-                        type="number"
-                        step="0.01"
-                        value={product.price}
-                        placeholder="Enter price"
-                        onChange={(e) => handleChange(e, index)}
-                        onBlur={() => {
-                          setTemplate(prev => {
-                            const updatedProducts = [...prev.products];
-                            updatedProducts[index].price = Math.max(0, updatedProducts[index].price); // Ensure price is not negative
-                            return { ...prev, products: updatedProducts };
-                          });
-                        }}
-                        className="mt-1"
-                      />
-                    </div>
+  <Label htmlFor={`product-${index}-price`}>Price</Label>
+  <Input
+    id={`product-${index}-price`}
+    name="price"
+    type="number"
+    step="0.01"
+    value={product.price || ''}
+    placeholder="Enter price"
+    onChange={(e) => handleChange(e, index)}
+    onBlur={() => {
+      setTemplate(prev => {
+        const updatedProducts = [...prev.products];
+        updatedProducts[index].price = Math.max(0, updatedProducts[index].price); // Ensure price is not negative
+        return { ...prev, products: updatedProducts };
+      });
+    }}
+    className="mt-1"
+  />
+</div>
+
 
                     {/* Dropdown for selecting discount type */}
                     <div className="col-span-2">
@@ -569,26 +570,32 @@ export default function Newsletter() {
                     {product.discountType === 'discountCode' && (
                       <>
                         <div>
-                          <Label htmlFor={`product-${index}-discount`}>Discount Percentage</Label>
-                          <Input
-                            id={`product-${index}-discount`}
-                            name="discountPer"
-                            type="number"
-                            min="0"
-                            max="100"
-                            value={product.discountPer}
-                            placeholder="Enter discount percentage"
-                            onChange={(e) => handleChange(e, index)}
-                            onBlur={() => {
-                              setTemplate(prev => {
-                                const updatedProducts = [...prev.products];
-                                updatedProducts[index].discountPer = Math.min(100, Math.max(0, updatedProducts[index].discountPer)); // Ensure value is between 0 and 100
-                                return { ...prev, products: updatedProducts };
-                              });
-                            }}
-                            className="mt-1"
-                          />
-                        </div>
+  <Label htmlFor={`product-${index}-discount`}>Discount Percentage</Label>
+  <Input
+    id={`product-${index}-discount`}
+    name="discountPer"
+    type="number"
+    min="0"
+    max="100"
+    value={product.discountPer || ''} // Ensures it shows the number without leading zeros
+    placeholder="Enter discount percentage"
+    onChange={(e) => {
+      // Ensure the value stays between 0 and 100
+      const value = Math.max(0, Math.min(Number(e.target.value), 100));
+      handleChange({ target: { name: 'discountPer', value } }, index);
+    }}
+    onBlur={() => {
+      setTemplate(prev => {
+        const updatedProducts = [...prev.products];
+        // Ensure value is constrained between 0 and 100
+        updatedProducts[index].discountPer = Math.min(100, Math.max(0, updatedProducts[index].discountPer));
+        return { ...prev, products: updatedProducts };
+      });
+    }}
+    className="mt-1"
+  />
+</div>
+
                         <div>
                           <Label htmlFor={`product-${index}-promoCode`}>Promo Code</Label>
                           <Input
@@ -606,30 +613,32 @@ export default function Newsletter() {
                     {product.discountType === 'relatedProduct' && (
                       <>
                         <div>
-                          <Label htmlFor={`product-${index}-discountAmt`}>Discount Amount</Label>
-                          <Input
-                            id={`product-${index}-discountAmt`}
-                            name="discountAmt"
-                            type="number"
-                            min="0"
-                            step="0.01"
-                            value={product.discountAmt}
-                            placeholder="Enter discount amount"
-                            onChange={(e) => {
-                              const value = Math.max(0, Math.min(e.target.value, product.price)); // Ensure it does not exceed the price
-                              handleChange({ target: { name: 'discountAmt', value } }, index);
-                            }}
-                            onBlur={() => {
-                              setTemplate(prev => {
-                                const updatedProducts = [...prev.products];
-                                // Ensure the discount amount does not exceed the price
-                                updatedProducts[index].discountAmt = Math.min(updatedProducts[index].discountAmt, updatedProducts[index].price);
-                                return { ...prev, products: updatedProducts };
-                              });
-                            }}
-                            className="mt-1"
-                          />
-                        </div>
+  <Label htmlFor={`product-${index}-discountAmt`}>Discount Amount</Label>
+  <Input
+    id={`product-${index}-discountAmt`}
+    name="discountAmt"
+    type="number"
+    min="0"
+    step="0.01"
+    value={product.discountAmt || ''} // Ensures that a number without leading zeros is displayed
+    placeholder="Enter discount amount"
+    onChange={(e) => {
+      // Ensure it does not exceed the price and does not go below 0
+      const value = Math.max(0, Math.min(Number(e.target.value), product.price));
+      handleChange({ target: { name: 'discountAmt', value } }, index);
+    }}
+    onBlur={() => {
+      setTemplate(prev => {
+        const updatedProducts = [...prev.products];
+        // Ensure the discount amount does not exceed the price onBlur
+        updatedProducts[index].discountAmt = Math.min(updatedProducts[index].discountAmt, updatedProducts[index].price);
+        return { ...prev, products: updatedProducts };
+      });
+    }}
+    className="mt-1"
+  />
+</div>
+
                         <div>
                           <Label htmlFor={`product-${index}-relatedProduct`}>Related Product</Label>
                           <Input
@@ -666,7 +675,7 @@ ${template.image ? '[Image Preview: Embedded Image Below]' : '[No Image Provided
 Personalized Product Recommendations:
 Top Picks for You:
 ${template.products.map((product, index) => {
-                      let productDetails = `${index + 1}. ${product.productName}\n   o Price: $${product.price}`;
+                      let productDetails = `${index + 1}. ${product.productName}\n   o Original Price: $${product.price}`;
 
                       if (product.discountType === 'discountCode' && product.discountPer && product.promoCode) {
                         productDetails += `\n   o Discount: ${product.discountPer}% off with code: ${product.promoCode}`;
