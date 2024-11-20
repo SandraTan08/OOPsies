@@ -163,14 +163,14 @@ const CustomerProfile: React.FC<CustomerProfileProps> = ({ customerId }) => {
       )}
 
       <Link href="/customers">
-        <button className="back-button">
+        <button className="back-button" style={{ backgroundColor: '#374151', color: 'white' }}>
           Back to Customers
         </button>
       </Link>
 
       {role === 'Marketing' && (
         <Link href={`/newsletter/${customerId}`}>
-          <button className="back-button">
+          <button className="back-button" style={{ backgroundColor: '#374151', color: 'white' }}>
             Contact me
           </button>
         </Link>
@@ -181,13 +181,13 @@ const CustomerProfile: React.FC<CustomerProfileProps> = ({ customerId }) => {
         <table id="purchase-history">
           <thead>
             <tr>
-              <th>Purchase ID</th>
-              <th>Product Name</th>
-              <th>Quantity</th>
-              <th>Sale Type</th>
-              <th>Digital</th>
-              <th>Total Price</th>
-              <th>Purchase Date</th>
+              <th style={{ backgroundColor: '#374151', color: 'white' }}>Purchase ID</th>
+              <th style={{ backgroundColor: '#374151', color: 'white' }}>Product Name</th>
+              <th style={{ backgroundColor: '#374151', color: 'white' }}>Quantity</th>
+              <th style={{ backgroundColor: '#374151', color: 'white' }}>Sale Type</th>
+              <th style={{ backgroundColor: '#374151', color: 'white' }}>Digital</th>
+              <th style={{ backgroundColor: '#374151', color: 'white' }}>Total Price</th>
+              <th style={{ backgroundColor: '#374151', color: 'white' }}>Purchase Date</th>
             </tr>
           </thead>
           <tbody>
