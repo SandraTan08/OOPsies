@@ -33,7 +33,7 @@ export default function Newsletter() {
   const [customerName, setCustomerName] = useState(''); // State for customer Name
   
   const [products, setProducts] = useState([]);
-  const [numProducts, setNumProducts] = useState(); // New state for number of products 
+  const [numProducts, setNumProducts] = useState(0); // New state for number of products 
   const textAreaRef = useRef(null); // Reference for the textarea
   const { data: session, status } = useSession();
   const [emailType, setEmailType] = useState('mass'); // Track selected email type
@@ -48,11 +48,13 @@ export default function Newsletter() {
   const [customerId, setCustomerId] = useState<string | null>(null);
 
 
+  
   useEffect(() => {
     if (session && session.account) {
       console.log(session);
       fetchNewsletters();
       fetchProducts();
+      
       if (emailType === 'personalized') {
         const path = window.location.pathname; // Get current path
         const match = path.match(/\/newsletter\/(\d+)/); // Extract customerId from URL
@@ -161,6 +163,7 @@ export default function Newsletter() {
 
   const handleSelectChange = (e) => {
     const selectedNewsletterId = e.target.value;
+    setNumProducts(0);
     setSelectedNewsletter(selectedNewsletterId);
     fetchNewsletterData(selectedNewsletterId); // Fetch data when selection changes
   };
@@ -588,7 +591,7 @@ export default function Newsletter() {
               )}
 
 
-              {session.account.role !== 'Admin' && (
+              {session.account.role !== 'Admin' && template.templateName && (
                 <div className="mb-6">
                   <Label htmlFor="numProducts">Number of Products</Label>
                   <Input
