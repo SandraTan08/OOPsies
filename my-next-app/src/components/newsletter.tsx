@@ -31,7 +31,7 @@ export default function Newsletter() {
   const [selectedNewsletter, setSelectedNewsletter] = useState(''); // State for selected newsletter
   const [customerEmail, setCustomerEmail] = useState(''); // State for customer email
   const [customerName, setCustomerName] = useState(''); // State for customer Name
-  
+
   const [products, setProducts] = useState([]);
   const [numProducts, setNumProducts] = useState(0); // New state for number of products 
   const textAreaRef = useRef(null); // Reference for the textarea
@@ -468,7 +468,7 @@ export default function Newsletter() {
 
   return (
     <div>
-      <Toaster />
+      <Toaster className="toast-container"/>
       <div className="min-h-screen bg-gray-50 text-gray-800">
         <div className="max-w-4xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden">
           <div className="px-6 py-4 bg-gray-100 border-b flex justify-between items-center">
@@ -611,43 +611,43 @@ export default function Newsletter() {
 
 
 
-{template.products.map((product, index) => (
-        <div key={index} className="mb-6 p-4 bg-gray-50 rounded-lg">
-          <h2 className="text-lg font-semibold mb-2">Product {index + 1}</h2>
-          <div className="grid grid-cols-2 gap-4">
-            {/* Product Name Dropdown with a textbox */}
-            <div>
-              <Label htmlFor={`product-${index}-name`}>Product Name</Label>
-              <select
-                id={`product-${index}-name`}
-                name="productName"
-                value={product.productId || ''}
-                onChange={(e) => handleProductChange(e, index)} // Handle product selection
-                className="mt-1 rounded-lg py-2 px-3 w-full">
-                <option value="" disabled>Select a product</option>
-                {products.map((productItem) => (
-                  <option key={productItem.productId} value={productItem.productId}>
-                    {productItem.productName + " " + productItem.variant}
-                  </option>
-                ))}
-              </select>
-            </div>
+              {template.products.map((product, index) => (
+                <div key={index} className="mb-6 p-4 bg-gray-50 rounded-lg">
+                  <h2 className="text-lg font-semibold mb-2">Product {index + 1}</h2>
+                  <div className="grid grid-cols-2 gap-4">
+                    {/* Product Name Dropdown with a textbox */}
+                    <div>
+                      <Label htmlFor={`product-${index}-name`}>Product Name</Label>
+                      <select
+                        id={`product-${index}-name`}
+                        name="productName"
+                        value={product.productId || ''}
+                        onChange={(e) => handleProductChange(e, index)} // Handle product selection
+                        className="mt-1 rounded-lg py-2 px-3 w-full">
+                        <option value="" disabled>Select a product</option>
+                        {products.map((productItem) => (
+                          <option key={productItem.productId} value={productItem.productId}>
+                            {productItem.productName + " " + productItem.variant}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
 
-            {/* Product Price */}
-            <div>
-              <Label htmlFor={`product-${index}-price`}>Price</Label>
-              <Input
-                id={`product-${index}-price`}
-                name="price"
-                type="number"
-                step="0.01"
-                value={product.price || ''}
-                placeholder="Enter price"
-                readOnly
-                className="mt-1"
-              />
-            </div>
-          
+                    {/* Product Price */}
+                    <div>
+                      <Label htmlFor={`product-${index}-price`}>Price</Label>
+                      <Input
+                        id={`product-${index}-price`}
+                        name="price"
+                        type="number"
+                        step="0.01"
+                        value={product.price || ''}
+                        placeholder="Enter price"
+                        readOnly
+                        className="mt-1"
+                      />
+                    </div>
+
 
 
                     {/* Dropdown for selecting discount type */}
@@ -738,22 +738,22 @@ export default function Newsletter() {
                           />
                         </div>
 
-<div>
-  <Label htmlFor={`product-${index}-relatedProduct`}>Related Product</Label>
-  <select
-    id={`product-${index}-relatedProduct`}
-    name="relatedProduct"
-    value={product.relatedProduct || ''}
-    onChange={(e) => handleChange(e, index)} // Handle related product selection
-    className="mt-1 rounded-lg py-2 px-3 w-full">
-    <option value="" disabled>Select a related product</option>
-    {products.map((productItem) => (
-      <option key={productItem.productId} value={productItem.Name}>
-        {productItem.productName + " " + productItem.variant}
-      </option>
-    ))}
-  </select>
-</div>
+                        <div>
+                          <Label htmlFor={`product-${index}-relatedProduct`}>Related Product</Label>
+                          <select
+                            id={`product-${index}-relatedProduct`}
+                            name="relatedProduct"
+                            value={product.relatedProduct || ''}
+                            onChange={(e) => handleChange(e, index)} // Handle related product selection
+                            className="mt-1 rounded-lg py-2 px-3 w-full">
+                            <option value="" disabled>Select a related product</option>
+                            {products.map((productItem) => (
+                              <option key={productItem.productId} value={productItem.Name}>
+                                {productItem.productName + " " + productItem.variant}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
                       </>
                     )}
                   </div>
