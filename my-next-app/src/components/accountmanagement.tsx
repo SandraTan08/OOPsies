@@ -17,15 +17,14 @@ export default function AccountManagement() {
   const [showModal, setShowModal] = useState(false)
   const [modalContent, setModalContent] = useState(null)
   const [notification, setNotification] = useState(null)
-  const [validationErrors, setValidationErrors] = useState({}) // Validation errors state
+  const [validationErrors, setValidationErrors] = useState({})
   const inputRef = useRef(null)
 
-  // New useEffect hook for handling notification timeout
   useEffect(() => {
     if (notification) {
       const timer = setTimeout(() => {
         setNotification(null)
-      }, 5000) // Notification will disappear after 5 seconds
+      }, 5000)
 
       return () => clearTimeout(timer)
     }
@@ -62,7 +61,7 @@ export default function AccountManagement() {
                 ref={inputRef}
                 type="text"
                 id="edit-user-name"
-                defaultValue={editingAccount.accountUserName} // Use defaultValue instead of value
+                defaultValue={editingAccount.accountUserName}
                 onBlur={(e) =>
                   setEditingAccount((prev) => ({
                     ...prev,
@@ -76,7 +75,7 @@ export default function AccountManagement() {
               <Input
                 type="email"
                 id="edit-email"
-                defaultValue={editingAccount.accountEmail} // Use defaultValue instead of value
+                defaultValue={editingAccount.accountEmail}
                 onBlur={(e) =>
                   setEditingAccount((prev) => ({
                     ...prev,
@@ -89,7 +88,7 @@ export default function AccountManagement() {
               <Label htmlFor="edit-role">Role</Label>
               <select
                 id="edit-role"
-                defaultValue={editingAccount.role} // Use defaultValue instead of value
+                defaultValue={editingAccount.role}
                 onBlur={(e) =>
                   setEditingAccount((prev) => ({
                     ...prev,
@@ -109,7 +108,7 @@ export default function AccountManagement() {
               <Input
                 type="password"
                 id="edit-password"
-                defaultValue={editingAccount.password || ''} // Use defaultValue instead of value
+                defaultValue={editingAccount.password || ''}
                 onBlur={(e) =>
                   setEditingAccount((prev) => ({
                     ...prev,
@@ -126,45 +125,55 @@ export default function AccountManagement() {
       setShowModal(true);
     }
   }, [editingAccount]);
-  
 
   const handleCreateAccount = async (e) => {
     e.preventDefault()
-    if (newAccount.accountId && newAccount.userName && newAccount.email && newAccount.role && newAccount.password) {
-      setModalContent({
-        title: 'Confirm Account Creation',
-        message: `Are you sure you want to create an account for ${newAccount.userName}?`,
-        action: async () => {
-          try {
-            const response = await fetch('http://localhost:8080/api/v1/account/new_account', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                accountId: newAccount.accountId,
-                accountUserName: newAccount.userName,
-                password: newAccount.password,
-                accountEmail: newAccount.email,
-                role: newAccount.role,
-              }),
-            })
-            if (response.ok) {
-              const createdAccount = await response.json()
-              setAccounts((prevAccounts) => [...prevAccounts, createdAccount])
-              setNewAccount({ accountId: '', userName: '', email: '', role: '', password: '' })
-              setNotification({ type: 'success', message: 'Account created successfully' })
-            } else {
-              throw new Error('Failed to create account')
-            }
-          } catch (error) {
-            console.error('Error:', error)
-            setNotification({ type: 'error', message: 'Error creating account' })
-          } finally {
-            setShowModal(false)
-          }
-        },
-      })
-      setShowModal(true)
+    const errors = {}
+    if (!newAccount.accountId) errors.accountId = 'Account ID is required'
+    if (!newAccount.userName) errors.userName = 'User Name is required'
+    if (!newAccount.email) errors.email = 'Email is required'
+    if (!newAccount.role) errors.role = 'Role is required'
+    if (!newAccount.password) errors.password = 'Password is required'
+
+    if (Object.keys(errors).length > 0) {
+      setValidationErrors(errors)
+      return
     }
+
+    setValidationErrors({})
+    setModalContent({
+      title: 'Confirm Account Creation',
+      message: `Are you sure you want to create an account for ${newAccount.userName}?`,
+      action: async () => {
+        try {
+          const response = await fetch('http://localhost:8080/api/v1/account/new_account', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              accountId: newAccount.accountId,
+              accountUserName: newAccount.userName,
+              password: newAccount.password,
+              accountEmail: newAccount.email,
+              role: newAccount.role,
+            }),
+          })
+          if (response.ok) {
+            const createdAccount = await response.json()
+            setAccounts((prevAccounts) => [...prevAccounts, createdAccount])
+            setNewAccount({ accountId: '', userName: '', email: '', role: '', password: '' })
+            setNotification({ type: 'success', message: 'Account created successfully' })
+          } else {
+            throw new Error('Failed to create account')
+          }
+        } catch (error) {
+          console.error('Error:', error)
+          setNotification({ type: 'error', message: 'Error creating account' })
+        } finally {
+          setShowModal(false)
+        }
+      },
+    })
+    setShowModal(true)
   }
 
   const handleEditAccount = (account) => {
@@ -269,10 +278,11 @@ export default function AccountManagement() {
                     <Label htmlFor="account-id">Account ID</Label>
                     <Input
                       type="text"
-                      id="account-id"
+                      id="account-id" 
                       value={newAccount.accountId}
                       onChange={(e) => setNewAccount({ ...newAccount, accountId: e.target.value })}
                     />
+                    {validationErrors.accountId && <p className="text-red-500 text-sm mt-1">{validationErrors.accountId}</p>}
                   </div>
                   <div>
                     <Label htmlFor="user-name">User Name</Label>
@@ -282,6 +292,7 @@ export default function AccountManagement() {
                       value={newAccount.userName}
                       onChange={(e) => setNewAccount({ ...newAccount, userName: e.target.value })}
                     />
+                    {validationErrors.userName && <p className="text-red-500 text-sm mt-1">{validationErrors.userName}</p>}
                   </div>
                   <div>
                     <Label htmlFor="email">Email</Label>
@@ -291,6 +302,7 @@ export default function AccountManagement() {
                       value={newAccount.email}
                       onChange={(e) => setNewAccount({ ...newAccount, email: e.target.value })}
                     />
+                    {validationErrors.email && <p className="text-red-500 text-sm mt-1">{validationErrors.email}</p>}
                   </div>
                   <div>
                     <Label htmlFor="role">Role</Label>
@@ -305,6 +317,7 @@ export default function AccountManagement() {
                       <option value="Marketing">Marketing</option>
                       <option value="Sales">Sales</option>
                     </select>
+                    {validationErrors.role && <p className="text-red-500 text-sm mt-1">{validationErrors.role}</p>}
                   </div>
                   <div>
                     <Label htmlFor="password">Password</Label>
@@ -314,6 +327,7 @@ export default function AccountManagement() {
                       value={newAccount.password}
                       onChange={(e) => setNewAccount({ ...newAccount, password: e.target.value })}
                     />
+                    {validationErrors.password && <p className="text-red-500 text-sm mt-1">{validationErrors.password}</p>}
                   </div>
                 </div>
                 <Button className="bg-gray-700 hover:bg-gray-500" type="submit">
@@ -334,30 +348,29 @@ export default function AccountManagement() {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-  {accounts.map((account) => (
-    <tr key={account.accountId}>
-      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 sm:px-6">{account.accountId}</td>
-      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 sm:px-6">{account.accountUserName}</td>
-      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 sm:px-6">{account.accountEmail}</td>
-      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 sm:px-6">{account.role}</td>
-      <td className="px-4 py-4 whitespace-nowrap text-sm font-medium space-x-2 sm:px-6">
-      {(account.role !== 'Admin' || account.accountId === session.account.accountId) && (
-        <>
-          <Button variant="ghost" size="sm" onClick={() => handleEditAccount(account)}>
-            <Edit2 className="w-4 h-4" />
-          </Button>
-          {account.role !== 'Admin' && (
-            <Button variant="ghost" size="sm" onClick={() => handleDeleteAccount(account)}>
-              <Trash2 className="w-4 h-4" />
-            </Button>
-          )}
-        </>
-      )}
-      </td>
-    </tr>
-  ))}
-</tbody>
-
+                  {accounts.map((account) => (
+                    <tr key={account.accountId}>
+                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 sm:px-6">{account.accountId}</td>
+                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 sm:px-6">{account.accountUserName}</td>
+                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 sm:px-6">{account.accountEmail}</td>
+                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 sm:px-6">{account.role}</td>
+                      <td className="px-4 py-4 whitespace-nowrap text-sm font-medium space-x-2 sm:px-6">
+                      {(account.role !== 'Admin' || account.accountId === session.account.accountId) && (
+                        <>
+                          <Button variant="ghost" size="sm" onClick={() => handleEditAccount(account)}>
+                            <Edit2 className="w-4 h-4" />
+                          </Button>
+                          {account.role !== 'Admin' && (
+                            <Button variant="ghost" size="sm" onClick={() => handleDeleteAccount(account)}>
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          )}
+                        </>
+                      )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
               </table>
             </div>
           </div>
