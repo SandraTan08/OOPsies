@@ -69,6 +69,9 @@ export default function Newsletter() {
     if(customerId == 0){
       setEmailType('mass');
     }
+    if(customerId != 0){
+      setEmailType('personalized');
+    }
   }, [customerId]); // Only triggers when customerId changes
 
   const fetchCustomerData = async (customerId: number) => {
