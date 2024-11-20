@@ -22,8 +22,6 @@ public class Newsletter {
 
     private String accountId;  // Store the ID of the user who created this template
 
-    private String customerName;
-
     @OneToMany(mappedBy = "newsletter", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<ProductTemplate> products;
 
@@ -39,7 +37,7 @@ public class Newsletter {
     public String toString() {
         return "Newsletter{" +
                 "newsletterId=" + newsletterId +
-                ", customerName='" + customerName + '\'' +
+                ", templateName='" + templateName + '\'' +
                 ", accountId='" + accountId + '\'' +
                 ", introduction='" + introduction + '\'' +
                 ", conclusion='" + conclusion + '\'' +

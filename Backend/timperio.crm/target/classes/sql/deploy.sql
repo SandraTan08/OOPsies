@@ -5,7 +5,6 @@ CREATE TABLE IF NOT EXISTS newsletter (
     `newsletterId` BIGINT AUTO_INCREMENT PRIMARY KEY,
     `templateName` VARCHAR(255) NOT NULL,
     `accountId` VARCHAR(255) NOT NULL,
-    `customerName` VARCHAR(255) NULL,
     `introduction` VARCHAR(5000) NOT NULL, 
     `conclusion` VARCHAR(5000) NOT NULL,
     `image` MEDIUMBLOB
