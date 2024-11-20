@@ -43,6 +43,8 @@ export default function Dashboard() {
   const [sortConfig, setSortConfig] = useState<{ key: string; direction: string } | null>(null);
   const [viewType, setViewType] = useState<string>('monthly');
   const [saleTypeFilter, setSaleTypeFilter] = useState<string>('');
+  const [platformFilter, setPlatformFilter] = useState<string>('');
+  const [availableYears, setAvailableYears] = useState<number[]>([]);
   const [customerIdFilter, setCustomerIdFilter] = useState<string>('');
   const [productFilter, setProductFilter] = useState<string>('');
   const [currentPage, setCurrentPage] = useState(1);
@@ -153,11 +155,11 @@ export default function Dashboard() {
 
   const renderSortIcon = (key: string) => {
     if (!sortConfig || sortConfig.key !== key) {
-      return '↕'; 
+      return '↕';
     }
     return sortConfig.direction === 'ascending' ? '▲' : '▼';
   };
-  
+
 
   const totalPages = Math.ceil(filteredTransactions.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -215,6 +217,24 @@ export default function Dashboard() {
       }
     }
 
+    async function fetchAvailableYears() {
+      try {
+        const res = await fetch('http://localhost:8080/api/v1/purchaseHistory');
+        if (!res.ok) throw new Error('Failed to fetch data');
+        const data = await res.json();
+
+        // Extract unique years from the data
+        const years = Array.from(
+          new Set(data.map((transaction: any) => new Date(transaction.saleDate).getFullYear()))
+        ).sort((a, b) => a - b); // Sort the years in ascending order
+        setAvailableYears(years);
+      } catch (error) {
+        console.error('Error fetching available years:', error);
+      }
+    }
+
+    fetchAvailableYears();
+
     async function fetchSalesData() {
       try {
         // Fetch product details first
@@ -231,7 +251,8 @@ export default function Dashboard() {
         const transactions = data.map((purchase: any) => ({
           id: purchase.purchaseId,
           customerId: purchase.customerId.toString(),
-          saleType: purchase.saleType === 1 ? 'Online' : 'In-store',
+          saleType: purchase.saleType,
+          platform: purchase.digital,
           product: productMap.get(purchase.productId) || `Product ${purchase.productId}`, // use product name, fallback to ID if not found
           value: purchase.totalPrice,
           quantity: purchase.quantity,
@@ -301,7 +322,7 @@ export default function Dashboard() {
       console.log('Session is missing, redirecting to login');
       return;
     }
-  
+
     if (session?.account?.role === 'Admin') {
       router.push('/account');
       console.log(session);
@@ -321,6 +342,10 @@ export default function Dashboard() {
 
     if (saleTypeFilter) {
       filtered = filtered.filter(transaction => transaction.saleType === saleTypeFilter);
+    }
+
+    if (platformFilter) {
+      filtered = filtered.filter(transaction => transaction.platform === platformFilter);
     }
 
     if (customerIdFilter) {
@@ -343,20 +368,20 @@ export default function Dashboard() {
     setFilteredTransactions(filteredRangeTransactions);
   };
 
-    if (session === undefined) {
-      return <div>Loading...</div>; // You can show a loading spinner or message
-    }
+  if (session === undefined) {
+    return <div>Loading...</div>; // You can show a loading spinner or message
+  }
 
-    // if (session?.account?.role === 'Admin') {
-    //   // Redirect to a different page if the user is an admin
-    //   window.location.href = '/account'; 
-    // }
+  // if (session?.account?.role === 'Admin') {
+  //   // Redirect to a different page if the user is an admin
+  //   window.location.href = '/account'; 
+  // }
 
-    if (!session) {
-      window.location.href = '/';
-      console.log('Session is missing, redirecting to login');
-      return null;
-    }
+  if (!session) {
+    window.location.href = '/';
+    console.log('Session is missing, redirecting to login');
+    return null;
+  }
 
   return (
     <div className="flex h-screen bg-gray-100">
@@ -364,7 +389,7 @@ export default function Dashboard() {
 
 
         <main className="flex-1  bg-gray-100">
-          
+
           <div className="py-6">
 
             <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
@@ -380,7 +405,7 @@ export default function Dashboard() {
                   className="px-4 py-2 bg-white border border-gray-300 rounded text-gray-500"
                 >
                   <option value="all">All Years</option>
-                  {[2019, 2020, 2021, 2022, 2023, 2024].map((year) => (
+                  {availableYears.map((year) => (
                     <option key={year} value={year}>{year}</option>
                   ))}
                 </select>
@@ -401,7 +426,7 @@ export default function Dashboard() {
                   className="px-4 py-2 bg-white border border-gray-300 rounded text-gray-500"
                 >
                   <option value="all">All Years</option>
-                  {[2019, 2020, 2021, 2022, 2023, 2024].map((year) => (
+                  {availableYears.map((year) => (
                     <option key={year} value={year}>{year}</option>
                   ))}
                 </select>
@@ -565,8 +590,28 @@ export default function Dashboard() {
                       className="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-500"
                     >
                       <option value="">All</option>
-                      <option value="Online">Online</option>
-                      <option value="In-store">In-store</option>
+                      <option value="Direct - B2B">Direct - B2B</option>
+                      <option value="Direct - B2C">Direct - B2C</option>
+                      <option value="Marketing">Marketing</option>
+                      <option value="Consignment">Consignment</option>
+                      <option value="Wholesaler">Wholesaler</option>
+                      <option value="Others">Others</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label htmlFor="platform" className="block text-sm font-medium text-black">Platform</label>
+                    <select
+                      id="platform"
+                      name="platform"
+                      value={platformFilter}
+                      onChange={(e) => setPlatformFilter(e.target.value)}
+                      className="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-500"
+                    >
+                      <option value="">All</option>
+                      <option value="Online - Website">Online (Website)</option>
+                      <option value="Offline">Offline</option>
+                      <option value="Others">Others</option>
                     </select>
                   </div>
 
@@ -640,137 +685,155 @@ export default function Dashboard() {
               </form>
 
               {/* Filtered Transactions Table */}
-              <div className="mt-8 p-4 bg-white rounded-lg shadow overflow-hidden">
-                <div className="flex justify-between items-center">
-                  <h3 className="text-lg font-medium text-gray-900">Sales Transactions</h3>
-                  {/* Export CSV Button */}
-                  <CSVLink
-                    data={filteredTransactions}  // Use the filtered transactions for export
-                    filename="transactions.csv"
-                    className="inline-flex items-center px-4 py-2 text-xs font-medium text-white hover:bg-gray-500 bg-gray-700 border border-transparent rounded-md shadow-sm  focus:outline-none focus:ring-2 focus:ring-offset-2"
-                  >
-                    Export CSV
-                  </CSVLink>
+              <div className="mt-8 flex flex-col space-y-4">
+                {/* Scrollable Table with Padding and Rounded Sides */}
+                <div className="p-4 bg-white rounded-lg shadow">
+                  <div className="flex justify-between items-center pb-4">
+                    <h3 className="text-lg font-medium text-gray-900">Sales Transactions</h3>
+                    {/* Export CSV Button */}
+                    <CSVLink
+                      data={filteredTransactions}  // Use the filtered transactions for export
+                      filename="transactions.csv"
+                      className="inline-flex items-center px-4 py-2 text-xs font-medium text-white hover:bg-gray-500 bg-gray-700 border border-transparent rounded-md shadow-sm  focus:outline-none focus:ring-2 focus:ring-offset-2"
+                    >
+                      Export CSV
+                    </CSVLink>
+                  </div>
+                  <div className="overflow-auto max-h-[500px] rounded-lg">
+                    <table className="min-w-full divide-y divide-gray-200">
+                      <thead className="bg-gray-700 sticky top-0 z-10 text-white font-bold rounded-t-lg">
+                        <tr>
+                          <th className="px-4 py-2 text-sm tracking-wider text-left uppercase bg-gray-700 text-white">Transaction ID</th>
+                          <th className="px-4 py-2 text-sm tracking-wider text-left uppercase bg-gray-700 text-white">Customer ID</th>
+                          <th className="px-4 py-2 text-sm tracking-wider text-left uppercase bg-gray-700 text-white">Sale Type</th>
+                          <th className="px-4 py-2 text-sm tracking-wider text-left uppercase bg-gray-700 text-white">Platform</th>
+                          <th className="px-4 py-2 text-sm tracking-wider text-left uppercase bg-gray-700 text-white">Product</th>
+                          <th className="px-4 py-2 text-sm tracking-wider text-left uppercase bg-gray-700 text-white">Value ($)</th>
+                          <th className="px-4 py-2 text-sm tracking-wider text-left uppercase bg-gray-700 text-white">Quantity</th>
+                          <th className="px-4 py-2 text-sm tracking-wider text-left uppercase bg-gray-700 text-white">Date</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-200">
+                        {currentTransactions.map((transaction) => (
+                          <tr key={transaction.id} className="hover:bg-gray-100">
+                            <td className="px-4 py-2 text-sm text-gray-900">{transaction.id}</td>
+                            <td className="px-4 py-2 text-sm text-gray-500">{transaction.customerId}</td>
+                            <td className="px-4 py-2 text-sm text-gray-500">{transaction.saleType}</td>
+                            <td className="px-4 py-2 text-sm text-gray-500">{transaction.platform}</td>
+                            <td className="px-4 py-2 text-sm text-gray-500">{transaction.product}</td>
+                            <td className="px-4 py-2 text-sm text-gray-500">{transaction.value.toFixed(2)}</td>
+                            <td className="px-4 py-2 text-sm text-gray-500">{transaction.quantity}</td>
+                            <td className="px-4 py-2 text-sm text-gray-500">
+                              {new Date(transaction.date).toLocaleDateString()}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                  {/* Fixed Pagination Section */}
+                  <div className="flex flex-col items-center space-y-4 pt-4">
+                    {/* Navigation Buttons */}
+                    <div className="flex justify-center items-center space-x-4">
+                      <button
+                        onClick={() => setCurrentPage(1)}
+                        disabled={currentPage === 1}
+                        className="w-24 px-2 py-1 bg-gray-700 hover:bg-gray-500 text-white rounded disabled:opacity-50"
+                      >
+                        First
+                      </button>
+
+                      <button
+                        onClick={() => setCurrentPage(currentPage - 1)}
+                        disabled={currentPage === 1}
+                        className="w-24 px-2 py-1 bg-gray-700 hover:bg-gray-500 text-white rounded disabled:opacity-50"
+                      >
+                        Previous
+                      </button>
+
+                      <span className="text-black w-28 text-center">
+                        Page {currentPage} of {totalPages}
+                      </span>
+
+                      <button
+                        onClick={() => setCurrentPage(currentPage + 1)}
+                        disabled={currentPage === totalPages}
+                        className="w-24 px-2 py-1 bg-gray-700 hover:bg-gray-500 text-white rounded disabled:opacity-50"
+                      >
+                        Next
+                      </button>
+
+                      <button
+                        onClick={() => setCurrentPage(totalPages)}
+                        disabled={currentPage === totalPages}
+                        className="w-24 px-2 py-1 bg-gray-700 hover:bg-gray-500 text-white rounded disabled:opacity-50"
+                      >
+                        Last
+                      </button>
+                    </div>
+
+                    {/* Page Jump Input with Go Button */}
+                    <div className="flex items-center space-x-2">
+                      <label htmlFor="pageInput" className="text-sm font-medium text-gray-700">
+                        Jump to page:
+                      </label>
+                      <input
+                        id="pageInput"
+                        type="number"
+                        min="1"
+                        max={totalPages}
+                        placeholder="1"
+                        className="w-16 px-2 py-1 border border-gray-300 rounded text-center"
+                      />
+                      <button
+                        onClick={() => {
+                          const pageInput = document.getElementById('pageInput').value; // Access input value
+                          const page = Math.max(1, Math.min(totalPages, Number(pageInput))); // Validate page range
+                          setCurrentPage(page);
+                        }}
+                        className="px-4 py-1 bg-gray-700 hover:bg-gray-500 text-white rounded"
+                      >
+                        Go
+                      </button>
+                    </div>
+                  </div>
                 </div>
-                <div className="max-h-96 overflow-y-auto">
-                <table className="min-w-full mt-4 divide-y divide-gray-200 bg-white rounded-lg shadow overflow-hidden">
-  <thead className="bg-gray-700 sticky top-0 z-10 text-white rounded-t-lg">
-    <tr>
-      <th
-        className="px-6 py-3 text-sm font-lg tracking-wider text-left uppercase cursor-pointer"
-        onClick={() => handleSort('id')}
-      >
-        Transaction ID {renderSortIcon('id')}
-      </th>
-      <th
-        className="px-6 py-3 text-sm font-lg tracking-wider text-left uppercase cursor-pointer"
-        onClick={() => handleSort('customerId')}
-      >
-        Customer ID {renderSortIcon('customerId')}
-      </th>
-      <th
-        className="px-6 py-3 text-sm font-lg tracking-wider text-left uppercase cursor-pointer"
-        onClick={() => handleSort('saleType')}
-      >
-        Sale Type {renderSortIcon('saleType')}
-      </th>
-      <th
-        className="px-6 py-3 text-sm font-lg tracking-wider text-left uppercase cursor-pointer"
-        onClick={() => handleSort('product')}
-      >
-        Product {renderSortIcon('product')}
-      </th>
-      <th
-        className="px-6 py-3 text-sm font-lg tracking-wider text-left uppercase cursor-pointer"
-        onClick={() => handleSort('value')}
-      >
-        Value ($) {renderSortIcon('value')}
-      </th>
-      <th
-        className="px-6 py-3 text-sm font-lg tracking-wider text-left uppercase cursor-pointer"
-        onClick={() => handleSort('quantity')}
-      >
-        Quantity {renderSortIcon('quantity')}
-      </th>
-      <th
-        className="px-6 py-3 text-sm font-lg tracking-wider text-left uppercase cursor-pointer"
-        onClick={() => handleSort('date')}
-      >
-        Date {renderSortIcon('date')}
-      </th>
-    </tr>
-  </thead>
-  <tbody className="divide-y divide-gray-200">
-    {currentTransactions.map((transaction, index) => (
-      <tr
-        key={transaction.id}
-        className={`hover:bg-gray-100 ${
-          index === currentTransactions.length - 1 ? 'rounded-b-lg' : ''
-        }`}
-      >
-        <td className="px-6 py-4 text-sm font-medium text-gray-900">{transaction.id}</td>
-        <td className="px-6 py-4 text-sm text-gray-500">{transaction.customerId}</td>
-        <td className="px-6 py-4 text-sm text-gray-500">{transaction.saleType}</td>
-        <td className="px-6 py-4 text-sm text-gray-500">{transaction.product}</td>
-        <td className="px-6 py-4 text-sm text-gray-500">{transaction.value.toFixed(2)}</td>
-        <td className="px-6 py-4 text-sm text-gray-500">{transaction.quantity}</td>
-        <td className="px-6 py-4 text-sm text-gray-500">{new Date(transaction.date).toLocaleDateString()}</td>
-      </tr>
-    ))}
-  </tbody>
-  <div className="mt-4 flex justify-between"></div>
-  <div className="mt-8 flex justify-center items-center space-x-4">
-    <button
-      onClick={() => setCurrentPage(currentPage - 1)}
-      disabled={currentPage === 1}
-      className="w-24 px-2 py-1 bg-gray-700 hover:bg-gray-500 text-white rounded disabled:opacity-50"
-    >
-      Previous
-    </button>
 
-    <span className="text-black w-28">Page {currentPage} of {totalPages}</span>
-
-    <button
-      onClick={() => setCurrentPage(currentPage + 1)}
-      disabled={currentPage === totalPages}
-      className="w-24 px-2 py-1 bg-gray-700 hover:bg-gray-500 text-white rounded disabled:opacity-50"
-    >
-      Next
-    </button>
-  </div>
-</table>
-
-
-                </div>
               </div>
+
 
               {/* total qty sold by product table */}
               <div className="mt-8 p-4 bg-white rounded-lg shadow">
-                <h3 className="text-lg font-medium text-gray-900">Total Quantity Sold by Product</h3>
-                <div className="max-h-96 overflow-y-auto">
-
-                <table className="min-w-full mt-4 divide-y divide-gray-200 bg-white rounded-lg shadow overflow-hidden">
-  <thead className="bg-gray-700 text-white rounded-t-lg sticky top-0 z-10">
-    <tr>
-      <th className="px-6 py-3 text-sm font-lg tracking-wider text-left uppercase">Product</th>
-      <th className="px-6 py-3 text-sm font-lg tracking-wider text-left uppercase">Total Quantity Sold</th>
-    </tr>
-  </thead>
-  <tbody className="divide-y divide-gray-200">
-    {Object.entries(totalQuantitybyProduct).map(([product, quantity], index) => (
-      <tr
-        key={product}
-        className={`hover:bg-gray-100 ${
-          index === Object.entries(totalQuantitybyProduct).length - 1 ? 'rounded-b-lg' : ''
-        }`}
-      >
-        <td className="px-6 py-4 text-sm font-medium text-gray-900">{product}</td>
-        <td className="px-6 py-4 text-sm text-gray-500">{quantity}</td>
-      </tr>
-    ))}
-  </tbody>
-</table>
-
+                <h3 className="text-lg font-medium text-gray-900 pb-4">Total Quantity Sold by Product</h3>
+                <div className="relative max-h-96 overflow-y-auto rounded-lg">
+                  <table className="w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-700">
+                      <tr>
+                        <th
+                          className="sticky top-0 px-6 py-3 text-sm font-lg tracking-wider text-left uppercase text-white bg-gray-700"
+                        >
+                          Product
+                        </th>
+                        <th
+                          className="sticky top-0 px-6 py-3 text-sm font-lg tracking-wider text-left uppercase text-white bg-gray-700"
+                        >
+                          Total Quantity Sold
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {Object.entries(totalQuantitybyProduct).map(([product, quantity], index) => (
+                        <tr
+                          key={product}
+                          className={`hover:bg-gray-100 ${index === Object.entries(totalQuantitybyProduct).length - 1 ? 'rounded-b-lg' : ''
+                            }`}
+                        >
+                          <td className="px-6 py-4 text-sm font-medium text-gray-900">{product}</td>
+                          <td className="px-6 py-4 text-sm text-gray-500">{quantity}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
               </div>
 
