@@ -173,7 +173,7 @@ export default function TemplateNewsletter() {
               onChange={handleImageChange}
               className="hidden"
             />
-            <Button onClick={() => document.getElementById('image')?.click()}>
+            <Button className="bg-gray-700 hover:bg-gray-500" onClick={() => document.getElementById('image')?.click()}>
               <Upload className="mr-2 h-4 w-4" /> Choose Image
             </Button>
             {image && <span className="text-sm text-muted-foreground">{image.name}</span>}
@@ -209,7 +209,7 @@ Marketing team
 
         {/* Action Buttons */}
         <div className="flex space-x-4 mb-6">
-          <Button onClick={handleSaveTemplate} className="flex items-center">
+          <Button onClick={handleSaveTemplate} className="bg-gray-700 hover:bg-gray-500flex items-center">
             <Save className="mr-2 h-4 w-4" /> Save Template
           </Button>
           <Button variant="destructive" onClick={handleRemoveTemplate} disabled={!selectedNewsletter} className="flex items-center">

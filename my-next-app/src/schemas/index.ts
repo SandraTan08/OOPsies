@@ -1,8 +1,6 @@
 import { z } from 'zod';
 
-const ACCOUNT_ID_SCHEMA = z
-  .string()
-  .length(4, 'Staff ID must be 4 digits long.')
+const ACCOUNT_ID_SCHEMA = z.string().min(1, 'Staff ID cannot be empty.');
 
 export const loginSchema = z.object({
   accountId: ACCOUNT_ID_SCHEMA, // Updated from EMAIL_SCHEMA to STAFF_ID_SCHEMA

@@ -105,7 +105,7 @@ export const LoginForm = () => {
               />
             </div>
           </div>
-          <Button type="submit" disabled={isPending} className="w-full">
+          <Button type="submit" disabled={isPending} className="bg-gray-700 hover:bg-gray-500 w-full">
             Login
           </Button>
         </form>

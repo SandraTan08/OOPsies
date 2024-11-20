@@ -17,6 +17,7 @@ export default function AccountManagement() {
   const [showModal, setShowModal] = useState(false)
   const [modalContent, setModalContent] = useState(null)
   const [notification, setNotification] = useState(null)
+  const [validationErrors, setValidationErrors] = useState({}) // Validation errors state
   const inputRef = useRef(null)
 
   // New useEffect hook for handling notification timeout
@@ -315,7 +316,7 @@ export default function AccountManagement() {
                     />
                   </div>
                 </div>
-                <Button type="submit">
+                <Button className="bg-gray-700 hover:bg-gray-500" type="submit">
                   <Plus className="mr-2" /> Create Account
                 </Button>
               </form>
