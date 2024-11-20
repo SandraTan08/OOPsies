@@ -121,7 +121,7 @@ const CustomerProfile: React.FC<CustomerProfileProps> = ({ customerId }) => {
     fetchCustomerData();
   }, [customerId]);
 
-  
+
 
   const tierMap: Record<string, string> = {
     G: "Gold",
@@ -145,7 +145,14 @@ const CustomerProfile: React.FC<CustomerProfileProps> = ({ customerId }) => {
         <span className="profile-left">
           Customer Profile for User ID: <span className="customer-id">{customerId}</span>
         </span>
-        <span className="tier-badge">{tier}</span>
+        <span className={`tier-badge ${tier.toLowerCase() === 'gold'
+            ? 'bg-yellow-500 text-yellow-900'
+            : tier.toLowerCase() === 'silver'
+              ? 'bg-gray-300 text-gray-700'
+              : tier.toLowerCase() === 'bronze'
+                ? 'bg-amber-800 text-amber-200'
+                : 'bg-gray-100 text-gray-500'
+          } px-2 py-1 rounded-full text-sm font-medium`}>{tier}</span>
       </h1>
 
       {customer && (
