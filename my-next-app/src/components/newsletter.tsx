@@ -12,6 +12,7 @@ import { toast, Toaster } from 'sonner'  // Ensure `sonner` is installed and imp
 import { useSession, signIn, signOut } from 'next-auth/react'
 
 
+
 const brevoApiKey = process.env.NEXT_PUBLIC_resend_api_key;
 
 export default function Newsletter() {
@@ -29,27 +30,62 @@ export default function Newsletter() {
   const [savedNewsletters, setSavedNewsletters] = useState([]); // State for saved newsletters
   const [selectedNewsletter, setSelectedNewsletter] = useState(''); // State for selected newsletter
   const [customerEmail, setCustomerEmail] = useState(''); // State for customer email
+  const [customerName, setCustomerName] = useState(''); // State for customer Name
 
   const [numProducts, setNumProducts] = useState(0); // New state for number of products 
   const textAreaRef = useRef(null); // Reference for the textarea
   const { data: session, status } = useSession();
-  const [emailType, setEmailType] = useState(''); // Track selected email type
+  const [emailType, setEmailType] = useState('personalized'); // Track selected email type
   const [customerTier, setCustomerTier] = useState(''); // State for customer tier
   const tierDisplayNames = {
     B: "Bronze",
     S: "Silver",
     G: "Gold",
   };
+  // State to store customerId from URL
+  const [customerId, setCustomerId] = useState<string | null>(null);
+
 
   useEffect(() => {
     if (session && session.account) {
+      console.log(session);
       fetchNewsletters();
+      if (emailType === 'personalized') {
+        const path = window.location.pathname; // Get current path
+        const match = path.match(/\/newsletter\/(\d+)/); // Extract customerId from URL
+        if (match) {
+          const extractedCustomerId = match[1]; // Set extracted customerId
+          setCustomerId(extractedCustomerId); // Update customerId state
+        }
+      }
     }
-  }, [session]);
+  }, [session, emailType]); // Dependencies include session and emailType
+
+  useEffect(() => {
+    if (customerId) {
+      fetchCustomerData(customerId); // Fetch customer data once customerId is set
+    }
+  }, [customerId]); // Only triggers when customerId changes
+
+  const fetchCustomerData = async (customerId: string) => {
+    if (!customerId) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`http://localhost:8080/api/v1/customers/byCustomer?customerId=${customerId}`);
+      const customerData = await response.json();
+      console.log(customerData);
+      setCustomerEmail(customerData.customerEmail);
+      setCustomerName(customerData.customerName);
+    } catch (error) {
+      console.error('Error fetching customer data:', error);
+    }
+  };
 
   const fetchNewsletters = async () => {
     try {
-      const response = await axios.get(`http://localhost:8080/api/v1/newsletter`);
+      const response = await axios.get('http://localhost:8080/api/v1/newsletter');
       if (response.status === 200) {
         setSavedNewsletters(response.data);
         console.log('Fetched newsletters:', response.data);
@@ -58,7 +94,6 @@ export default function Newsletter() {
       }
     } catch (error) {
       console.error('Error fetching newsletters:', error);
-      // toast.error('Error fetching saved newsletters.');
     }
   };
 
@@ -420,7 +455,7 @@ export default function Newsletter() {
                   <Input
                     id="customerName"
                     name="customerName"
-                    value={template.customerName}
+                    value={customerName}
                     placeholder="Enter customer name"
                     onChange={(e) => setTemplate({ ...template, customerName: e.target.value })}
                     className="mt-1"
