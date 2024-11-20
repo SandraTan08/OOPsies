@@ -202,9 +202,9 @@ const CustomerProfile: React.FC<CustomerProfileProps> = ({ customerId }) => {
               <tr key={purchase.purchaseId}>
                 <td>{purchase.purchaseId}</td>
                 <td>{purchase.productName}</td>
+                <td>{purchase.quantity}</td>
                 <td>{purchase.saleType}</td>
                 <td>{purchase.digital}</td>
-                <td>{purchase.quantity}</td>
                 <td>${purchase.totalPrice.toFixed(2)}</td>
                 <td>{purchase.saleDate}</td>
               </tr>
