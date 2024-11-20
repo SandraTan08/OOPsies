@@ -34,8 +34,10 @@ CREATE TABLE IF NOT EXISTS `customer` (
     `customerEmail` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 
+INSERT INTO `customer` (`customerId`, `zipCode`, `customer_type`, `tier`, 'customerName', 'customerEmail') VALUES
+(1, 437050, 'TieredCustomer', 'G', 'Raine', 'raine@gmail.com')
+
 INSERT INTO `customer` (`customerId`, `zipCode`, `customer_type`, `tier`) VALUES
-(1, 437050, 'TieredCustomer', 'G'),
 (2, 126793, 'TieredCustomer', 'G'),
 (3, 608830, 'TieredCustomer', 'B'),
 (4, 570110, 'TieredCustomer', 'B'),
@@ -552,8 +554,8 @@ ON DUPLICATE KEY UPDATE productId = productId;
 CREATE TABLE IF NOT EXISTS `purchasehistory` (
   `purchaseId` int PRIMARY KEY,
   `saleDate` varchar(11) NOT NULL,
-  `saleType` int NOT NULL,
-  `digital` int NOT NULL,
+  `saleType` varchar(255) NULL,
+  `digital` varchar(255) NULL,
   `customerId` int NOT NULL,
   `shippingMethod` varchar(255) NOT NULL,
   `productId` int NOT NULL,

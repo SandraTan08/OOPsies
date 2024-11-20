@@ -18,6 +18,7 @@ public class Customer {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer customerId;
     private String customerEmail;
+    private String customerName;
     private Integer zipCode;
 
     @Override
