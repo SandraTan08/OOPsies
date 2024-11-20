@@ -31,7 +31,8 @@ export default function Newsletter() {
   const [selectedNewsletter, setSelectedNewsletter] = useState(''); // State for selected newsletter
   const [customerEmail, setCustomerEmail] = useState(''); // State for customer email
   const [customerName, setCustomerName] = useState(''); // State for customer Name
-
+  
+  const [products, setProducts] = useState([]);
   const [numProducts, setNumProducts] = useState(); // New state for number of products 
   const textAreaRef = useRef(null); // Reference for the textarea
   const { data: session, status } = useSession();
@@ -51,6 +52,7 @@ export default function Newsletter() {
     if (session && session.account) {
       console.log(session);
       fetchNewsletters();
+      fetchProducts();
       if (emailType === 'personalized') {
         const path = window.location.pathname; // Get current path
         const match = path.match(/\/newsletter\/(\d+)/); // Extract customerId from URL
@@ -74,6 +76,19 @@ export default function Newsletter() {
     }
   }, [customerId]); // Only triggers when customerId changes
 
+
+  // Function to fetch product data from API
+  const fetchProducts = async () => {
+    try {
+      const response = await fetch('http://localhost:8080/api/v1/product');
+      const productList = await response.json();
+      setProducts(productList); // Store products in state
+      console.log('Fetched products:', productList);
+    } catch (error) {
+      console.error('Error fetching products:', error);
+    }
+  };
+
   const fetchCustomerData = async (customerId: number) => {
     if (!customerId) {
       return; // Prevent fetching for invalid or 0 customerId
@@ -90,6 +105,25 @@ export default function Newsletter() {
     }
   };
     
+
+  // Handle product selection and price update
+  const handleProductChange = (e, index) => {
+    const selectedProductId = parseInt(e.target.value, 10);
+    const selectedProduct = products.find(product => product.productId === selectedProductId);
+
+    if (selectedProduct) {
+      setTemplate(prevTemplate => {
+        const updatedProducts = [...prevTemplate.products];
+        updatedProducts[index] = {
+          ...updatedProducts[index],
+          productName: selectedProduct.productName,
+          price: selectedProduct.price,
+          productId: selectedProduct.productId
+        };
+        return { ...prevTemplate, products: updatedProducts };
+      });
+    }
+  };
 
   const fetchNewsletters = async () => {
     try {
@@ -514,41 +548,43 @@ export default function Newsletter() {
 
 
 
-              {template.products.map((product, index) => (
-                <div key={index} className="mb-6 p-4 bg-gray-50 rounded-lg">
-                  <h2 className="text-lg font-semibold mb-2">Product {index + 1}</h2>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor={`product-${index}-name`}>Product Name</Label>
-                      <Input
-                        id={`product-${index}-name`}
-                        name="productName"
-                        value={product.productName}
-                        placeholder="Enter product name"
-                        onChange={(e) => handleChange(e, index)}
-                        className="mt-1"
-                      />
-                    </div>
-                    <div>
-  <Label htmlFor={`product-${index}-price`}>Price</Label>
-  <Input
-    id={`product-${index}-price`}
-    name="price"
-    type="number"
-    step="0.01"
-    value={product.price || ''}
-    placeholder="Enter price"
-    onChange={(e) => handleChange(e, index)}
-    onBlur={() => {
-      setTemplate(prev => {
-        const updatedProducts = [...prev.products];
-        updatedProducts[index].price = Math.max(0, updatedProducts[index].price); // Ensure price is not negative
-        return { ...prev, products: updatedProducts };
-      });
-    }}
-    className="mt-1"
-  />
-</div>
+{template.products.map((product, index) => (
+        <div key={index} className="mb-6 p-4 bg-gray-50 rounded-lg">
+          <h2 className="text-lg font-semibold mb-2">Product {index + 1}</h2>
+          <div className="grid grid-cols-2 gap-4">
+            {/* Product Name Dropdown with a textbox */}
+            <div>
+              <Label htmlFor={`product-${index}-name`}>Product Name</Label>
+              <select
+                id={`product-${index}-name`}
+                name="productName"
+                value={product.productId || ''}
+                onChange={(e) => handleProductChange(e, index)} // Handle product selection
+                className="mt-1 rounded-lg py-2 px-3 w-full">
+                <option value="" disabled>Select a product</option>
+                {products.map((productItem) => (
+                  <option key={productItem.productId} value={productItem.productId}>
+                    {productItem.productName + " " + productItem.variant}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Product Price */}
+            <div>
+              <Label htmlFor={`product-${index}-price`}>Price</Label>
+              <Input
+                id={`product-${index}-price`}
+                name="price"
+                type="number"
+                step="0.01"
+                value={product.price || ''}
+                placeholder="Enter price"
+                readOnly
+                className="mt-1"
+              />
+            </div>
+          
 
 
                     {/* Dropdown for selecting discount type */}
@@ -639,17 +675,22 @@ export default function Newsletter() {
   />
 </div>
 
-                        <div>
-                          <Label htmlFor={`product-${index}-relatedProduct`}>Related Product</Label>
-                          <Input
-                            id={`product-${index}-relatedProduct`}
-                            name="relatedProduct"
-                            value={product.relatedProduct}
-                            placeholder="Enter related product"
-                            onChange={(e) => handleChange(e, index)}
-                            className="mt-1"
-                          />
-                        </div>
+<div>
+  <Label htmlFor={`product-${index}-relatedProduct`}>Related Product</Label>
+  <select
+    id={`product-${index}-relatedProduct`}
+    name="relatedProduct"
+    value={product.relatedProduct || ''}
+    onChange={(e) => handleChange(e, index)} // Handle related product selection
+    className="mt-1 rounded-lg py-2 px-3 w-full">
+    <option value="" disabled>Select a related product</option>
+    {products.map((productItem) => (
+      <option key={productItem.productId} value={productItem.Name}>
+        {productItem.productName + " " + productItem.variant}
+      </option>
+    ))}
+  </select>
+</div>
                       </>
                     )}
                   </div>
