@@ -17,7 +17,6 @@ public class NewsletterDTO {
     private Long newsletterId;
     private String templateName;
     private String accountId;
-    private String customerName;
     private String introduction;
     private String conclusion;
     private String image; // Base64-encoded image
