@@ -172,16 +172,16 @@ const CustomerList: React.FC = () => {
           <table className="min-w-full mt-4 divide-y divide-gray-200 bg-white rounded-lg shadow overflow-hidden">
             <thead className="sticky top-0 z-10 bg-gray-900 text-white rounded-t-lg">
               <tr>
-                <th className="px-6 py-3 text-sm tracking-wider text-left uppercase bg-gray-700 text-white" style={{ backgroundColor: '#374151', color: 'white' }}>
+                <th className="px-6 py-4 text-sm tracking-wider text-left uppercase bg-gray-700 text-white" style={{ backgroundColor: '#374151', color: 'white' }}>
                   Customer ID
                 </th>
-                <th className="px-6 py-3 text-sm tracking-wider text-left uppercase bg-gray-700 text-white" style={{ backgroundColor: '#374151', color: 'white' }}>
+                <th className="px-6 py-4 text-sm tracking-wider text-left uppercase bg-gray-700 text-white" style={{ backgroundColor: '#374151', color: 'white' }}>
                   Zip Code
                 </th>
-                <th className="px-6 py-3 text-sm tracking-wider text-left uppercase bg-gray-700 text-white" style={{ backgroundColor: '#374151', color: 'white' }}>
+                <th className="px-6 py-4 text-sm tracking-wider text-left uppercase bg-gray-700 text-white" style={{ backgroundColor: '#374151', color: 'white' }}>
                   Tier
                 </th>
-                <th className="px-6 py-3 text-sm tracking-wider text-left uppercase bg-gray-700 text-white" style={{ backgroundColor: '#374151', color: 'white' }}>
+                <th className="px-6 py-4 text-sm tracking-wider text-left uppercase bg-gray-700 text-white" style={{ backgroundColor: '#374151', color: 'white' }}>
                   Amount Spent
                 </th>
               </tr>
