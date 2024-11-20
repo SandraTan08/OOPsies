@@ -26,9 +26,9 @@ public class PurchaseHistory {
     private LocalDate saleDate; // Using LocalDate for better handling
 
     @JsonProperty("saleType")
-    private int saleType;
+    private String saleType;
     @JsonProperty("digital")
-    private int digital; 
+    private String digital;
     @JsonProperty("customerId")
     private Long customerId;
     @JsonProperty("shippingMethod")
