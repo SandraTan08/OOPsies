@@ -84,25 +84,27 @@ export default function AccountManagement() {
                 }
               />
             </div>
-            <div>
-              <Label htmlFor="edit-role">Role</Label>
-              <select
-                id="edit-role"
-                defaultValue={editingAccount.role}
-                onBlur={(e) =>
-                  setEditingAccount((prev) => ({
-                    ...prev,
-                    role: e.target.value,
-                  }))
-                }
-                className="w-full px-3 py-2 text-gray-700 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="">Select a role</option>
-                <option value="Admin">Admin</option>
-                <option value="Marketing">Marketing</option>
-                <option value="Sales">Sales</option>
-              </select>
-            </div>
+            {editingAccount.role !== 'Admin' && (
+              <div>
+                <Label htmlFor="edit-role">Role</Label>
+                <select
+                  id="edit-role"
+                  defaultValue={editingAccount.role}
+                  onBlur={(e) =>
+                    setEditingAccount((prev) => ({
+                      ...prev,
+                      role: e.target.value,
+                    }))
+                  }
+                  className="w-full px-3 py-2 text-gray-700 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">Select a role</option>
+                  <option value="Admin">Admin</option>
+                  <option value="Marketing">Marketing</option>
+                  <option value="Sales">Sales</option>
+                </select>
+              </div>
+            )}
             <div>
               <Label htmlFor="edit-password">Set Password</Label>
               <Input
@@ -278,7 +280,7 @@ export default function AccountManagement() {
                     <Label htmlFor="account-id">Account ID</Label>
                     <Input
                       type="text"
-                      id="account-id" 
+                      id="account-id"
                       value={newAccount.accountId}
                       onChange={(e) => setNewAccount({ ...newAccount, accountId: e.target.value })}
                     />
