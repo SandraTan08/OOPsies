@@ -39,7 +39,7 @@ export default function Newsletter() {
   const [emailType, setEmailType] = useState('mass'); // Track selected email type
   const [customerTier, setCustomerTier] = useState(''); // State for customer tier
   const tierDisplayNames = {
-    
+
     B: "Bronze",
     S: "Silver",
     G: "Gold",
@@ -68,10 +68,10 @@ export default function Newsletter() {
     if (customerId) {
       fetchCustomerData(customerId); // Fetch customer data once customerId is set
     }
-    if(customerId == 0){
+    if (customerId == 0) {
       setEmailType('mass');
     }
-    if(customerId != 0){
+    if (customerId != 0) {
       setEmailType('personalized');
     }
   }, [customerId]); // Only triggers when customerId changes
@@ -93,7 +93,7 @@ export default function Newsletter() {
     if (!customerId) {
       return; // Prevent fetching for invalid or 0 customerId
     }
-    
+
     try {
       const response = await fetch(`http://localhost:8080/api/v1/customers/byCustomer?customerId=${customerId}`);
       const customerData = await response.json();
@@ -104,7 +104,7 @@ export default function Newsletter() {
       console.error('Error fetching customer data:', error);
     }
   };
-    
+
 
   // Handle product selection and price update
   const handleProductChange = (e, index) => {
@@ -261,6 +261,41 @@ export default function Newsletter() {
   };
 
   const handleCopy = () => {
+    const errors = [];
+    if (template.newsletterId === null) {
+      errors.push('Please select a newsletter.');
+    }
+    if (numProducts === 0 || numProducts === undefined || numProducts === '') {
+      errors.push('Please specify the number of products.');
+    }
+
+    // Validate product details
+    else {
+      for (let i = 0; i < template.products.length; i++) {
+        const product = template.products[i];
+
+        // Check if product name and price are filled
+        if (!product.productName || !product.price) {
+          errors.push(`Product ${i + 1}: Please enter both product name and price.`);
+        }
+
+        // Additional validation based on discount type
+        if (product.discountType === 'discountCode') {
+          if (!product.discountPer || !product.promoCode) {
+            errors.push(`Product ${i + 1}: Please enter discount percentage and promo code.`);
+          }
+        } else if (product.discountType === 'relatedProduct') {
+          if (!product.discountAmt || !product.relatedProduct) {
+            errors.push(`Product ${i + 1}: Please enter discount amount and related product.`);
+          }
+        }
+      }
+    }
+
+    if (errors.length > 0) {
+      toast.error(errors.join('\n'), { duration: 5000 });
+      return;
+    }
     console.log('Copying template');
     if (textAreaRef.current) {
       navigator.clipboard.writeText(textAreaRef.current.value)
@@ -313,17 +348,46 @@ export default function Newsletter() {
   };
 
   const handleSend = async () => {
+    const errors = [];
     // Validate input based on email type
+    if (template.newsletterId === null) {
+      errors.push('Please select a newsletter.');
+    }
     if (emailType === 'personalized' && !customerEmail) {
-      toast.error('Please enter a customer email.');
-      return;
+      errors.push('Please enter a customer email.');
     }
     if (emailType === 'mass' && !template.customerTier) {
-      toast.error('Please select a customer tier.');
-      return;
+      errors.push('Please select a customer tier.');
     }
-    if (numProducts == 0) {
-      toast.error('Please put in number of products.');
+    if (numProducts === 0 || numProducts === undefined || numProducts === '') {
+      errors.push('Please specify the number of products.');
+    }
+
+    // Validate product details
+    else {
+      for (let i = 0; i < template.products.length; i++) {
+        const product = template.products[i];
+
+        // Check if product name and price are filled
+        if (!product.productName || !product.price) {
+          errors.push(`Product ${i + 1}: Please enter both product name and price.`);
+        }
+
+        // Additional validation based on discount type
+        if (product.discountType === 'discountCode') {
+          if (!product.discountPer || !product.promoCode) {
+            errors.push(`Product ${i + 1}: Please enter discount percentage and promo code.`);
+          }
+        } else if (product.discountType === 'relatedProduct') {
+          if (!product.discountAmt || !product.relatedProduct) {
+            errors.push(`Product ${i + 1}: Please enter discount amount and related product.`);
+          }
+        }
+      }
+    }
+
+    if (errors.length > 0) {
+      toast.error(errors.join('\n'), { duration: 5000 });
       return;
     }
 
@@ -390,10 +454,6 @@ export default function Newsletter() {
     }
   };
 
-
-
-  ;
-
   const handleDiscountTypeChange = (e, index) => {
     const { value } = e.target;
     setTemplate(prev => {
@@ -435,40 +495,40 @@ export default function Newsletter() {
               />
             </div>
             <div>
-            {session.account.role !== 'Admin' && (
-  <div className="mb-6">
-    <Label>Email Type</Label>
-    <div className="flex space-x-4 mt-1">
-      {/* Only show Personalized Email option if emailType is not '0' */}
-      {emailType === 'personalized' && (
-        <label className="flex items-center space-x-2">
-          <input
-            type="radio"
-            name="emailType"
-            value="personalized"
-            checked={emailType === 'personalized'}
-            onChange={() => setEmailType('personalized')}
-          />
-          <span>Personalized Email</span>
-        </label>
-      )}
+              {session.account.role !== 'Admin' && (
+                <div className="mb-6">
+                  <Label>Email Type</Label>
+                  <div className="flex space-x-4 mt-1">
+                    {/* Only show Personalized Email option if emailType is not '0' */}
+                    {emailType === 'personalized' && (
+                      <label className="flex items-center space-x-2">
+                        <input
+                          type="radio"
+                          name="emailType"
+                          value="personalized"
+                          checked={emailType === 'personalized'}
+                          onChange={() => setEmailType('personalized')}
+                        />
+                        <span>Personalized Email</span>
+                      </label>
+                    )}
 
-      {/* Only show Mass Email option if emailType is '0' */}
-      {emailType === 'mass' && (
-        <label className="flex items-center space-x-2">
-          <input
-            type="radio"
-            name="emailType"
-            value="mass"
-            checked={emailType === 'mass'}
-            onChange={() => setEmailType('mass')}
-          />
-          <span>Mass Email</span>
-        </label>
-      )}
-    </div>
-  </div>
-)}
+                    {/* Only show Mass Email option if emailType is '0' */}
+                    {emailType === 'mass' && (
+                      <label className="flex items-center space-x-2">
+                        <input
+                          type="radio"
+                          name="emailType"
+                          value="mass"
+                          checked={emailType === 'mass'}
+                          onChange={() => setEmailType('mass')}
+                        />
+                        <span>Mass Email</span>
+                      </label>
+                    )}
+                  </div>
+                </div>
+              )}
 
               {session.account.role !== 'Admin' && emailType === 'personalized' && (
                 <div className="mb-6">
@@ -505,44 +565,44 @@ export default function Newsletter() {
                 </div>
               )}
 
-{session.account.role !== 'Admin' && emailType === 'personalized' && (
-  <div className="mb-6">
-    <Label htmlFor="customerName">Customer Name</Label>
-    <Input
-      id="customerName"
-      name="customerName"
-      value={customerName}  
-      placeholder="Enter customer name"
-      disabled={true}
-      onChange={(e) => {
-  // Directly update customerName while maintaining the previous state
-  setTemplate({
-    ...prevTemplate, // Keep the previous state
-    customerName: e.target.value // Directly set the new customerName
-    
-  });
-}}
-      className="mt-1"
-    />
-  </div>
-)}
+              {session.account.role !== 'Admin' && emailType === 'personalized' && (
+                <div className="mb-6">
+                  <Label htmlFor="customerName">Customer Name</Label>
+                  <Input
+                    id="customerName"
+                    name="customerName"
+                    value={customerName}
+                    placeholder="Enter customer name"
+                    disabled={true}
+                    onChange={(e) => {
+                      // Directly update customerName while maintaining the previous state
+                      setTemplate({
+                        ...prevTemplate, // Keep the previous state
+                        customerName: e.target.value // Directly set the new customerName
+
+                      });
+                    }}
+                    className="mt-1"
+                  />
+                </div>
+              )}
 
 
-{session.account.role !== 'Admin' && (
-  <div className="mb-6">
-    <Label htmlFor="numProducts">Number of Products</Label>
-    <Input
-      id="numProducts"
-      type="number"
-      min="0"
-      max="10"
-      value={numProducts ? numProducts : ''}
-      placeholder="Enter number of products"
-      onChange={handleNumProductsChange}
+              {session.account.role !== 'Admin' && (
+                <div className="mb-6">
+                  <Label htmlFor="numProducts">Number of Products</Label>
+                  <Input
+                    id="numProducts"
+                    type="number"
+                    min="0"
+                    max="10"
+                    value={numProducts ? numProducts : ''}
+                    placeholder="Enter number of products"
+                    onChange={handleNumProductsChange}
 
-    />
-  </div>
-)}
+                  />
+                </div>
+              )}
 
 
 
@@ -606,31 +666,31 @@ export default function Newsletter() {
                     {product.discountType === 'discountCode' && (
                       <>
                         <div>
-  <Label htmlFor={`product-${index}-discount`}>Discount Percentage</Label>
-  <Input
-    id={`product-${index}-discount`}
-    name="discountPer"
-    type="number"
-    min="0"
-    max="100"
-    value={product.discountPer || ''} // Ensures it shows the number without leading zeros
-    placeholder="Enter discount percentage"
-    onChange={(e) => {
-      // Ensure the value stays between 0 and 100
-      const value = Math.max(0, Math.min(Number(e.target.value), 100));
-      handleChange({ target: { name: 'discountPer', value } }, index);
-    }}
-    onBlur={() => {
-      setTemplate(prev => {
-        const updatedProducts = [...prev.products];
-        // Ensure value is constrained between 0 and 100
-        updatedProducts[index].discountPer = Math.min(100, Math.max(0, updatedProducts[index].discountPer));
-        return { ...prev, products: updatedProducts };
-      });
-    }}
-    className="mt-1"
-  />
-</div>
+                          <Label htmlFor={`product-${index}-discount`}>Discount Percentage</Label>
+                          <Input
+                            id={`product-${index}-discount`}
+                            name="discountPer"
+                            type="number"
+                            min="0"
+                            max="100"
+                            value={product.discountPer || ''} // Ensures it shows the number without leading zeros
+                            placeholder="Enter discount percentage"
+                            onChange={(e) => {
+                              // Ensure the value stays between 0 and 100
+                              const value = Math.max(0, Math.min(Number(e.target.value), 100));
+                              handleChange({ target: { name: 'discountPer', value } }, index);
+                            }}
+                            onBlur={() => {
+                              setTemplate(prev => {
+                                const updatedProducts = [...prev.products];
+                                // Ensure value is constrained between 0 and 100
+                                updatedProducts[index].discountPer = Math.min(100, Math.max(0, updatedProducts[index].discountPer));
+                                return { ...prev, products: updatedProducts };
+                              });
+                            }}
+                            className="mt-1"
+                          />
+                        </div>
 
                         <div>
                           <Label htmlFor={`product-${index}-promoCode`}>Promo Code</Label>
@@ -649,31 +709,31 @@ export default function Newsletter() {
                     {product.discountType === 'relatedProduct' && (
                       <>
                         <div>
-  <Label htmlFor={`product-${index}-discountAmt`}>Discount Amount</Label>
-  <Input
-    id={`product-${index}-discountAmt`}
-    name="discountAmt"
-    type="number"
-    min="0"
-    step="0.01"
-    value={product.discountAmt || ''} // Ensures that a number without leading zeros is displayed
-    placeholder="Enter discount amount"
-    onChange={(e) => {
-      // Ensure it does not exceed the price and does not go below 0
-      const value = Math.max(0, Math.min(Number(e.target.value), product.price));
-      handleChange({ target: { name: 'discountAmt', value } }, index);
-    }}
-    onBlur={() => {
-      setTemplate(prev => {
-        const updatedProducts = [...prev.products];
-        // Ensure the discount amount does not exceed the price onBlur
-        updatedProducts[index].discountAmt = Math.min(updatedProducts[index].discountAmt, updatedProducts[index].price);
-        return { ...prev, products: updatedProducts };
-      });
-    }}
-    className="mt-1"
-  />
-</div>
+                          <Label htmlFor={`product-${index}-discountAmt`}>Discount Amount</Label>
+                          <Input
+                            id={`product-${index}-discountAmt`}
+                            name="discountAmt"
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            value={product.discountAmt || ''} // Ensures that a number without leading zeros is displayed
+                            placeholder="Enter discount amount"
+                            onChange={(e) => {
+                              // Ensure it does not exceed the price and does not go below 0
+                              const value = Math.max(0, Math.min(Number(e.target.value), product.price));
+                              handleChange({ target: { name: 'discountAmt', value } }, index);
+                            }}
+                            onBlur={() => {
+                              setTemplate(prev => {
+                                const updatedProducts = [...prev.products];
+                                // Ensure the discount amount does not exceed the price onBlur
+                                updatedProducts[index].discountAmt = Math.min(updatedProducts[index].discountAmt, updatedProducts[index].price);
+                                return { ...prev, products: updatedProducts };
+                              });
+                            }}
+                            className="mt-1"
+                          />
+                        </div>
 
 <div>
   <Label htmlFor={`product-${index}-relatedProduct`}>Related Product</Label>
@@ -704,8 +764,8 @@ export default function Newsletter() {
                   id="preview"
                   className="mt-1 h-64"
                   value={`Dear ${emailType === 'personalized'
-                      ? customerName
-                      : `${tierDisplayNames[template.customerTier || ""] || "Unknown"} Customers`
+                    ? customerName
+                    : `${tierDisplayNames[template.customerTier || ""] || "Unknown"} Customers`
                     },
 
 ${template.introduction}
@@ -738,7 +798,7 @@ Marketing team`}
               </div>
 
               <div className="mt-6 flex justify-end space-x-4">
-              {/* {session.account.role === 'Admin' && emailType === 'mass' && (
+                {/* {session.account.role === 'Admin' && emailType === 'mass' && (
                 <Button onClick={handleSave} className="bg-gray-700 hover:bg-gray-500 flex items-center">
                   <Save className="w-4 h-4 mr-2" />
                   Save Template

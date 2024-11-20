@@ -172,16 +172,16 @@ const CustomerList: React.FC = () => {
           <table className="min-w-full mt-4 divide-y divide-gray-200 bg-white rounded-lg shadow overflow-hidden">
             <thead className="sticky top-0 z-10 bg-gray-900 text-white rounded-t-lg">
               <tr>
-                <th className="px-6 py-3 text-sm font-medium tracking-wider text-left uppercase" style={{ backgroundColor: '#374151', color: 'white' }}>
+                <th className="px-6 py-3 text-sm tracking-wider text-left uppercase bg-gray-700 text-white" style={{ backgroundColor: '#374151', color: 'white' }}>
                   Customer ID
                 </th>
-                <th className="px-6 py-3 text-sm font-medium tracking-wider text-left uppercase" style={{ backgroundColor: '#374151', color: 'white' }}>
+                <th className="px-6 py-3 text-sm tracking-wider text-left uppercase bg-gray-700 text-white" style={{ backgroundColor: '#374151', color: 'white' }}>
                   Zip Code
                 </th>
-                <th className="px-6 py-3 text-sm font-medium tracking-wider text-left uppercase" style={{ backgroundColor: '#374151', color: 'white' }}>
+                <th className="px-6 py-3 text-sm tracking-wider text-left uppercase bg-gray-700 text-white" style={{ backgroundColor: '#374151', color: 'white' }}>
                   Tier
                 </th>
-                <th className="px-6 py-3 text-sm font-medium tracking-wider text-left uppercase" style={{ backgroundColor: '#374151', color: 'white' }}>
+                <th className="px-6 py-3 text-sm tracking-wider text-left uppercase bg-gray-700 text-white" style={{ backgroundColor: '#374151', color: 'white' }}>
                   Amount Spent
                 </th>
               </tr>
@@ -216,24 +216,71 @@ const CustomerList: React.FC = () => {
           <p>No customers available for the selected tier(s) or search query.</p>
         )}
 
-        {/* Pagination controls */}
-        <div className="pagination mt-4">
-          <button
-            onClick={() => handlePageChange(currentPage - 1)}
-            disabled={currentPage === 1}
-            className="px-4 py-2 bg-gray-700 rounded hover:bg-gray-500 disabled:bg-gray-200 text-white"
-          >
-            Previous
-          </button>
-          <span className="mx-4">{`Page ${currentPage} of ${totalPages}`}</span>
-          <button
-            onClick={() => handlePageChange(currentPage + 1)}
-            disabled={currentPage === totalPages}
-            className="px-4 py-2 bg-gray-700 rounded hover:bg-gray-500 disabled:bg-gray-200 text-white"
-          >
-            Next
-          </button>
+        {/* Navigation Buttons */}
+  <div className="flex justify-center items-center space-x-4 p-5">
+    <button
+      onClick={() => setCurrentPage(1)} // Go to the first page
+      disabled={currentPage === 1}
+      className="w-24 px-2 py-1 bg-gray-700 hover:bg-gray-500 text-white rounded disabled:opacity-50"
+    >
+      First
+    </button>
+
+    <button
+      onClick={() => setCurrentPage(currentPage - 1)} // Go to the previous page
+      disabled={currentPage === 1}
+      className="w-24 px-2 py-1 bg-gray-700 hover:bg-gray-500 text-white rounded disabled:opacity-50"
+    >
+      Previous
+    </button>
+
+    <span className="text-black w-28 text-center">
+      Page {currentPage} of {totalPages}
+    </span>
+
+    <button
+      onClick={() => setCurrentPage(currentPage + 1)} // Go to the next page
+      disabled={currentPage === totalPages}
+      className="w-24 px-2 py-1 bg-gray-700 hover:bg-gray-500 text-white rounded disabled:opacity-50"
+    >
+      Next
+    </button>
+
+    <button
+      onClick={() => setCurrentPage(totalPages)} // Go to the last page
+      disabled={currentPage === totalPages}
+      className="w-24 px-2 py-1 bg-gray-700 hover:bg-gray-500 text-white rounded disabled:opacity-50"
+    >
+      Last
+    </button>
+  </div>
+
+  <div className="mt-8 flex flex-col items-center">
+  {/* Page Jump Input with Go Button */}
+  <div className="flex items-center space-x-2">
+    <label htmlFor="pageInput" className="text-sm font-medium text-gray-700">
+      Jump to page:
+    </label>
+    <input
+      id="pageInput"
+      type="number"
+      min="1"
+      max={totalPages}
+      placeholder="1"
+      className="w-16 px-2 py-1 border border-gray-300 rounded text-center"
+    />
+    <button
+      onClick={() => {
+        const pageInput = document.getElementById('pageInput').value; // Access input value
+        const page = Math.max(1, Math.min(totalPages, Number(pageInput))); // Validate page range
+        setCurrentPage(page);
+      }}
+      className="px-4 py-1 bg-gray-700 hover:bg-gray-500 text-white rounded"
+    >
+      Go
+    </button>
         </div>
+      </div>
       </div>
     </div>
   );
