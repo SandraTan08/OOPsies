@@ -34,8 +34,8 @@ CREATE TABLE IF NOT EXISTS `customer` (
     `customerEmail` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 
-INSERT INTO `customer` (`customerId`, `zipCode`, `customer_type`, `tier`, 'customerName', 'customerEmail') VALUES
-(1, 437050, 'TieredCustomer', 'G', 'Raine', 'raine@gmail.com')
+INSERT INTO `customer` (`customerId`, `zipCode`, `customer_type`, `tier`, `customerName`, `customerEmail`) VALUES
+(1, 437050, 'TieredCustomer', 'G', 'Raine', 'raine@gmail.com');
 
 INSERT INTO `customer` (`customerId`, `zipCode`, `customer_type`, `tier`) VALUES
 (2, 126793, 'TieredCustomer', 'G'),

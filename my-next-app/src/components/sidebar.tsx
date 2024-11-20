@@ -65,7 +65,7 @@ export default function Sidebar() {
               </Link>
             )}
               {role === 'Marketing' && (
-                <Link href="/newsletter" className="flex items-center px-2 py-2 pl-7 text-sm font-medium text-gray-300 rounded-md hover:bg-gray-700 hover:text-white group">
+                <Link href="/newsletter/0" className="flex items-center px-2 py-2 pl-7 text-sm font-medium text-gray-300 rounded-md hover:bg-gray-700 hover:text-white group">
                   <ShoppingCart className="w-6 h-6 mr-3 text-gray-400 group-hover:text-gray-300" />
                   Newsletter
                 </Link>

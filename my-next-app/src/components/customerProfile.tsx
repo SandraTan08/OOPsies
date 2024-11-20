@@ -169,7 +169,7 @@ const CustomerProfile: React.FC<CustomerProfileProps> = ({ customerId }) => {
       </Link>
 
       {role === 'Marketing' && (
-        <Link href={`/newsletter?customerId=${customerId}`}>
+        <Link href={`/newsletter/${customerId}`}>
           <button className="back-button">
             Contact me
           </button>
