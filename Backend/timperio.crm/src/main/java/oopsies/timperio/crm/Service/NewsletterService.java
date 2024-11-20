@@ -57,11 +57,7 @@ public class NewsletterService {
         // Fetch the existing newsletter by ID
         Newsletter existingNewsletter = newsletterRepository.findById(newsletterId)
                 .orElseThrow(() -> new RuntimeException("Newsletter not found with ID: " + newsletterId));
-    
-        // Update only specific fields
-        if (newsletterDTO.getCustomerName() != null) {
-            existingNewsletter.setCustomerName(newsletterDTO.getCustomerName());
-        }
+
         if (newsletterDTO.getAccountId() != null) {
             existingNewsletter.setAccountId(newsletterDTO.getAccountId());
         }
@@ -131,7 +127,6 @@ public class NewsletterService {
         dto.setNewsletterId(newsletter.getNewsletterId());
         dto.setTemplateName(newsletter.getTemplateName());
         dto.setAccountId(newsletter.getAccountId());
-        dto.setCustomerName(newsletter.getCustomerName());
         dto.setIntroduction(newsletter.getIntroduction());
         dto.setConclusion(newsletter.getConclusion());
         dto.setImage(base64Image); // Set Base64 image in the DTO

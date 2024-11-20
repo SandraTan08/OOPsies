@@ -35,9 +35,10 @@ export default function Newsletter() {
   const [numProducts, setNumProducts] = useState(1); // New state for number of products 
   const textAreaRef = useRef(null); // Reference for the textarea
   const { data: session, status } = useSession();
-  const [emailType, setEmailType] = useState('personalized'); // Track selected email type
+  const [emailType, setEmailType] = useState('mass'); // Track selected email type
   const [customerTier, setCustomerTier] = useState(''); // State for customer tier
   const tierDisplayNames = {
+    
     B: "Bronze",
     S: "Silver",
     G: "Gold",
@@ -387,7 +388,7 @@ export default function Newsletter() {
                 name="templateName"
                 value={template.templateName}
                 placeholder="Choose template from above"
-                onChange={(e) => setTemplate({ ...template, templateName: e.target.value })}
+                onChange={(e) => setTemplate({ ...template, customerName: e.target.value })}
                 className="mt-1"
                 readOnly
               />
@@ -449,7 +450,8 @@ export default function Newsletter() {
                   <select
                     id="customerTier"
                     name="customerTier"
-                    value={template.customerTier} // Assuming this state will now represent the selected tier
+                    placeholder="Select a Customer Tier"
+                    value={template.customerTier || ''} // Assuming this state will now represent the selected tier
                     onChange={(e) => setTemplate((prevTemplate) => ({ ...prevTemplate, customerTier: e.target.value, }))
                     } // Update this state based on selection
                     className="w-full mt-1 px-3 py-2 text-sm text-gray-700 border border-gray-200 rounded-md"
