@@ -268,7 +268,7 @@ export default function Newsletter() {
     <div>
       <p>Dear ${displayName},</p>
       <p>${template.introduction}</p>
-      <p>${imageSection} <!-- Insert image here --> hello </p>
+      <p>${imageSection} <!-- Insert image here --> </p>
       <p>We've curated something special for you! Based on your recent purchases and browsing history, here are some exclusive offers:</p>
       <ul>${productList}</ul>
       <p>Take advantage of these personalized offers and discover more with Timperio. Shop now and enjoy the best deals tailored just for you!</p>
@@ -682,10 +682,12 @@ Marketing team`}
               </div>
 
               <div className="mt-6 flex justify-end space-x-4">
+              {/* {session.account.role === 'Admin' && emailType === 'mass' && (
                 <Button onClick={handleSave} className="bg-gray-700 hover:bg-gray-500 flex items-center">
                   <Save className="w-4 h-4 mr-2" />
                   Save Template
                 </Button>
+              )} */}
                 <Button onClick={handleCopy} className="bg-gray-700 hover:bg-gray-500 flex items-center">
                   <Copy className="w-4 h-4 mr-2" />
                   Copy to Clipboard
