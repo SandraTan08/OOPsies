@@ -703,14 +703,54 @@ export default function Dashboard() {
                     <table className="min-w-full divide-y divide-gray-200">
                       <thead className="bg-gray-700 sticky top-0 z-10 text-white font-bold rounded-t-lg">
                         <tr>
-                          <th className="px-4 py-2 text-sm tracking-wider text-left uppercase bg-gray-700 text-white">Transaction ID</th>
-                          <th className="px-4 py-2 text-sm tracking-wider text-left uppercase bg-gray-700 text-white">Customer ID</th>
-                          <th className="px-4 py-2 text-sm tracking-wider text-left uppercase bg-gray-700 text-white">Sale Type</th>
-                          <th className="px-4 py-2 text-sm tracking-wider text-left uppercase bg-gray-700 text-white">Platform</th>
-                          <th className="px-4 py-2 text-sm tracking-wider text-left uppercase bg-gray-700 text-white">Product</th>
-                          <th className="px-4 py-2 text-sm tracking-wider text-left uppercase bg-gray-700 text-white">Value ($)</th>
-                          <th className="px-4 py-2 text-sm tracking-wider text-left uppercase bg-gray-700 text-white">Quantity</th>
-                          <th className="px-4 py-2 text-sm tracking-wider text-left uppercase bg-gray-700 text-white">Date</th>
+                          <th
+                            className="px-4 py-4 text-sm tracking-wider text-left uppercase bg-gray-700 text-white"
+                            onClick={() => handleSort('id')}
+                          >
+                            Transaction ID {renderSortIcon('id')}
+                          </th>
+                          <th
+                            className="px-4 py-4 text-sm tracking-wider text-left uppercase bg-gray-700 text-white"
+                            onClick={() => handleSort('customerId')}
+                          >
+                            Customer ID {renderSortIcon('customerId')}
+                          </th>
+                          <th
+                            className="px-4 py-4 text-sm tracking-wider text-left uppercase bg-gray-700 text-white"
+                            onClick={() => handleSort('saleType')}
+                          >
+                            Sale Type {renderSortIcon('saleType')}
+                          </th>
+                          <th
+                            className="px-4 py-4 text-sm tracking-wider text-left uppercase bg-gray-700 text-white"
+                            onClick={() => handleSort('platform')}
+                          >
+                            Platform {renderSortIcon('platform')}
+                          </th>
+                          <th
+                            className="px-4 py-4 text-sm tracking-wider text-left uppercase bg-gray-700 text-white"
+                            onClick={() => handleSort('product')}
+                          >
+                            Product {renderSortIcon('product')}
+                          </th>
+                          <th
+                            className="px-4 py-4 text-sm tracking-wider text-left uppercase bg-gray-700 text-white"
+                            onClick={() => handleSort('value')}
+                          >
+                            Value ($) {renderSortIcon('value')}
+                          </th>
+                          <th
+                            className="px-4 py-4 text-sm tracking-wider text-left uppercase bg-gray-700 text-white"
+                            onClick={() => handleSort('quantity')}
+                          >
+                            Quantity {renderSortIcon('quantity')}
+                          </th>
+                          <th
+                            className="px-4 py-4 text-sm tracking-wider text-left uppercase bg-gray-700 text-white"
+                            onClick={() => handleSort('date')}
+                          >
+                            Date {renderSortIcon('date')}
+                          </th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-200">
@@ -810,12 +850,12 @@ export default function Dashboard() {
                     <thead className="bg-gray-700">
                       <tr>
                         <th
-                          className="sticky top-0 px-6 py-3 text-sm font-lg tracking-wider text-left uppercase text-white bg-gray-700"
+                          className="sticky top-0 px-6 py-4 text-sm font-lg tracking-wider text-left uppercase text-white bg-gray-700"
                         >
                           Product
                         </th>
                         <th
-                          className="sticky top-0 px-6 py-3 text-sm font-lg tracking-wider text-left uppercase text-white bg-gray-700"
+                          className="sticky top-0 px-6 py-4 text-sm font-lg tracking-wider text-left uppercase text-white bg-gray-700"
                         >
                           Total Quantity Sold
                         </th>

@@ -97,3 +97,9 @@ body {
   background-position: center;
   background-repeat: no-repeat;
 }
+
+.toast-container {
+  bottom: 100px;
+  position: fixed;
+  z-index: 9999;
+}
