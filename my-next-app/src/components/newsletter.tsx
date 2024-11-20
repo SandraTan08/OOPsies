@@ -32,12 +32,13 @@ export default function Newsletter() {
   const [customerEmail, setCustomerEmail] = useState(''); // State for customer email
   const [customerName, setCustomerName] = useState(''); // State for customer Name
 
-  const [numProducts, setNumProducts] = useState(0); // New state for number of products 
+  const [numProducts, setNumProducts] = useState(1); // New state for number of products 
   const textAreaRef = useRef(null); // Reference for the textarea
   const { data: session, status } = useSession();
-  const [emailType, setEmailType] = useState('personalized'); // Track selected email type
+  const [emailType, setEmailType] = useState('mass'); // Track selected email type
   const [customerTier, setCustomerTier] = useState(''); // State for customer tier
   const tierDisplayNames = {
+    
     B: "Bronze",
     S: "Silver",
     G: "Gold",
@@ -54,7 +55,7 @@ export default function Newsletter() {
         const path = window.location.pathname; // Get current path
         const match = path.match(/\/newsletter\/(\d+)/); // Extract customerId from URL
         if (match) {
-          const extractedCustomerId = match[1]; // Set extracted customerId
+          const extractedCustomerId = parseInt(match[1], 10); // Convert to integer
           setCustomerId(extractedCustomerId); // Update customerId state
         }
       }
@@ -65,13 +66,19 @@ export default function Newsletter() {
     if (customerId) {
       fetchCustomerData(customerId); // Fetch customer data once customerId is set
     }
+    if(customerId == 0){
+      setEmailType('mass');
+    }
+    if(customerId != 0){
+      setEmailType('personalized');
+    }
   }, [customerId]); // Only triggers when customerId changes
 
-  const fetchCustomerData = async (customerId: string) => {
+  const fetchCustomerData = async (customerId: number) => {
     if (!customerId) {
-      return;
+      return; // Prevent fetching for invalid or 0 customerId
     }
-
+    
     try {
       const response = await fetch(`http://localhost:8080/api/v1/customers/byCustomer?customerId=${customerId}`);
       const customerData = await response.json();
@@ -82,6 +89,7 @@ export default function Newsletter() {
       console.error('Error fetching customer data:', error);
     }
   };
+    
 
   const fetchNewsletters = async () => {
     try {
@@ -383,39 +391,47 @@ export default function Newsletter() {
                 name="templateName"
                 value={template.templateName}
                 placeholder="Choose template from above"
-                onChange={(e) => setTemplate({ ...template, templateName: e.target.value })}
+                onChange={(e) => setTemplate({ ...template, customerName: e.target.value })}
                 className="mt-1"
                 readOnly
               />
             </div>
             <div>
-              {session.account.role !== 'Admin' && (
-                <div className="mb-6">
-                  <Label>Email Type</Label>
-                  <div className="flex space-x-4 mt-1">
-                    <label className="flex items-center space-x-2">
-                      <input
-                        type="radio"
-                        name="emailType"
-                        value="personalized"
-                        checked={emailType === 'personalized'}
-                        onChange={() => setEmailType('personalized')}
-                      />
-                      <span>Personalized Email</span>
-                    </label>
-                    <label className="flex items-center space-x-2">
-                      <input
-                        type="radio"
-                        name="emailType"
-                        value="mass"
-                        checked={emailType === 'mass'}
-                        onChange={() => setEmailType('mass')}
-                      />
-                      <span>Mass Email</span>
-                    </label>
-                  </div>
-                </div>
-              )}
+            {session.account.role !== 'Admin' && (
+  <div className="mb-6">
+    <Label>Email Type</Label>
+    <div className="flex space-x-4 mt-1">
+      {/* Only show Personalized Email option if emailType is not '0' */}
+      {emailType === 'personalized' && (
+        <label className="flex items-center space-x-2">
+          <input
+            type="radio"
+            name="emailType"
+            value="personalized"
+            checked={emailType === 'personalized'}
+            onChange={() => setEmailType('personalized')}
+          />
+          <span>Personalized Email</span>
+        </label>
+      )}
+
+      {/* Only show Mass Email option if emailType is '0' */}
+      {emailType === 'mass' && (
+        <label className="flex items-center space-x-2">
+          <input
+            type="radio"
+            name="emailType"
+            value="mass"
+            checked={emailType === 'mass'}
+            onChange={() => setEmailType('mass')}
+          />
+          <span>Mass Email</span>
+        </label>
+      )}
+    </div>
+  </div>
+)}
+
               {session.account.role !== 'Admin' && emailType === 'personalized' && (
                 <div className="mb-6">
                   <Label> Customer Email</Label>
@@ -423,6 +439,7 @@ export default function Newsletter() {
                     id="customerEmail"
                     name="customerEmail"
                     type="email"
+                    disabled={true}
                     value={customerEmail}
                     placeholder="Enter customer email"
                     className="mt-1"
@@ -436,7 +453,8 @@ export default function Newsletter() {
                   <select
                     id="customerTier"
                     name="customerTier"
-                    value={template.customerTier} // Assuming this state will now represent the selected tier
+                    placeholder="Select a Customer Tier"
+                    value={template.customerTier || ''} // Assuming this state will now represent the selected tier
                     onChange={(e) => setTemplate((prevTemplate) => ({ ...prevTemplate, customerTier: e.target.value, }))
                     } // Update this state based on selection
                     className="w-full mt-1 px-3 py-2 text-sm text-gray-700 border border-gray-200 rounded-md"
@@ -449,35 +467,46 @@ export default function Newsletter() {
                 </div>
               )}
 
-              {session.account.role !== 'Admin' && emailType === 'personalized' && (
-                <div className="mb-6">
-                  <Label htmlFor="customerName">Customer Name</Label>
-                  <Input
-                    id="customerName"
-                    name="customerName"
-                    value={customerName}
-                    placeholder="Enter customer name"
-                    onChange={(e) => setTemplate({ ...template, customerName: e.target.value })}
-                    className="mt-1"
-                  />
-                </div>
-              )}
+{session.account.role !== 'Admin' && emailType === 'personalized' && (
+  <div className="mb-6">
+    <Label htmlFor="customerName">Customer Name</Label>
+    <Input
+      id="customerName"
+      name="customerName"
+      value={customerName}  
+      placeholder="Enter customer name"
+      disabled={true}
+      onChange={(e) => {
+  // Directly update customerName while maintaining the previous state
+  setTemplate({
+    ...prevTemplate, // Keep the previous state
+    customerName: e.target.value // Directly set the new customerName
+    
+  });
+}}
+      className="mt-1"
+    />
+  </div>
+)}
 
-              {session.account.role !== 'Admin' && (
-                <div className="mb-6">
-                  <Label htmlFor="numProducts">Number of Products</Label>
-                  <Input
-                    id="numProducts"
-                    type="number"
-                    min="0"
-                    max="10"
-                    value={numProducts}
-                    placeholder="Enter number of products"
-                    onChange={handleNumProductsChange}
-                    className="mt-1"
-                  />
-                </div>
-              )}
+
+{session.account.role !== 'Admin' && (
+  <div className="mb-6">
+    <Label htmlFor="numProducts">Number of Products</Label>
+    <Input
+      id="numProducts"
+      type="number"
+      min="1"
+      max="10"
+      value={numProducts}
+      placeholder="Enter number of products"
+      onChange={handleNumProductsChange}
+      className="mt-1"
+    />
+  </div>
+)}
+
+
 
               {template.products.map((product, index) => (
                 <div key={index} className="mb-6 p-4 bg-gray-50 rounded-lg">
@@ -619,7 +648,7 @@ export default function Newsletter() {
                   id="preview"
                   className="mt-1 h-64"
                   value={`Dear ${emailType === 'personalized'
-                      ? template.customerName
+                      ? customerName
                       : `${tierDisplayNames[template.customerTier || ""] || "Unknown"} Customers`
                     },
 
