@@ -17,6 +17,20 @@ Before starting the application, ensure you have the following installed:
 - **Maven** and **Java 11+** (for the backend)
 - **WAMP/MAMP** (if required for your local environment)
 
+Login Details: 
+
+(Admin)
+Userid: A001
+Password: 123456 
+
+(Marketing)
+Userid: A003
+Password: 123456 
+
+(Sales)
+Userid: A004
+Password: 123456 
+
 ## Getting Started
 
 ### 1. Set Up the Frontend
