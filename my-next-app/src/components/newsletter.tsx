@@ -288,6 +288,10 @@ export default function Newsletter() {
       toast.error('Please select a customer tier.');
       return;
     }
+    if (numProducts == 0) {
+      toast.error('Please put in number of products.');
+      return;
+    }
 
     let recipientEmails = [];
 
@@ -498,13 +502,15 @@ export default function Newsletter() {
       type="number"
       min="1"
       max="10"
-      value={numProducts}
+      value={numProducts ? numProducts : ''}
       placeholder="Enter number of products"
       onChange={handleNumProductsChange}
-      className="mt-1"
+
     />
   </div>
 )}
+
+
 
 
 
