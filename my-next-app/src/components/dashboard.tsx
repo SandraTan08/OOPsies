@@ -51,6 +51,8 @@ export default function Dashboard() {
   const itemsPerPage = 25;
   const { data: session } = useSession();
   const role = session?.account?.role || '';
+  const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
+
 
   const [salesData, setSalesData] = useState<any>({
     labels: [],
@@ -199,7 +201,7 @@ export default function Dashboard() {
   useEffect(() => {
     async function fetchProductDeets() {
       try {
-        const res = await fetch('http://localhost:8080/api/v1/product');
+        const res = await fetch(`${backendUrl}product`);
         if (!res.ok) throw new Error('Failed to fetch product data');
         const data = await res.json();
 
@@ -219,7 +221,7 @@ export default function Dashboard() {
 
     async function fetchAvailableYears() {
       try {
-        const res = await fetch('http://localhost:8080/api/v1/purchaseHistory');
+        const res = await fetch(`${backendUrl}purchaseHistory`);
         if (!res.ok) throw new Error('Failed to fetch data');
         const data = await res.json();
 
@@ -240,7 +242,7 @@ export default function Dashboard() {
         // Fetch product details first
         const productDeets = await fetchProductDeets();
 
-        const res = await fetch('http://localhost:8080/api/v1/purchaseHistory');
+        const res = await fetch(`${backendUrl}purchaseHistory`);
         if (!res.ok) throw new Error('Failed to fetch sales data');
         const data = await res.json();
 
@@ -279,7 +281,7 @@ export default function Dashboard() {
 
     async function fetchCustomerData() {
       try {
-        const res = await fetch('http://localhost:8080/api/v1/customers');
+        const res = await fetch(`${backendUrl}customers`);
         if (!res.ok) throw new Error('Failed to fetch customer data');
         const data = await res.json();
 

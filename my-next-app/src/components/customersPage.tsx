@@ -11,6 +11,8 @@ interface Customer {
   totalSpent?: number;
 }
 
+const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
+
 const CustomerList: React.FC = () => {
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(true);
@@ -26,7 +28,7 @@ const CustomerList: React.FC = () => {
   useEffect(() => {
     const fetchCustomers = async () => {
       try {
-        const response = await fetch('http://localhost:8080/api/v1/customers');
+        const response = await fetch(`${backendUrl}customers`);
         if (!response.ok) {
           throw new Error('Failed to fetch customers');
         }
@@ -63,7 +65,7 @@ const CustomerList: React.FC = () => {
 
   const fetchTotalSpent = async (customerId: number): Promise<number> => {
     try {
-      const response = await fetch(`http://localhost:8080/api/v1/purchaseHistory/byCustomer?customerId=${customerId}`);
+      const response = await fetch(`${backendUrl}purchaseHistory/byCustomer?customerId=${customerId}`);
       if (!response.ok) {
         throw new Error(`Failed to fetch purchase history for customer ID ${customerId}`);
       }

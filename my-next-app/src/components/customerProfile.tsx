@@ -50,6 +50,8 @@ interface CustomerProfileProps {
   role: string;
 }
 
+const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
+
 const CustomerProfile: React.FC<CustomerProfileProps> = ({ customerId }) => {
   const [customer, setCustomer] = useState<Customer | null>(null);
   const [purchaseHistory, setPurchaseHistory] = useState<Purchase[]>([]);
@@ -63,14 +65,14 @@ const CustomerProfile: React.FC<CustomerProfileProps> = ({ customerId }) => {
   useEffect(() => {
     const fetchCustomerData = async () => {
       try {
-        const customerResponse = await fetch(`http://localhost:8080/api/v1/customers/byCustomer?customerId=${customerId}`);
+        const customerResponse = await fetch(`${backendUrl}customers/byCustomer?customerId=${customerId}`);
         if (!customerResponse.ok) {
           throw new Error('Failed to fetch customer data');
         }
         const customerData = await customerResponse.json();
         setCustomer({ zipCode: customerData.zipCode, tier: customerData.tier });
 
-        const purchaseResponse = await fetch(`http://localhost:8080/api/v1/purchaseHistory/byCustomer?customerId=${customerId}`);
+        const purchaseResponse = await fetch(`${backendUrl}purchaseHistory/byCustomer?customerId=${customerId}`);
         if (!purchaseResponse.ok) {
           throw new Error('Failed to fetch purchase history');
         }
@@ -79,7 +81,7 @@ const CustomerProfile: React.FC<CustomerProfileProps> = ({ customerId }) => {
         const productIds = Array.from(new Set(purchaseData.map((purchase: Purchase) => purchase.productId)));
         const productResponses = await Promise.all(
           productIds.map(async (productId) => {
-            const productResponse = await fetch(`http://localhost:8080/api/v1/product/byProduct?productId=${productId}`);
+            const productResponse = await fetch(`${backendUrl}product/byProduct?productId=${productId}`);
             return productResponse.ok ? productResponse.json() : { productId, productName: "N/A" };
           })
         );
