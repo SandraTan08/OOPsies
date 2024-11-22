@@ -312,8 +312,8 @@ export default function Newsletter() {
   }
 
   const generateTemplateHTML = (template) => {
-    const displayName = template.customerName
-      ? template.customerName
+    const displayName = customerName
+      ? customerName
       : `${tierDisplayNames[template.customerTier] || template.customerTier} Customer`;
 
     const productList = template.products.map((product, index) => {
@@ -342,7 +342,6 @@ export default function Newsletter() {
       <p>${imageSection} <!-- Insert image here --> </p>
       <p>We've curated something special for you! Based on your recent purchases and browsing history, here are some exclusive offers:</p>
       <ul>${productList}</ul>
-      <p>Take advantage of these personalized offers and discover more with Timperio. Shop now and enjoy the best deals tailored just for you!</p>
       <p>${template.conclusion}</p>
       <p>Warm regards,<br/>Marketing team</p>
     </div>
@@ -774,9 +773,7 @@ ${template.introduction}
 
 ${template.image ? '[Image Preview: Embedded Image Below]' : '[No Image Provided]'}
 
-
-Personalized Product Recommendations:
-Top Picks for You:
+We've curated something special for you! Based on your recent purchases and browsing history, here are some exclusive offers:
 ${template.products.map((product, index) => {
                       let productDetails = `${index + 1}. ${product.productName}\n   o Original Price: $${product.price}`;
 

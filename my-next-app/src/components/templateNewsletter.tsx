@@ -91,7 +91,7 @@ export default function TemplateNewsletter() {
 
       console.log("Form data:", formData.get('accountId'), formData.get('templateName'), formData.get('introduction'), formData.get('conclusion'), formData.get('image'));
 
-      await axios.post('${backendUrl}newsletter/create', formData, {
+      await axios.post(`${backendUrl}newsletter/create`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
 
@@ -198,14 +198,14 @@ export default function TemplateNewsletter() {
 
 ${introduction}
 
-Personalized Product Recommendations:
-Top Picks for You:
+[Image placed here]
+
+We've curated something special for you! Based on your recent purchases and browsing history, here are some exclusive offers:
 
 ${conclusion}
 
 Warm regards,
-Marketing team
-[Image placed here]`}
+Marketing team`}
           readOnly/>
         </div>
 
