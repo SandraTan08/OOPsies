@@ -5,6 +5,7 @@ import bcrypt from 'bcryptjs';
 
 export async function POST(request: NextRequest) {
   try {
+    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
     // Parse the incoming request body (it should be a JSON)
     const payload = await request.json();
     console.log('Payload:', payload);
@@ -20,7 +21,7 @@ export async function POST(request: NextRequest) {
     const { accountId, password } = validatedFields.data;
 
     // Fetch the user from the database or another backend API
-    const fetchResponse = await fetch(`http://localhost:8080/api/v1/account/${accountId}`, {
+    const fetchResponse = await fetch(`${backendUrl}account/${accountId}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
