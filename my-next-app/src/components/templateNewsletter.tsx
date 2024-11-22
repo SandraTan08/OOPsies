@@ -21,6 +21,8 @@ export default function TemplateNewsletter() {
   const textAreaRef = useRef(null);
   const { data: session } = useSession();
 
+  const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
+
   useEffect(() => {
     console.log("Session data:", session);
     if (session && session.account) {
@@ -30,7 +32,7 @@ export default function TemplateNewsletter() {
 
   const fetchNewsletters = async () => {
     try {
-      const response = await axios.get(`http://localhost:8080/api/v1/newsletter`);
+      const response = await axios.get(`${backendUrl}newsletter`);
       if (response.status === 200) {
         setSavedNewsletters(response.data);
       }
@@ -42,7 +44,7 @@ export default function TemplateNewsletter() {
 
   const fetchNewsletterData = async (newsletterId) => {
     try {
-      const response = await axios.get(`http://localhost:8080/api/v1/newsletter/${newsletterId}`);
+      const response = await axios.get(`${backendUrl}newsletter/${newsletterId}`);
       const data = response.data;
       setTemplateName(data.templateName);
       setIntroduction(data.introduction);
@@ -89,7 +91,7 @@ export default function TemplateNewsletter() {
 
       console.log("Form data:", formData.get('accountId'), formData.get('templateName'), formData.get('introduction'), formData.get('conclusion'), formData.get('image'));
 
-      await axios.post('http://localhost:8080/api/v1/newsletter/create', formData, {
+      await axios.post('${backendUrl}newsletter/create', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
 
@@ -105,7 +107,7 @@ export default function TemplateNewsletter() {
   const handleRemoveTemplate = async () => {
     if (!selectedNewsletter) return;
     try {
-      await axios.delete(`http://localhost:8080/api/v1/newsletter/delete/${selectedNewsletter}`);
+      await axios.delete(`${backendUrl}newsletter/delete/${selectedNewsletter}`);
       toast.success('Template removed successfully');
       setSelectedNewsletter('');
       fetchNewsletters();

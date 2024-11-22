@@ -9,6 +9,8 @@ import { Label } from "@/components/ui/label"
 import { LayoutGrid, Users, ShoppingCart, BarChart, Menu, Search, Bell, User, Edit2, Plus, Edit, Trash2, X } from 'lucide-react'
 
 const initialAccounts = []
+const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
+
 
 export default function AccountManagement() {
   const [accounts, setAccounts] = useState(initialAccounts)
@@ -33,7 +35,7 @@ export default function AccountManagement() {
   useEffect(() => {
     const fetchAccounts = async () => {
       try {
-        const response = await fetch('http://localhost:8080/api/v1/account')
+        const response = await fetch(`${backendUrl}account`)
         if (response.ok) {
           const data = await response.json()
           setAccounts(data)
@@ -148,7 +150,7 @@ export default function AccountManagement() {
       message: `Are you sure you want to create an account for ${newAccount.userName}?`,
       action: async () => {
         try {
-          const response = await fetch('http://localhost:8080/api/v1/account/new_account', {
+          const response = await fetch(`${backendUrl}account/new_account`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -184,7 +186,7 @@ export default function AccountManagement() {
 
   const handleUpdateAccount = async () => {
     try {
-      const response = await fetch(`http://localhost:8080/api/v1/account/${editingAccount.accountId}`, {
+      const response = await fetch(`${backendUrl}account/${editingAccount.accountId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(editingAccount),
@@ -216,7 +218,7 @@ export default function AccountManagement() {
       message: `Are you sure you want to delete the account for ${account.accountUserName}?`,
       action: async () => {
         try {
-          const response = await fetch(`http://localhost:8080/api/v1/account/${account.accountId}`, {
+          const response = await fetch(`${backendUrl}account/${account.accountId}`, {
             method: 'DELETE',
           })
 

@@ -11,8 +11,7 @@ import { Label } from "@/components/ui/label"
 import { toast, Toaster } from 'sonner'  // Ensure `sonner` is installed and imported
 import { useSession, signIn, signOut } from 'next-auth/react'
 
-
-
+const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
 const brevoApiKey = process.env.NEXT_PUBLIC_resend_api_key;
 
 export default function Newsletter() {
@@ -82,7 +81,7 @@ export default function Newsletter() {
   // Function to fetch product data from API
   const fetchProducts = async () => {
     try {
-      const response = await fetch('http://localhost:8080/api/v1/product');
+      const response = await fetch(`${backendUrl}product`);
       const productList = await response.json();
       setProducts(productList); // Store products in state
       console.log('Fetched products:', productList);
@@ -97,7 +96,7 @@ export default function Newsletter() {
     }
 
     try {
-      const response = await fetch(`http://localhost:8080/api/v1/customers/byCustomer?customerId=${customerId}`);
+      const response = await fetch(`${backendUrl}customers/byCustomer?customerId=${customerId}`);
       const customerData = await response.json();
       console.log(customerData);
       setCustomerEmail(customerData.customerEmail);
@@ -129,7 +128,7 @@ export default function Newsletter() {
 
   const fetchNewsletters = async () => {
     try {
-      const response = await axios.get('http://localhost:8080/api/v1/newsletter');
+      const response = await axios.get(`${backendUrl}newsletter`);
       if (response.status === 200) {
         setSavedNewsletters(response.data);
         console.log('Fetched newsletters:', response.data);
@@ -143,7 +142,7 @@ export default function Newsletter() {
 
   const fetchNewsletterData = async (newsletterId) => {
     try {
-      const response = await fetch(`http://localhost:8080/api/v1/newsletter/${newsletterId}`);
+      const response = await fetch(`${backendUrl}newsletter/${newsletterId}`);
       const data = await response.json();
       console.log('Fetched newsletter data:', data);
 
@@ -239,7 +238,7 @@ export default function Newsletter() {
     };
 
     try {
-      const response = await fetch(`http://localhost:8080/api/v1/newsletter/update/${newsletterId}`, {
+      const response = await fetch(`${backendUrl}newsletter/update/${newsletterId}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -399,7 +398,7 @@ export default function Newsletter() {
     // Fetch recipient emails for mass emails
     if (emailType === 'mass') {
       try {
-        const response = await fetch(`http://localhost:8080/api/v1/customers/byTier?tier=${template.customerTier}`);
+        const response = await fetch(`${backendUrl}customers/byTier?tier=${template.customerTier}`);
         const customers = await response.json();
 
         // Filter out customers with null or empty emails
